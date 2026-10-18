@@ -25,7 +25,7 @@ services:
         value: info
       # Only used if the frontend ever calls the API cross-origin (VITE_API_BASE fallback). Exact origins, never "*".
       - key: ATLAS_CORS_ORIGINS
-        value: https://cosmic-atlas.onrender.com
+        value: https://cosmic-atlas-jk2e.onrender.com
       # Optional secret: LLM suggestions for unmapped dataset columns. Leave empty to disable.
       - key: ANTHROPIC_API_KEY
         sync: false

@@ -26,7 +26,7 @@ cd backend && python -m pytest -q
 
 ### Deploy / Docker
 
-- **Live:** https://cosmic-atlas.onrender.com, hosted on Render (free plan): a Static Site, with `/api/*` rewritten to a Dockerized FastAPI service ([`render.yaml`](render.yaml)).
+- **Live:** https://cosmic-atlas-jk2e.onrender.com, hosted on Render (free plan): a Static Site, with `/api/*` rewritten to a Dockerized FastAPI service ([`render.yaml`](render.yaml)).
 - **Docker:** `docker compose up --build -d`, then open http://localhost:8080. nginx serves the app and proxies `/api`, and SQLite is kept on a named volume.
 - Full guide: [DEPLOYMENT.md](DEPLOYMENT.md). It covers architecture, env vars, health checks, logs, backups, redeploying and free-plan limits.
 - Smoke-test any deployment: `python scripts/smoke_test_deployment.py <base-url>`.

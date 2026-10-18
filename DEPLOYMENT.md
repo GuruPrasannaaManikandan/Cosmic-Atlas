@@ -1,5 +1,21 @@
 # COSMIC ATLAS — Deployment Guide
 
+## Current deployment
+
+| | URL |
+|---|---|
+| Website | https://cosmic-atlas-jk2e.onrender.com |
+| API (via the website, same origin) | https://cosmic-atlas-jk2e.onrender.com/api/ |
+| Health / readiness | `/api/health` · `/api/ready` |
+| API service direct URL (diagnostics only) | https://cosmic-atlas-api.onrender.com/api/health |
+
+Render Blueprint `cosmic-atlas` created from the **public** repo URL
+`https://github.com/GuruPrasannaaManikandan/Cosmic-Atlas`, branch `main`. Because GitHub isn't connected to the
+Render workspace, **pushes do not auto-deploy**. Use *Manual Deploy* (see Redeploy), or connect GitHub in Render
+(Account Settings → Git providers) to enable auto-deploy and Blueprint auto-sync.
+
+The workspace's 750 free instance-hours/month are shared with every other free web service in it (e.g. `OceanGuard`).
+
 ## Architecture
 
 ### Production (Render, free plan)
@@ -13,7 +29,7 @@ Browser ──HTTPS──▶ cosmic-atlas            Render Static Site (global 
                                                                └─ SIMBAD (CDS) · JPL Horizons · optional Anthropic API
 ```
 
-* The browser only ever talks to one origin: `https://cosmic-atlas.onrender.com`, with the API at `/api/...`.
+* The browser only ever talks to one origin: `https://cosmic-atlas-jk2e.onrender.com`, with the API at `/api/...`.
   No browser request goes to `localhost` or to an internal hostname. CORS is not needed, but the API also allows
   exactly the static-site origin as a fallback (`ATLAS_CORS_ORIGINS`).
 * Defined as code in [`render.yaml`](render.yaml) (Render Blueprint). Pushing to the connected branch redeploys both services.
@@ -102,14 +118,16 @@ docker compose cp api:/data/backup.sqlite3 ./atlas-backup-$(date +%F).sqlite3
 
 ## Redeploy
 
-* **Render:** commit and `git push` to the connected branch → both services rebuild automatically.
-  Manual: dashboard → service → *Manual Deploy* → *Deploy latest commit*. Blueprint changes (`render.yaml`) are applied by the Blueprint sync.
+* **Render:** `git push origin main`, then in the dashboard open each changed service → *Manual Deploy* →
+  *Deploy latest commit* (`cosmic-atlas-api` for backend changes, `cosmic-atlas` for frontend changes).
+  For `render.yaml` changes, open Blueprints → `cosmic-atlas` → *Manual Sync*. If GitHub is connected to Render,
+  pushes deploy both services automatically.
 * **Compose:** `docker compose up --build -d`.
 
 Verify after every deploy:
 
 ```bash
-python scripts/smoke_test_deployment.py https://cosmic-atlas.onrender.com
+python scripts/smoke_test_deployment.py https://cosmic-atlas-jk2e.onrender.com
 ```
 
 ## External services
