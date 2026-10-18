@@ -1,0 +1,24 @@
+# dependencies / build output
+node_modules/
+frontend/dist/
+.vite/
+
+# python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# local data (SQLite databases hold uploaded datasets and caches - never commit)
+*.sqlite3
+*.sqlite3-*
+backend/data/
+
+# secrets
+.env
+.env.*
+!.env.example
+
+# logs
+*.log

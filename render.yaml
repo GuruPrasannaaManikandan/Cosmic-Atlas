@@ -1,0 +1,70 @@
+# COSMIC ATLAS on Render (Blueprint). Dashboard: New > Blueprint > pick this repo > Apply.
+#
+#   Browser --HTTPS--> cosmic-atlas (Static Site, CDN)  /          -> Vite build (dist/)
+#                                                        /api/*     -> rewrite to the API service (same origin for the browser)
+#                      cosmic-atlas-api (Docker web service, free)  -> FastAPI (backend/Dockerfile)
+#
+# Free-plan limits (accepted): the API spins down after 15 min idle (~1 min cold start) and its filesystem is
+# ephemeral, so uploaded datasets / mapping profiles / catalogue cache are lost on restart, redeploy or spin-down.
+# To keep them, move the API to a paid plan and add a disk mounted at /data (see DEPLOYMENT.md).
+services:
+  - type: web
+    name: cosmic-atlas-api
+    runtime: docker
+    plan: free
+    region: singapore
+    rootDir: backend
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeployTrigger: commit
+    envVars:
+      - key: ATLAS_DB
+        value: /data/atlas.sqlite3
+      - key: LOG_LEVEL
+        value: info
+      # Only used if the frontend ever calls the API cross-origin (VITE_API_BASE fallback). Exact origins, never "*".
+      - key: ATLAS_CORS_ORIGINS
+        value: https://cosmic-atlas.onrender.com
+      # Optional secret: LLM suggestions for unmapped dataset columns. Leave empty to disable.
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-haiku-5-5
+
+  - type: web
+    name: cosmic-atlas
+    runtime: static
+    rootDir: frontend
+    buildCommand: npm ci --no-audit --no-fund && npm run build
+    staticPublishPath: ./dist
+    autoDeployTrigger: commit
+    envVars:
+      - key: NODE_VERSION
+        value: 22.14.0
+      # Empty = same-origin /api through the rewrite below. Public build-time value: never a secret.
+      - key: VITE_API_BASE
+        value: ""
+    routes:
+      - type: rewrite
+        source: /api/*
+        destination: https://cosmic-atlas-api.onrender.com/api/*
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /index.html
+        name: Cache-Control
+        value: no-cache
+      - path: /assets/*
+        name: Cache-Control
+        value: public, max-age=86400

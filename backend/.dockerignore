@@ -1,0 +1,15 @@
+# Only app/, requirements.lock and docker-entrypoint.sh are needed in the image.
+**/__pycache__
+**/*.pyc
+.pytest_cache
+.venv
+venv
+.env
+.env.*
+!.env.example
+*.sqlite3
+*.sqlite3-*
+*.db
+data/
+tests/
+*.log

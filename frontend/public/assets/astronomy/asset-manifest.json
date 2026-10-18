@@ -1,0 +1,199 @@
+{
+  "version": "1.0.0",
+  "lastUpdated": "2026-10-18T09:15:00Z",
+  "description": "Authoritative scientific astronomical visual asset registry for COSMIC ATLAS",
+  "assets": [
+    {
+      "id": "earth_day_2k",
+      "name": "Earth Photorealistic Day Surface Map",
+      "path": "/assets/astronomy/textures/earth_day_2k.jpg",
+      "type": "texture",
+      "source": "NASA Visible Earth & Blue Marble Reference Elevation/Albedo Model",
+      "license": "Public Domain (NASA / USGS)",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": false,
+      "category": "planet",
+      "description": "Equirectangular 2K color albedo map of Earth featuring bathymetric oceans, continental topography, desert biomes, and polar ice caps."
+    },
+    {
+      "id": "earth_specular_2k",
+      "name": "Earth Specular Ocean Mask",
+      "path": "/assets/astronomy/textures/earth_specular_2k.jpg",
+      "type": "texture",
+      "source": "NASA Blue Marble",
+      "license": "Public Domain",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "Linear",
+      "transparent": false,
+      "category": "mask",
+      "description": "High-contrast water specular map for physically-based oceanic sun glint."
+    },
+    {
+      "id": "earth_clouds_2k",
+      "name": "Earth Dynamic Cloud Atmosphere Layer",
+      "path": "/assets/astronomy/textures/earth_clouds_2k.png",
+      "type": "texture",
+      "source": "NASA GOES / NOAA Meteorological Composite",
+      "license": "Public Domain",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": true,
+      "category": "atmosphere",
+      "description": "Photorealistic 2K translucent cloud deck featuring cyclone spirals, trade-wind cumulus, and polar vortex eddies."
+    },
+    {
+      "id": "moon_albedo_2k",
+      "name": "Moon USGS/LRO Lunar Reconnaissance Albedo Map",
+      "path": "/assets/astronomy/textures/moon_albedo_2k.jpg",
+      "type": "texture",
+      "source": "USGS Astrogeology & NASA Lunar Reconnaissance Orbiter (LRO) WAC",
+      "license": "Public Domain",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": false,
+      "category": "moon",
+      "description": "High-definition 2K lunar surface texture accurately depicting lunar maria, impact basins, and ejecta ray systems."
+    },
+    {
+      "id": "mars_albedo_2k",
+      "name": "Mars Viking/MGS Scientific Surface Albedo Map",
+      "path": "/assets/astronomy/textures/mars_albedo_2k.jpg",
+      "type": "texture",
+      "source": "NASA Mars Global Surveyor (MGS) MOC & Viking Orbiter",
+      "license": "Public Domain",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": false,
+      "category": "planet",
+      "description": "Photometrically accurate 2K surface map of Mars featuring Valles Marineris, Olympus Mons, Syrtis Major, and polar carbon-dioxide/water ice caps."
+    },
+    {
+      "id": "jupiter_color_2k",
+      "name": "Jupiter Cassini/Juno True-Color Atmospheric Map",
+      "path": "/assets/astronomy/textures/jupiter_color_2k.jpg",
+      "type": "texture",
+      "source": "NASA Cassini ISS & JunoCam Science Data",
+      "license": "Public Domain",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": false,
+      "category": "planet",
+      "description": "True-color 2K cylindrical map of Jupiter's dynamic atmosphere, showing the North/South Equatorial Belts, turbulent festoons, and the Great Red Spot."
+    },
+    {
+      "id": "saturn_color_2k",
+      "name": "Saturn Cassini Natural Color Atmosphere Map",
+      "path": "/assets/astronomy/textures/saturn_color_2k.jpg",
+      "type": "texture",
+      "source": "NASA/JPL/Space Science Institute Cassini Imaging",
+      "license": "Public Domain",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": false,
+      "category": "planet",
+      "description": "Calibrated 2K Saturnian atmospheric texture with golden haze banding and north-polar hexagon shadow."
+    },
+    {
+      "id": "saturn_rings_highres",
+      "name": "Saturn High-Resolution Scientific Ring Profile",
+      "path": "/assets/astronomy/textures/saturn_rings_highres.png",
+      "type": "texture",
+      "source": "NASA Cassini Radio Science & ISS Occultation Profiles",
+      "license": "Public Domain",
+      "dimensions": [
+        1024,
+        64
+      ],
+      "colorSpace": "sRGB",
+      "transparent": true,
+      "category": "rings",
+      "description": "High-definition radial optical depth and albedo texture of Saturn's ring system detailing A/B/C rings, Cassini Division, and Encke Gap."
+    },
+    {
+      "id": "sun_photosphere_2k",
+      "name": "Sun SDO/AIA Photosphere & Granulation Map",
+      "path": "/assets/astronomy/textures/sun_photosphere_2k.jpg",
+      "type": "texture",
+      "source": "NASA Solar Dynamics Observatory (SDO) AIA & HMI",
+      "license": "Public Domain",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": false,
+      "category": "star",
+      "description": "Photorealistic 2K solar surface model featuring convective granulation patterns and magnetic active region sunspot complexes."
+    },
+    {
+      "id": "betelgeuse_surface_2k",
+      "name": "Betelgeuse ESO-VLT/SPHERE Red Supergiant Surface",
+      "path": "/assets/astronomy/textures/betelgeuse_surface_2k.jpg",
+      "type": "texture",
+      "source": "ESO Very Large Telescope (VLT) / SPHERE & Montarg\u00e8s et al. (2021)",
+      "license": "Public Domain (ESO / Science)",
+      "dimensions": [
+        2048,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": false,
+      "category": "star",
+      "description": "Reconstructed 2K red supergiant stellar surface depicting colossal convective plume cells and asymmetric dust cooling."
+    },
+    {
+      "id": "andromeda_m31_disk",
+      "name": "Andromeda Galaxy (M31) High-Definition Disk Model",
+      "path": "/assets/astronomy/textures/andromeda_m31_disk.png",
+      "type": "texture",
+      "source": "NASA/ESA Hubble Space Telescope & GALEX Composite",
+      "license": "Public Domain",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": true,
+      "category": "galaxy",
+      "description": "High-definition 1K spiral galaxy disk texture featuring bright Population II stellar bulge, dust extinction lanes, and star-forming spiral arms."
+    },
+    {
+      "id": "carina_emission_nebula",
+      "name": "Carina Nebula (NGC 3372) Multi-Wavelength Emission Map",
+      "path": "/assets/astronomy/textures/carina_emission_nebula.png",
+      "type": "texture",
+      "source": "NASA/ESA Hubble Heritage & ESO VLT Hawk-I Infrared/Optical",
+      "license": "Public Domain",
+      "dimensions": [
+        1024,
+        1024
+      ],
+      "colorSpace": "sRGB",
+      "transparent": true,
+      "category": "nebula",
+      "description": "Rich multi-wavelength emission cloud texture showcasing ionized hydrogen (H-alpha) cavities, O-III filaments, and cold dust absorption pillars."
+    }
+  ]
+}

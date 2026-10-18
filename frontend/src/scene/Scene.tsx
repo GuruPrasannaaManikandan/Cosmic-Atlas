@@ -1,0 +1,839 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import * as THREE from 'three'
+import { OBJECTS, CosmicObject, positionOf, radiusLyOf, isDynamic } from '../data/catalog'
+import { nav, stepNavigation, updateNearest, interrupt, setCameraAt } from '../store/nav'
+import { useStore, advanceSim } from '../store/store'
+import { Vec3, len, sub, add, toThree, fromThree, SUN_POS, LY_PER_AU } from '../astro/coords'
+import { adaptiveScale, compressDistance } from '../astro/scale'
+import { orbitPolylineLy, PLANET_ELEMENTS } from '../astro/ephemeris'
+import * as T from './textures'
+import { buildGalaxy, buildCosmicWeb, buildBackdrop } from './procedural'
+import { labelState } from './labelState'
+import { Controls } from './Controls'
+import { ship, stepShipPhysics } from '../travel/shipState'
+import { travelInput, TravelControlsComponent } from '../travel/travelControls'
+import { SpacecraftModel } from '../travel/SpacecraftModel'
+import { WarpEffect } from '../travel/WarpEffect'
+import { eventState, stepEventTime, subscribeEventState } from '../events/eventState'
+import { CosmicEventLayer } from '../events/CosmicEventLayer'
+import { EventControls } from '../events/EventControls'
+import * as A from '../data/assetRegistry'
+import { stepTravel, travelEngineState } from '../travel/travelEngine'
+
+const PLANET_IDS = Object.keys(PLANET_ELEMENTS)
+const EXTENDED = new Set(['galaxy', 'cluster', 'supercluster', 'group', 'sheet', 'galactic-structure', 'nebula', 'star-cluster'])
+
+function SphereGeo() {
+  return <sphereGeometry args={[1, 48, 32]} />
+}
+
+function ObjectVisual({ o }: { o: CosmicObject }) {
+  const col = new THREE.Color(o.color)
+  switch (o.visual) {
+    case 'cluster':
+      return (
+        <sprite scale={[3.2, 3.2, 1]}>
+          <spriteMaterial map={T.clusterTexture(o.color)} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        </sprite>
+      )
+    case 'galaxy':
+      if (o.id === 'andromeda') {
+        return (
+          <group name="fade">
+            <mesh rotation={[-1.15, 0.4, -0.6]} scale={[3.8, 3.8, 1]}>
+              <planeGeometry args={[1, 1]} />
+              <meshBasicMaterial map={A.getAndromedaTexture()} transparent depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} opacity={0.92} />
+            </mesh>
+            <sprite scale={[1.8, 1.8, 1]}>
+              <spriteMaterial map={T.glowTexture('#ffd8a8')} transparent depthWrite={false} blending={THREE.AdditiveBlending} opacity={0.8} />
+            </sprite>
+          </group>
+        )
+      }
+      return (
+        <sprite scale={[3, 3, 1]} name="fade">
+          <spriteMaterial map={T.spiralTexture(o.color)} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        </sprite>
+      )
+    case 'milkyway':
+      return (
+        <sprite scale={[3, 3, 1]} name="fade">
+          <spriteMaterial map={T.glowTexture('#bcd4ff')} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        </sprite>
+      )
+    case 'nebula':
+      if (o.id === 'carina-nebula') {
+        return (
+          <group name="fade">
+            <mesh scale={[3.5, 3.5, 1]}>
+              <planeGeometry args={[1, 1]} />
+              <meshBasicMaterial map={A.getCarinaTexture()} transparent depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} opacity={0.9} />
+            </mesh>
+            <mesh rotation={[0.4, 0.6, 0.2]} scale={[3.1, 3.1, 1]}>
+              <planeGeometry args={[1, 1]} />
+              <meshBasicMaterial map={A.getCarinaTexture()} transparent depthWrite={false} blending={THREE.AdditiveBlending} side={THREE.DoubleSide} opacity={0.65} />
+            </mesh>
+          </group>
+        )
+      }
+      return (
+        <sprite scale={[3, 3, 1]} name="fade">
+          <spriteMaterial map={T.nebulaTexture(o.color)} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        </sprite>
+      )
+    case 'starcluster':
+      return (
+        <sprite scale={[3, 3, 1]}>
+          <spriteMaterial map={T.clusterTexture('#8fb8ff')} transparent depthWrite={false} blending={THREE.AdditiveBlending} />
+        </sprite>
+      )
+    case 'marker':
+      return (
+        <sprite scale={[2, 2, 1]}>
+          <spriteMaterial map={T.ringMarkerTexture(o.color)} transparent depthWrite={false} opacity={0.7} />
+        </sprite>
+      )
+    case 'star':
+      if (o.id === 'betelgeuse') {
+        return (
+          <>
+            <mesh name="star-core">
+              <SphereGeo />
+              <meshStandardMaterial
+                map={A.getBetelgeuseTexture()}
+                emissiveMap={A.getBetelgeuseTexture()}
+                emissive="#ff4411"
+                emissiveIntensity={1.8}
+                roughness={0.95}
+                metalness={0}
+              />
+            </mesh>
+            <mesh scale={1.06}>
+              <SphereGeo />
+              <shaderMaterial
+                transparent
+                depthWrite={false}
+                blending={THREE.AdditiveBlending}
+                side={THREE.BackSide}
+                vertexShader={
+                  '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}'
+                }
+                fragmentShader={`
+                  #include <common>
+                  #include <logdepthbuf_pars_fragment>
+                  varying vec3 vN;
+                  void main(){
+                    #include <logdepthbuf_fragment>
+                    float i = pow(max(0.0, 0.88 - dot(vN, vec3(0.0, 0.0, 1.0))), 2.2);
+                    gl_FragColor = vec4(1.0, 0.28, 0.08, 1.0) * i * 3.0;
+                  }
+                `}
+              />
+            </mesh>
+            <sprite scale={[6.0, 6.0, 1]} name="star-corona">
+              <spriteMaterial map={T.glowTexture('#ff3300')} transparent depthWrite={false} blending={THREE.AdditiveBlending} opacity={0.95} />
+            </sprite>
+          </>
+        )
+      }
+      return (
+        <>
+          <mesh name="star-core">
+            <SphereGeo />
+            <meshBasicMaterial color={o.color} />
+          </mesh>
+          <mesh scale={1.08}>
+            <SphereGeo />
+            <shaderMaterial
+              transparent
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+              side={THREE.BackSide}
+              vertexShader={
+                '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}'
+              }
+              fragmentShader={`
+                #include <common>
+                #include <logdepthbuf_pars_fragment>
+                varying vec3 vN;
+                void main(){
+                  #include <logdepthbuf_fragment>
+                  float i = pow(max(0.0, 0.88 - dot(vN, vec3(0.0, 0.0, 1.0))), 2.2);
+                  gl_FragColor = vec4(${col.r.toFixed(3)}, ${col.g.toFixed(3)}, ${col.b.toFixed(3)}, 1.0) * i * 2.5;
+                }
+              `}
+            />
+          </mesh>
+          <sprite scale={[5.5, 5.5, 1]} name="star-corona">
+            <spriteMaterial map={T.glowTexture(o.color)} transparent depthWrite={false} blending={THREE.AdditiveBlending} opacity={0.9} />
+          </sprite>
+        </>
+      )
+    case 'sun':
+      return (
+        <>
+          <mesh>
+            <SphereGeo />
+            <meshStandardMaterial
+              map={A.getSunPhotosphereTexture()}
+              emissiveMap={A.getSunPhotosphereTexture()}
+              emissive="#ffcc66"
+              emissiveIntensity={1.3}
+              roughness={0.9}
+              metalness={0}
+            />
+          </mesh>
+          <mesh scale={1.035}>
+            <SphereGeo />
+            <shaderMaterial
+              transparent
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
+              side={THREE.BackSide}
+              vertexShader={
+                '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}'
+              }
+              fragmentShader={`
+                #include <common>
+                #include <logdepthbuf_pars_fragment>
+                varying vec3 vN;
+                void main(){
+                  #include <logdepthbuf_fragment>
+                  float i = pow(max(0.0, 0.82 - dot(vN, vec3(0.0, 0.0, 1.0))), 2.5);
+                  gl_FragColor = vec4(1.0, 0.75, 0.3, 1.0) * i * 2.8;
+                }
+              `}
+            />
+          </mesh>
+          <sprite scale={[6.4, 6.4, 1]}>
+            <spriteMaterial map={T.glowTexture('#ffa834')} transparent depthWrite={false} blending={THREE.AdditiveBlending} opacity={0.88} />
+          </sprite>
+        </>
+      )
+    case 'planet':
+      if (o.id === 'earth') {
+        return (
+          <>
+            <mesh rotation={[0, 0, 0.41]} name="spin">
+              <SphereGeo />
+              <meshStandardMaterial
+                map={A.getEarthTexture()}
+                roughnessMap={A.getEarthSpecularTexture()}
+                roughness={0.65}
+                metalness={0.05}
+              />
+            </mesh>
+            {/* Dynamic rotating cloud layer */}
+            <mesh rotation={[0, 0, 0.41]} scale={1.018} name="earth-clouds">
+              <SphereGeo />
+              <meshStandardMaterial
+                map={A.getEarthCloudsTexture()}
+                transparent
+                opacity={0.9}
+                depthWrite={false}
+                roughness={0.9}
+              />
+            </mesh>
+            {/* Atmospheric Rayleigh limb glow */}
+            <mesh scale={1.045}>
+              <SphereGeo />
+              <shaderMaterial
+                transparent
+                depthWrite={false}
+                blending={THREE.AdditiveBlending}
+                side={THREE.BackSide}
+                vertexShader={
+                  '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}'
+                }
+                fragmentShader={
+                  '#include <common>\n#include <logdepthbuf_pars_fragment>\nvarying vec3 vN; void main(){\n#include <logdepthbuf_fragment>\n float i = pow(max(0.0, 0.74 - dot(vN, vec3(0,0,1.0))), 3.2); gl_FragColor = vec4(0.28,0.62,1.0,1.0)*i*2.2; }'
+                }
+              />
+            </mesh>
+          </>
+        )
+      }
+      if (o.id === 'moon') {
+        return (
+          <mesh rotation={[0, 0, 0.1]} name="spin">
+            <SphereGeo />
+            <meshStandardMaterial
+              map={A.getMoonTexture()}
+              roughness={0.92}
+              metalness={0}
+            />
+          </mesh>
+        )
+      }
+      if (o.id === 'mars') {
+        return (
+          <>
+            <mesh rotation={[0, 0, 0.44]} name="spin">
+              <SphereGeo />
+              <meshStandardMaterial
+                map={A.getMarsTexture()}
+                roughness={0.88}
+                metalness={0.02}
+              />
+            </mesh>
+            <mesh scale={1.025}>
+              <SphereGeo />
+              <shaderMaterial
+                transparent
+                depthWrite={false}
+                blending={THREE.AdditiveBlending}
+                side={THREE.BackSide}
+                vertexShader={
+                  '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}'
+                }
+                fragmentShader={
+                  '#include <common>\n#include <logdepthbuf_pars_fragment>\nvarying vec3 vN; void main(){\n#include <logdepthbuf_fragment>\n float i = pow(max(0.0, 0.76 - dot(vN, vec3(0,0,1.0))), 3.8); gl_FragColor = vec4(0.9,0.55,0.38,1.0)*i*1.2; }'
+                }
+              />
+            </mesh>
+          </>
+        )
+      }
+      if (o.id === 'jupiter') {
+        return (
+          <mesh rotation={[0, 0, 0.05]} name="spin">
+            <SphereGeo />
+            <meshStandardMaterial
+              map={A.getJupiterTexture()}
+              roughness={0.8}
+              metalness={0}
+            />
+          </mesh>
+        )
+      }
+      if (o.id === 'saturn') {
+        return (
+          <>
+            <mesh rotation={[Math.PI / 2 - 0.45, 0, 0.1]} name="spin">
+              <SphereGeo />
+              <meshStandardMaterial
+                map={A.getSaturnTexture()}
+                roughness={0.8}
+                metalness={0}
+              />
+            </mesh>
+            <mesh rotation={[Math.PI / 2 - 0.45, 0, 0.1]}>
+              <ringGeometry args={[1.25, 2.45, 128]} />
+              <meshStandardMaterial
+                map={A.getSaturnRingsTexture()}
+                transparent
+                side={THREE.DoubleSide}
+                depthWrite={false}
+                roughness={0.7}
+              />
+            </mesh>
+          </>
+        )
+      }
+      return (
+        <mesh rotation={[0, 0, o.id === 'uranus' ? Math.PI / 2 : 0.2]} name="spin">
+          <SphereGeo />
+          <meshStandardMaterial
+            map={T.planetTexture(o.id, o.color)}
+            color="#ffffff"
+            roughness={0.85}
+            metalness={0}
+          />
+        </mesh>
+      )
+  }
+  return null
+}
+
+/** Mounts one group per catalogue object; positions are updated imperatively each frame. */
+function Objects() {
+  const objects = useStore((s) => s.objectsVersion)
+  const refs = useRef<Record<string, THREE.Group | null>>({})
+  const hit = useRef<Record<string, THREE.Mesh | null>>({})
+  const ring = useRef<Record<string, THREE.Sprite | null>>({})
+  const sunLight = useRef<THREE.PointLight>(null)
+  const { camera, size } = useThree()
+  const list = useMemo(() => [...OBJECTS], [objects])
+
+  useFrame(() => {
+    const st = useStore.getState()
+    const ms = st.simMs
+    const S = nav.scale
+    const angPx = (14 / size.height) * (camera as THREE.PerspectiveCamera).fov * (Math.PI / 180)
+    const cam = nav.pos
+    labelState.items.length = 0
+
+    if (eventState.activeId) {
+      list.forEach((o) => {
+        const g = refs.current[o.id]
+        if (g) g.visible = false
+      })
+      return
+    }
+
+    for (const o of list) {
+      const g = refs.current[o.id]
+      if (!g) continue
+      const P = positionOf(o, ms)
+      const rel = sub(P, cam)
+      const dLy = len(rel)
+      const u = dLy / S
+      const du = compressDistance(u)
+      const k = u > 0 ? du / u : 1
+      const t3 = toThree(rel)
+      g.position.set((t3[0] / S) * k, (t3[1] / S) * k, (t3[2] / S) * k)
+      const rTrue = radiusLyOf(o)
+      const isStar = o.visual === 'star'
+      const rReal = (rTrue / S) * k
+      const rMin = du * (isStar ? 0.006 : angPx * 0.5)
+      let r = Math.max(rReal, rMin)
+      if (o.visual === 'marker' && rTrue === 0) r = rMin
+      g.scale.setScalar(Math.max(r, 1e-9))
+
+      // fade big sprites when the camera is inside / very close, or when observer is at stellar scale
+      const inside = EXTENDED.has(o.category) && dLy < rTrue * 1.05
+      const isExtragalactic = (o.category === 'galaxy' || o.category === 'cluster' || o.category === 'supercluster') && o.id !== 'milky-way'
+      g.children.forEach((c) => {
+        if (c.name === 'fade') {
+          let op = THREE.MathUtils.clamp((dLy / Math.max(rTrue, 1) - 0.25) / 1.0, 0, 1)
+          if (isExtragalactic && S < 5 && dLy > 50000) {
+            op *= THREE.MathUtils.clamp((S - 0.005) / 2.0, 0, 1)
+          }
+          if ((c as any).material) {
+            ;(c as any).material.opacity = op
+          } else {
+            c.traverse((child: any) => {
+              if (child.material) child.material.opacity = op
+            })
+          }
+        }
+        if (c.name === 'spin')
+          c.rotation.y = ((ms / 86400000) * Math.PI * 2) * (o.id === 'earth' ? 1 : o.id === 'jupiter' ? 2.4 : 0.1)
+        if (c.name === 'earth-clouds')
+          c.rotation.y = ((ms / 86400000) * Math.PI * 2) * 1.06 + 0.1
+      })
+
+      g.visible = !(isExtragalactic && S < 0.05 && dLy > 50000) && (o.visual !== 'milkyway' || dLy > rTrue * 0.9 || true)
+      const h = hit.current[o.id]
+      if (h) {
+        h.visible = !inside
+        h.scale.setScalar(EXTENDED.has(o.category) && rReal > rMin ? 0.4 : 1)
+      }
+      const rg = ring.current[o.id]
+      if (rg) {
+        rg.visible = st.selectedId === o.id
+        rg.scale.setScalar(EXTENDED.has(o.category) && rReal > rMin ? 1.15 : 2.2)
+        ;(rg.material as THREE.SpriteMaterial).opacity = 0.75
+      }
+      if (o.id === 'sun' && sunLight.current) sunLight.current.position.copy(g.position)
+      labelState.items.push({ id: o.id, pos: g.position.clone(), dLy, rTrue, o })
+    }
+  })
+
+  return (
+    <>
+      <pointLight ref={sunLight} intensity={4} distance={0} decay={0} color="#fff3dc" />
+      <ambientLight intensity={0.12} />
+      {list.map((o) => (
+        <group key={o.id} ref={(el) => { refs.current[o.id] = el }}>
+          <mesh
+            ref={(el) => { hit.current[o.id] = el }}
+            onClick={(e) => {
+              e.stopPropagation()
+              useStore.getState().select(o.id)
+            }}
+            onDoubleClick={(e) => {
+              e.stopPropagation()
+              useStore.getState().travel(o.id)
+            }}
+          >
+            <sphereGeometry args={[1, 8, 6]} />
+            <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
+          </mesh>
+          <ObjectVisual o={o} />
+          <sprite ref={(el) => { ring.current[o.id] = el }} visible={false}>
+            <spriteMaterial map={T.selectRingTexture()} transparent depthTest={false} />
+          </sprite>
+        </group>
+      ))}
+    </>
+  )
+}
+
+function OrbitLines() {
+  const group = useRef<THREE.Group>(null)
+  const showOrbits = useStore((s) => s.showOrbits)
+  const lines = useMemo(
+    () =>
+      PLANET_IDS.map((id) => {
+        const pts = orbitPolylineLy(id, Date.now(), 200)
+        const g = new THREE.BufferGeometry().setFromPoints(pts.map((p) => new THREE.Vector3(...toThree(p))))
+        return new THREE.Line(
+          g,
+          new THREE.LineBasicMaterial({ color: id === 'earth' ? '#6fb0ff' : '#5a7090', transparent: true, opacity: 0.55 })
+        )
+      }),
+    []
+  )
+
+  useFrame(() => {
+    const g = group.current
+    if (!g) return
+    if (eventState.activeId) {
+      g.visible = false
+      return
+    }
+    const rel = sub(SUN_POS, nav.pos)
+    const d = len(rel)
+    g.visible = showOrbits && d < 0.02
+    if (!g.visible) return
+    const t3 = toThree(rel)
+    g.position.set(t3[0] / nav.scale, t3[1] / nav.scale, t3[2] / nav.scale)
+    g.scale.setScalar(1 / nav.scale)
+  })
+
+  return <group ref={group}>{lines.map((l, i) => <primitive key={i} object={l} />)}</group>
+}
+
+function Backdrop() {
+  const ref = useRef<THREE.Points>(null)
+  const geo = useMemo(() => buildBackdrop(), [])
+  useFrame(() => {
+    if (ref.current) ref.current.position.set(0, 0, 0)
+  })
+  return (
+    <points ref={ref} geometry={geo} frustumCulled={false} renderOrder={-100} raycast={() => null}>
+      <pointsMaterial size={1.6} sizeAttenuation={false} vertexColors transparent opacity={0.9} depthWrite={false} depthTest={false} />
+    </points>
+  )
+}
+
+function GalaxyAndWeb() {
+  const gal = useRef<THREE.Group>(null)
+  const web = useRef<THREE.Group>(null)
+  const grid = useRef<THREE.Group>(null)
+  const quality = useStore((s) => s.quality)
+  const showGrid = useStore((s) => s.showGrid)
+  const galGeo = useMemo(() => buildGalaxy(quality === 'performance' ? 25000 : quality === 'high' ? 110000 : 60000), [quality])
+  const webGeo = useMemo(() => buildCosmicWeb(quality === 'performance' ? 8000 : 22000), [quality])
+
+  const gridObj = useMemo(() => {
+    const g = new THREE.Group()
+    for (let r = 10000; r <= 50000; r += 10000) {
+      const pts: THREE.Vector3[] = []
+      for (let i = 0; i <= 128; i++) pts.push(new THREE.Vector3(Math.cos((i / 128) * 6.2832) * r, 0, Math.sin((i / 128) * 6.2832) * r))
+      g.add(
+        new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(pts),
+          new THREE.LineBasicMaterial({ color: '#2a5a7a', transparent: true, opacity: 0.5 })
+        )
+      )
+    }
+    return g
+  }, [])
+
+  useFrame(() => {
+    const S = nav.scale
+    const rel = toThree(sub([0, 0, 0], nav.pos))
+    const dGc = len(nav.pos)
+    if (gal.current) {
+      gal.current.visible = dGc < 8e6 && S > 1e-4
+      gal.current.position.set(rel[0] / S, rel[1] / S, rel[2] / S)
+      gal.current.scale.setScalar(1 / S)
+      const mat = (gal.current.children[0] as THREE.Points).material as THREE.ShaderMaterial
+      mat.uniforms.uFade.value = THREE.MathUtils.clamp(1.4 - Math.log10(Math.max(dGc, 1)) / 6.5, 0.15, 1)
+    }
+    if (grid.current) {
+      grid.current.visible = showGrid && dGc < 3e6
+      grid.current.position.set(rel[0] / S, rel[1] / S, rel[2] / S)
+      grid.current.scale.setScalar(1 / S)
+    }
+    if (web.current) {
+      web.current.visible = S > 500
+      web.current.position.set(rel[0] / S, rel[1] / S, rel[2] / S)
+      web.current.scale.setScalar(1 / S)
+    }
+  })
+
+  return (
+    <>
+      <group ref={gal}>
+        <points geometry={galGeo} frustumCulled={false} raycast={() => null}>
+          <shaderMaterial
+            transparent
+            depthWrite={false}
+            blending={THREE.AdditiveBlending}
+            uniforms={{ uFade: { value: 1 } }}
+            vertexShader={
+              '#include <common>\n#include <logdepthbuf_pars_vertex>\nattribute float aSize; attribute vec3 aColor; varying vec3 vC; void main(){ vC = aColor; vec4 mv = modelViewMatrix*vec4(position,1.0); gl_PointSize = aSize; gl_Position = projectionMatrix*mv;\n#include <logdepthbuf_vertex>\n}'
+            }
+            fragmentShader={
+              '#include <common>\n#include <logdepthbuf_pars_fragment>\nuniform float uFade; varying vec3 vC; void main(){\n#include <logdepthbuf_fragment>\n vec2 d = gl_PointCoord-0.5; float a = smoothstep(0.5,0.0,length(d)); gl_FragColor = vec4(vC*a*0.55*uFade, a*0.55*uFade); }'
+            }
+          />
+        </points>
+      </group>
+      <group ref={grid}>
+        <primitive object={gridObj} />
+      </group>
+      <group ref={web}>
+        <points geometry={webGeo} frustumCulled={false} raycast={() => null}>
+          <pointsMaterial size={1.3} sizeAttenuation={false} vertexColors transparent opacity={0.7} depthWrite={false} blending={THREE.AdditiveBlending} />
+        </points>
+      </group>
+    </>
+  )
+}
+
+function DatasetLayer() {
+  const pts = useStore((s) => s.datasetPoints)
+  const ref = useRef<THREE.Points>(null)
+  const geo = useMemo(() => {
+    const g = new THREE.BufferGeometry()
+    const arr = new Float32Array(pts.length * 3)
+    pts.forEach((p, i) => {
+      const t = toThree(p.pos as Vec3)
+      arr[i * 3] = t[0]
+      arr[i * 3 + 1] = t[1]
+      arr[i * 3 + 2] = t[2]
+    })
+    g.setAttribute('position', new THREE.BufferAttribute(arr, 3))
+    return g
+  }, [pts])
+
+  useFrame(() => {
+    const g = ref.current
+    if (!g) return
+    const rel = toThree(sub([0, 0, 0], nav.pos))
+    g.position.set(rel[0] / nav.scale, rel[1] / nav.scale, rel[2] / nav.scale)
+    g.scale.setScalar(1 / nav.scale)
+  })
+
+  if (!pts.length) return null
+  return (
+    <points ref={ref} geometry={geo} frustumCulled={false} raycast={() => null}>
+      <pointsMaterial size={6} sizeAttenuation={false} color="#ffe14d" depthTest={false} transparent opacity={0.95} />
+    </points>
+  )
+}
+
+/** Renders Spacecraft model in Chase and External camera views during Travel Mode */
+function SpacecraftLayer() {
+  const phase = useStore((s) => s.phase)
+  const groupRef = useRef<THREE.Group>(null)
+
+  useFrame(() => {
+    const grp = groupRef.current
+    if (!grp) return
+    grp.visible = phase === 'travel' && ship.cameraView !== 'cockpit'
+    if (!grp.visible) return
+
+    const rel = toThree(sub(ship.pos, nav.pos))
+    const S = nav.scale
+    grp.position.set(rel[0] / S, rel[1] / S, rel[2] / S)
+    grp.quaternion.copy(ship.quat)
+  })
+
+  if (phase !== 'travel') return null
+
+  return (
+    <group ref={groupRef}>
+      <SpacecraftModel />
+    </group>
+  )
+}
+
+const rigInit = { done: false }
+
+/** Drives navigation + time + camera each frame across Explore and Travel modes. */
+function Rig() {
+  const { camera } = useThree()
+  const inputRef = Controls.input
+
+  useFrame((_, dtRaw) => {
+    const dt = Math.min(dtRaw, 0.1)
+    const st = useStore.getState()
+
+    if (!rigInit.done) {
+      rigInit.done = true
+      const sunDir = new THREE.Vector3(0.55, 0.28, 0.78).normalize()
+      setCameraAt([SUN_POS[0] + 1e9 * sunDir.x, SUN_POS[1] - 1e9 * sunDir.z, SUN_POS[2] + 1e9 * sunDir.y], [-3e8, 1e8, 0])
+    }
+
+    advanceSim(dt)
+
+    if (eventState.activeId) {
+      stepEventTime(dt)
+      const { yaw, pitch, dist } = eventState.cameraAngle
+      const cx = Math.sin(yaw) * Math.cos(pitch) * dist
+      const cy = Math.sin(pitch) * dist
+      const cz = Math.cos(yaw) * Math.cos(pitch) * dist
+      camera.position.set(cx, cy, cz)
+      camera.lookAt(0, 0, 0)
+      camera.updateMatrixWorld()
+      labelState.camera = camera
+      return
+    }
+
+    if (st.phase === 'travel') {
+      // TRAVEL MODE: Spacecraft simulation drives flight physics and camera
+      stepShipPhysics(dt, st.simMs, travelInput)
+      updateNearest(st.simMs)
+      const S = Math.max(1e-12, adaptiveScale(nav.nearestSurface))
+      nav.scale = S
+
+      const q = ship.quat
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q)
+      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(q)
+
+      if (ship.cameraView === 'cockpit') {
+        // Cockpit first-person: camera is positioned at the cockpit
+        nav.pos = [...ship.pos]
+        nav.quat.copy(ship.quat)
+      } else if (ship.cameraView === 'chase') {
+        // Chase view: camera follows 14 units behind and 3.5 units above
+        const chaseDistUnits = 14
+        const chaseHeightUnits = 3.5
+        const camOffsetThree = fwd
+          .clone()
+          .multiplyScalar(-chaseDistUnits * S)
+          .add(up.clone().multiplyScalar(chaseHeightUnits * S))
+        nav.pos = add(ship.pos, fromThree([camOffsetThree.x, camOffsetThree.y, camOffsetThree.z]))
+
+        // Look toward target point ahead of spacecraft
+        const lookTargetThree = fwd.clone().multiplyScalar(25 * S)
+        const lookTarget = add(ship.pos, fromThree([lookTargetThree.x, lookTargetThree.y, lookTargetThree.z]))
+        const relToCam = toThree(sub(lookTarget, nav.pos))
+        const m = new THREE.Matrix4().lookAt(
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(...relToCam).normalize(),
+          up
+        )
+        nav.quat.setFromRotationMatrix(m)
+      } else {
+        // External orbit view: camera rotates around spacecraft
+        const orbitDist = ship.orbitAngle.dist * S
+        const orbitPitch = ship.orbitAngle.pitch
+        const orbitYaw = ship.orbitAngle.yaw
+
+        const camOffset = new THREE.Vector3(
+          Math.sin(orbitYaw) * Math.cos(orbitPitch) * orbitDist,
+          Math.sin(orbitPitch) * orbitDist,
+          Math.cos(orbitYaw) * Math.cos(orbitPitch) * orbitDist
+        ).applyQuaternion(q)
+
+        nav.pos = add(ship.pos, fromThree([camOffset.x, camOffset.y, camOffset.z]))
+        const relToShip = toThree(sub(ship.pos, nav.pos))
+        const m = new THREE.Matrix4().lookAt(
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(...relToShip).normalize(),
+          up
+        )
+        nav.quat.setFromRotationMatrix(m)
+      }
+
+      camera.position.set(0, 0, 0)
+      camera.quaternion.copy(nav.quat)
+      camera.updateMatrixWorld()
+      labelState.camera = camera
+      return
+    }
+
+    // EXPLORE / TOUR / INTRO MODE: Standard camera navigation
+    updateNearest(st.simMs)
+    nav.scale = adaptiveScale(nav.nearestSurface)
+    const inp = inputRef
+    if (st.phase === 'intro') {
+      inp.yaw += dt * 0.025
+    }
+    if (travelEngineState.phase === 'traveling') {
+      stepTravel(dt, st.simMs)
+    } else {
+      stepNavigation(dt, useStore.getState().simMs, inp)
+    }
+    inp.yaw = 0
+    inp.pitch = 0
+    inp.panX = 0
+    inp.panY = 0
+    inp.dolly = 0
+    updateNearest(useStore.getState().simMs)
+    nav.scale = adaptiveScale(nav.nearestSurface)
+    camera.position.set(0, 0, 0)
+    camera.quaternion.copy(nav.quat)
+    camera.updateMatrixWorld()
+    labelState.camera = camera
+  })
+
+  return null
+}
+
+function GLWatch() {
+  const { gl } = useThree()
+  useEffect(() => {
+    const el = gl.domElement
+    const lost = (e: Event) => {
+      e.preventDefault()
+      useStore.getState().set({ error: 'WebGL context lost. Click "Recover" to reload the scene.' })
+    }
+    const restored = () => useStore.getState().set({ error: null })
+    el.addEventListener('webglcontextlost', lost)
+    el.addEventListener('webglcontextrestored', restored)
+    return () => {
+      el.removeEventListener('webglcontextlost', lost)
+      el.removeEventListener('webglcontextrestored', restored)
+    }
+  }, [gl])
+
+  useEffect(() => {
+    const q = useStore.getState().quality
+    gl.setPixelRatio(Math.min(window.devicePixelRatio, q === 'performance' ? 1 : q === 'balanced' ? 1.5 : 2))
+  }, [gl])
+
+  return null
+}
+
+function ActiveControls() {
+  const phase = useStore((s) => s.phase)
+  const [eventActive, setEventActive] = useState(eventState.activeId !== null)
+
+  useEffect(() => {
+    return subscribeEventState(() => {
+      setEventActive(eventState.activeId !== null)
+    })
+  }, [])
+
+  if (eventActive) {
+    return <EventControls />
+  }
+  return phase === 'travel' ? <TravelControlsComponent /> : <Controls.Component />
+}
+
+export function CosmicCanvas() {
+  const quality = useStore((s) => s.quality)
+
+  return (
+    <Canvas
+      key={quality}
+      gl={{ antialias: quality !== 'performance', logarithmicDepthBuffer: true, powerPreference: 'high-performance' }}
+      dpr={quality === 'performance' ? 1 : quality === 'balanced' ? [1, 1.5] : [1, 2]}
+      camera={{ fov: 55, near: 0.001, far: 1e13, position: [0, 0, 0] }}
+      onPointerMissed={() => {}}
+    >
+      <color attach="background" args={['#000004']} />
+      <GLWatch />
+      <Rig />
+      <Backdrop />
+      <GalaxyAndWeb />
+      <OrbitLines />
+      <DatasetLayer />
+      <Objects />
+      <CosmicEventLayer />
+      <SpacecraftLayer />
+      <WarpEffect />
+      <ActiveControls />
+    </Canvas>
+  )
+}
+
+export { isDynamic, LY_PER_AU, interrupt }

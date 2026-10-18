@@ -1,0 +1,64 @@
+# COSMIC ATLAS - production-like local stack.
+#   cp .env.example .env        (optional; every variable has a default)
+#   docker compose up --build -d
+#   open http://localhost:8080   (API: http://localhost:8080/api/health)
+name: cosmic-atlas
+
+services:
+  api:
+    build: ./backend
+    image: cosmic-atlas-api:local
+    environment:
+      ATLAS_DB: /data/atlas.sqlite3
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      ATLAS_CORS_ORIGINS: ${ATLAS_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      ANTHROPIC_MODEL: ${ANTHROPIC_MODEL:-claude-haiku-5-5}
+    volumes:
+      - atlas-data:/data
+    # No published port: only the web service can reach the API (http://api:8000).
+    expose:
+      - "8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/ready', timeout=4)"]
+      interval: 30s
+      timeout: 5s
+      start_period: 15s
+      retries: 3
+    restart: unless-stopped
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 512m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+  web:
+    build: ./frontend
+    image: cosmic-atlas-web:local
+    environment:
+      API_UPSTREAM: http://api:8000
+      NGINX_CLIENT_MAX_BODY_SIZE: 60m
+    ports:
+      - "${WEB_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/healthz"]
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 128m
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+volumes:
+  # SQLite database (datasets, mapping profiles, catalogue cache). Survives container rebuilds/replacement.
+  atlas-data:

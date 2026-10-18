@@ -1,0 +1,94 @@
+# COSMIC ATLAS nginx site. Rendered at container start by the nginx image entrypoint (envsubst) from:
+#   API_UPSTREAM, NGINX_LOCAL_RESOLVERS, NGINX_CLIENT_MAX_BODY_SIZE
+
+map $http_x_forwarded_proto $atlas_forwarded_proto {
+    default $http_x_forwarded_proto;
+    ""      $scheme;
+}
+
+# HSTS only when the edge actually served HTTPS (Fly sets X-Forwarded-Proto); empty value = header omitted.
+map $atlas_forwarded_proto $atlas_hsts {
+    https   "max-age=31536000";
+    default "";
+}
+
+server {
+    listen 8080;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+    server_tokens off;
+
+    # Dataset uploads are base64 JSON: 40 MB backend limit x 4/3 encoding + envelope.
+    client_max_body_size ${NGINX_CLIENT_MAX_BODY_SIZE};
+
+    # Re-resolve the API host at runtime instead of pinning the IP seen at startup.
+    resolver ${NGINX_LOCAL_RESOLVERS} valid=10s;
+    resolver_timeout 5s;
+
+    gzip on;
+    gzip_static on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/javascript application/javascript application/json image/svg+xml application/xml;
+
+    include /etc/nginx/snippets/security-headers.conf;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    # Same-origin API: https://<site>/api/... -> FastAPI. The full original URI (including /api) is forwarded.
+    location /api/ {
+        set $atlas_api ${API_UPSTREAM};
+        proxy_pass $atlas_api;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $atlas_forwarded_proto;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_connect_timeout 10s;
+        # SIMBAD resolver + TAP + alias queries can legitimately take ~60-90 s when CDS is slow.
+        proxy_send_timeout 120s;
+        proxy_read_timeout 120s;
+        # Only nginx's own failures (API down / unreachable / timed out) become JSON 503s;
+        # the API's own error responses (e.g. 502 for an upstream catalogue outage) pass through unchanged.
+        error_page 502 503 504 = @api_unavailable;
+    }
+
+    location @api_unavailable {
+        default_type application/json;
+        add_header Cache-Control "no-store" always;
+        include /etc/nginx/snippets/security-headers.conf;
+        return 503 '{"detail":"The COSMIC ATLAS API is temporarily unavailable. Please retry shortly."}';
+    }
+
+    # Astronomy textures keep stable file names, so cache them for a week rather than forever.
+    location ^~ /assets/astronomy/ {
+        include /etc/nginx/snippets/security-headers.conf;
+        add_header Cache-Control "public, max-age=604800";
+        try_files $uri =404;
+    }
+
+    # Vite output has content-hashed names: safe to cache permanently. Missing files are real 404s, not index.html.
+    location ^~ /assets/ {
+        include /etc/nginx/snippets/security-headers.conf;
+        add_header Cache-Control "public, max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    location = /index.html {
+        include /etc/nginx/snippets/security-headers.conf;
+        add_header Cache-Control "no-cache";
+    }
+
+    # SPA fallback so a browser refresh on any client route still loads the app.
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}
