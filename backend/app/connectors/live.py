@@ -17,16 +17,23 @@ SIMBAD_TAP = "https://simbad.cds.unistra.fr/simbad/sim-tap/sync"
 HORIZONS_URL = "https://ssd.jpl.nasa.gov/api/horizons.api"
 HORIZONS_IDS = {"mercury": "199", "venus": "299", "earth": "399", "mars": "499", "jupiter": "599", "saturn": "699", "uranus": "799", "neptune": "899", "moon": "301", "sun": "10"}
 
+DEFAULT_CONNECT_TIMEOUT = 4.0
+DEFAULT_READ_TIMEOUT = 7.0
+DEFAULT_TIMEOUT = httpx.Timeout(connect=DEFAULT_CONNECT_TIMEOUT, read=DEFAULT_READ_TIMEOUT, write=5.0, pool=5.0)
+TAP_TIMEOUT = httpx.Timeout(connect=4.0, read=9.0, write=5.0, pool=5.0)
+
 
 class ConnectorError(Exception):
     pass
 
 
-def _get(url: str, params: dict, timeout: float = 20) -> httpx.Response:
+def _get(url: str, params: dict, timeout: httpx.Timeout | float = DEFAULT_TIMEOUT) -> httpx.Response:
     try:
         r = httpx.get(url, params=params, headers=UA, timeout=timeout)
         r.raise_for_status()
         return r
+    except httpx.TimeoutException as e:
+        raise ConnectorError(f"External astronomy service timed out ({type(e).__name__}). Please check your connection or try again shortly.") from e
     except httpx.HTTPError as e:
         raise ConnectorError(f"{url} unavailable: {type(e).__name__}: {e}") from e
 
@@ -72,24 +79,30 @@ def simbad_lookup(repo, query: str) -> dict:
     script = 'output console=off script=off\nformat object "%MAIN_ID"\nquery id ' + q
     text = ""
     for _attempt in range(2):  # the script resolver occasionally returns a transient error
-        text = _get(SIMBAD_URL, {"script": script}).text.strip()
-        if text and not text.startswith("::error"):
-            break
-        time.sleep(0.5)
+        try:
+            text = _get(SIMBAD_URL, {"script": script}, timeout=DEFAULT_TIMEOUT).text.strip()
+            if text and not text.startswith("::error"):
+                break
+        except ConnectorError:
+            if _attempt == 1:
+                raise
+        time.sleep(0.3)
     if text.startswith("::error") or not text:
         raise ConnectorError(f"SIMBAD: no object found for '{q}'")
     main_id = text.splitlines()[0].strip().replace("'", "''")
     adql = f"SELECT TOP 1 main_id, ra, dec, otype, plx_value, rvz_redshift FROM basic WHERE main_id = '{main_id}'"
     try:
-        r = httpx.post(SIMBAD_TAP, data={"request": "doQuery", "lang": "adql", "format": "json", "query": adql}, headers=UA, timeout=30)
+        r = httpx.post(SIMBAD_TAP, data={"request": "doQuery", "lang": "adql", "format": "json", "query": adql}, headers=UA, timeout=TAP_TIMEOUT)
         r.raise_for_status()
         payload = r.json()
+    except httpx.TimeoutException as e:
+        raise ConnectorError(f"SIMBAD TAP service timed out for '{q}'. The database may be temporarily overloaded.") from e
     except (httpx.HTTPError, ValueError) as e:
         raise ConnectorError(f"SIMBAD TAP unavailable: {type(e).__name__}: {e}") from e
     d = parse_simbad_tap(payload, q)
     d["aliases"] = []
     try:
-        ids = httpx.post(SIMBAD_TAP, data={"request": "doQuery", "lang": "adql", "format": "json", "query": f"SELECT id FROM ident JOIN basic ON oidref = oid WHERE main_id = '{main_id}'"}, headers=UA, timeout=30).json()
+        ids = httpx.post(SIMBAD_TAP, data={"request": "doQuery", "lang": "adql", "format": "json", "query": f"SELECT id FROM ident JOIN basic ON oidref = oid WHERE main_id = '{main_id}'"}, headers=UA, timeout=TAP_TIMEOUT).json()
         d["aliases"] = [x[0] for x in ids.get("data", [])][:15]
     except (httpx.HTTPError, ValueError, KeyError):
         pass  # aliases are optional
@@ -126,7 +139,7 @@ def horizons_vector(repo, body: str, day: str) -> dict:
     center = "500@399" if body.lower() == "moon" else "500@10"
     params = {"format": "json", "COMMAND": f"'{bid}'", "OBJ_DATA": "'NO'", "MAKE_EPHEM": "'YES'", "EPHEM_TYPE": "'VECTORS'", "CENTER": f"'{center}'",
               "START_TIME": f"'{d0.isoformat()}'", "STOP_TIME": f"'{(d0 + timedelta(days=1)).isoformat()}'", "STEP_SIZE": "'1d'", "VEC_TABLE": "'1'", "CSV_FORMAT": "'YES'", "REF_PLANE": "'ECLIPTIC'", "OUT_UNITS": "'AU-D'"}
-    payload = _get(HORIZONS_URL, params, timeout=30).json()
+    payload = _get(HORIZONS_URL, params, timeout=TAP_TIMEOUT).json()
     vec = parse_horizons_vector(payload)
     d = {"source": "NASA/JPL Horizons API (ssd.jpl.nasa.gov/api/horizons.api)", "body": body, "date": day, "frame": f"heliocentric ecliptic J2000, centre {center}", "vector_au": vec,
          "raw_excerpt": payload.get("result", "")[:0], "retrieved": time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime()), "cached": False}

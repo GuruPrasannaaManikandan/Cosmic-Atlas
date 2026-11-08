@@ -359,7 +359,7 @@ option { background: #070d1e; color: #fff; }
   border: 1px solid var(--line);
   border-radius: var(--r-sm);
   box-shadow: var(--shadow);
-  z-index: 50;
+  z-index: 60;
 }
 .results .res-group-title {
   font-size: 10px;
@@ -1098,7 +1098,7 @@ option { background: #070d1e; color: #fff; }
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 70;
+  z-index: 500;
   animation: fade 0.2s ease;
   backdrop-filter: blur(8px);
 }
@@ -1153,7 +1153,7 @@ option { background: #070d1e; color: #fff; }
   border-radius: var(--r);
   padding: 20px;
   overflow-y: auto;
-  z-index: 20;
+  z-index: 40;
   backdrop-filter: blur(20px);
   box-shadow: var(--shadow), 0 0 25px rgba(167, 139, 250, 0.15);
   animation: slidein-r 0.25s cubic-bezier(0.16, 1, 0.3, 1);
@@ -2094,7 +2094,7 @@ option { background: #070d1e; color: #fff; }
   right: 0;
   width: 320px;
   padding: 16px;
-  z-index: 1000;
+  z-index: 600;
   border-radius: var(--r);
   background: var(--glass-strong);
   border: 1px solid var(--line-hi);
@@ -2255,7 +2255,7 @@ option { background: #070d1e; color: #fff; }
   background: rgba(2, 4, 10, 0.82);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  z-index: 1200;
+  z-index: 700;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2900,7 +2900,7 @@ option { background: #070d1e; color: #fff; }
   background: rgba(1, 2, 8, 0.82);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  z-index: 1300;
+  z-index: 750;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3151,7 +3151,7 @@ option { background: #070d1e; color: #fff; }
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: 1050;
+  z-index: 450;
 }
 
 .tutorial-spotlight-ring {
@@ -3161,7 +3161,7 @@ option { background: #070d1e; color: #fff; }
   border-radius: var(--r);
   box-shadow: 0 0 24px var(--cy-glow), inset 0 0 12px var(--cy-glow);
   animation: spotlightPulse 1.8s ease-in-out infinite alternate;
-  z-index: 1040;
+  z-index: 440;
 }
 
 @keyframes spotlightPulse {
@@ -3811,4 +3811,51 @@ option { background: #070d1e; color: #fff; }
     filter: drop-shadow(0 0 12px var(--cy-glow));
   }
 }
+
+/* Module Lazy Loading & Error Fallbacks */
+.module-loader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  color: var(--mut);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.module-loader-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(56, 189, 248, 0.2);
+  border-top-color: var(--cy);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.module-fallback {
+  padding: 16px 20px;
+  margin: 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  background: rgba(30, 10, 15, 0.85);
+  color: #fecaca;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+}
+
+.module-fallback-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #ef4444;
+}
+
+.module-fallback-icon {
+  font-size: 15px;
+}
+
 
