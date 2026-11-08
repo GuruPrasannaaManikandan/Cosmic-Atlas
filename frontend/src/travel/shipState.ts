@@ -1,10 +1,14 @@
 import * as THREE from 'three'
-import { Vec3, add, sub, len, toThree, fromThree, SUN_POS, LY_PER_AU, C_KM_S } from '../astro/coords'
+import { Vec3, add, sub, len, scale, toThree, fromThree, SUN_POS, LY_PER_AU, C_KM_S } from '../astro/coords'
 import { BY_ID, positionOf, radiusLyOf } from '../data/catalog'
+import { relativeKm } from '../astro/heliocentric'
 import { ShipState, FlightModel, CameraView, ThrottleGear } from './types'
 
-export const C_LY_S = 3.16887646e-8 // c in ly/s
-export const KM_TO_LY = 1.057000834e-13
+/** km → ly, the same exact constant as catalog.ts (LY_PER_AU / KM_PER_AU). The old literal 1.057000834e-13 is kept
+ *  in NavMapModal only for display; the previous C_LY_S literal (3.16887646e-8) was 21 ppm too large. */
+export const KM_TO_LY = LY_PER_AU / 149597870.7
+/** c in ly/s */
+export const C_LY_S = C_KM_S * KM_TO_LY
 
 // Maximum speeds per gear in ly/s
 export const GEAR_SPEEDS: Record<ThrottleGear, { maxLyS: number; label: string; accelLyS2: number }> = {
@@ -47,11 +51,88 @@ export const ship: ShipState = {
     warpActive: false,
   },
 
+  refBodyId: null,
+  localKm: null,
+  nearestId: 'earth',
+  nearestSurfaceLy: Infinity,
+  arrivedId: null,
+  chaseZoom: 1,
+  event: null,
+
   speedKmS: 0,
   speedC: 0,
   headingDeg: { yaw: 0, pitch: 0 },
   gForce: 1,
   systemStatus: 'nominal',
+}
+
+/** Bodies with a surface the ship can collide with / navigate relative to. */
+const COMPACT = new Set(['planet', 'moon', 'dwarf-planet', 'asteroid', 'star', 'star-system'])
+
+export function flightEvent(text: string) {
+  ship.event = { text, at: typeof performance !== 'undefined' ? performance.now() : Date.now() }
+}
+
+// ----------------------------------------------------------------------------------------------------------------
+// Precise ship position. The authoritative state is ship.localKm: the offset (km, galactic axes) from the reference
+// body. ship.pos (root-frame light-years, quantised at ~34 km near the Sun — blueprint finding D1) is DERIVED from it
+// after every step, for the renderer and the rest of the app. If other code assigns ship.pos directly, the next step
+// re-derives localKm from it (detected by array identity).
+// ----------------------------------------------------------------------------------------------------------------
+let lastWrittenPos: Vec3 | null = null
+const KM_TO_LY_EXACT = KM_TO_LY
+
+function writePos(simMs: number) {
+  if (ship.refBodyId && ship.localKm && BY_ID[ship.refBodyId]) {
+    ship.pos = add(positionOf(BY_ID[ship.refBodyId], simMs), scale(ship.localKm, KM_TO_LY_EXACT))
+  }
+  lastWrittenPos = ship.pos
+}
+
+function syncFromExternalPos(simMs: number) {
+  if (!ship.refBodyId || !BY_ID[ship.refBodyId]) {
+    ship.localKm = null
+    return
+  }
+  if (!ship.localKm || ship.pos !== lastWrittenPos) {
+    ship.localKm = scale(sub(ship.pos, positionOf(BY_ID[ship.refBodyId], simMs)), 1 / KM_TO_LY_EXACT)
+    lastWrittenPos = ship.pos
+  }
+}
+
+/** Make `id` the co-moving reference body without moving the ship (re-expresses localKm exactly in km). */
+function setReferenceBody(id: string | null, simMs: number) {
+  if (id === ship.refBodyId) return
+  syncFromExternalPos(simMs)
+  if (id && ship.refBodyId && ship.localKm && BY_ID[id]) {
+    ship.localKm = add(ship.localKm, relativeKm(ship.refBodyId, id, simMs))
+  } else if (id && BY_ID[id]) {
+    ship.localKm = scale(sub(ship.pos, positionOf(BY_ID[id], simMs)), 1 / KM_TO_LY_EXACT)
+  } else {
+    ship.localKm = null
+  }
+  ship.refBodyId = id
+  writePos(simMs)
+}
+
+/** Nearest compact body to `pos` and the distance to its (display) surface. */
+export function nearestCompactBody(pos: Vec3, simMs: number): { id: string; surfaceLy: number; radiusLy: number } {
+  let best = Infinity
+  let bestId = 'sun'
+  let bestR = 0
+  for (const o of Object.values(BY_ID)) {
+    if (!COMPACT.has(o.category)) continue
+    const r = radiusLyOf(o)
+    // the reference body's distance comes from the exact local offset, not the quantised root-frame difference
+    const d = o.id === ship.refBodyId && ship.localKm && pos === ship.pos ? len(ship.localKm) * KM_TO_LY_EXACT : len(sub(positionOf(o, simMs), pos))
+    const surf = d - r
+    if (surf < best) {
+      best = surf
+      bestId = o.id
+      bestR = r
+    }
+  }
+  return { id: bestId, surfaceLy: best, radiusLy: bestR }
 }
 
 /** Place the spacecraft near a specific celestial body */
@@ -85,6 +166,14 @@ export function initShipNear(targetId: string, simMs: number) {
   ship.reverse = false
   ship.gear = 1
   ship.targetId = o.id
+  ship.arrivedId = null
+  ship.event = null
+  ship.refBodyId = COMPACT.has(o.category) ? o.id : null
+  ship.localKm = ship.refBodyId ? scale(offset, 1 / KM_TO_LY_EXACT) : null
+  writePos(simMs)
+  const n = nearestCompactBody(ship.pos, simMs)
+  ship.nearestId = n.id
+  ship.nearestSurfaceLy = n.surfaceLy
   cancelAutopilot()
 }
 
@@ -96,6 +185,7 @@ export function engageAutopilot(targetId: string, simMs: number, useWarp: boolea
   const dist = len(sub(targetPos, ship.pos))
 
   ship.targetId = targetId
+  ship.arrivedId = null
   ship.autopilot = {
     active: true,
     destinationId: targetId,
@@ -120,18 +210,25 @@ export function engageAutopilot(targetId: string, simMs: number, useWarp: boolea
     ship.gear = 1
   }
 
+  // Navigate in the destination's co-moving frame: the target is then stationary for the guidance law.
+  if (COMPACT.has(o.category)) setReferenceBody(targetId, simMs)
   ship.systemStatus = ship.autopilot.warpActive ? 'warp' : 'autopilot'
+  flightEvent(`Autopilot engaged → ${o.name}`)
   return true
 }
 
 /** Cancel autopilot and return full manual control */
-export function cancelAutopilot() {
+export function cancelAutopilot(reason?: string) {
   const had = ship.autopilot.active
   ship.autopilot.active = false
   ship.autopilot.destinationId = null
   ship.autopilot.destinationName = null
   ship.autopilot.warpActive = false
   ship.systemStatus = 'nominal'
+  if (had) {
+    ship.thrust = 0
+    if (reason) flightEvent(reason)
+  }
   return had
 }
 
@@ -157,265 +254,254 @@ export function toggleStabilization() {
   ship.stabilization = !ship.stabilization
 }
 
+export interface FlightInput {
+  /** rotation-rate commands, −1..1 (keyboard) */
+  yaw: number
+  pitch: number
+  roll: number
+  /** throttle lever change rate (+1 = W held, −1 = S held) */
+  thrustDelta: number
+  /** S held: once the throttle reaches zero the ship thrusts backward */
+  reverse: boolean
+  boost: boolean
+  /** lateral (A/D) and vertical (Space/C) thrust, −1..1 */
+  strafeX: number
+  strafeY: number
+  brake: boolean
+  /** mouse-look rotation accumulated since the last step (radians); consumed by the step */
+  lookYaw?: number
+  lookPitch?: number
+}
+
+/** Fraction of the gear acceleration used for reverse, lateral and vertical thrusters. */
+const RCS_FRACTION = 0.5
+/** Manual speed is capped at this many surface-distances per second near bodies (no frame-skips into planets). */
+const PROXIMITY_SPEED_PER_S = 1.5
+const MIN_PROXIMITY_SPEED_LYS = 2 * KM_TO_LY
+/** Below the gear maximum the autopilot follows a braking curve v = BRAKE_MARGIN·sqrt(2·a·d), capped at d / APPROACH_TAU. */
+const BRAKE_MARGIN = 0.8
+const APPROACH_TAU = 1.5
+
 /** Single-step numerical integration of spacecraft flight physics */
-export function stepShipPhysics(
-  dt: number,
-  simMs: number,
-  input: {
-    yaw: number
-    pitch: number
-    roll: number
-    thrustDelta: number
-    reverse: boolean
-    boost: boolean
-    strafeX: number
-    strafeY: number
-    brake: boolean
-  }
-) {
-  const safeDt = Math.min(dt, 0.1)
+export function stepShipPhysics(dt: number, simMs: number, input: FlightInput) {
+  const safeDt = Math.min(Math.max(dt, 0), 0.1)
 
-  // 1. Rotation handling
+  // 0. Co-moving reference frame: the ship's state is an exact km offset from its reference body, so it moves with
+  //    that body as simulation time runs (autopilot target while engaged, otherwise the nearest body).
+  syncFromExternalPos(simMs)
+  const wantRef =
+    ship.autopilot.active && ship.autopilot.destinationId ? ship.autopilot.destinationId
+      : ship.arrivedId ? ship.arrivedId // station keeping stays with the body we arrived at
+        : ship.refBodyId ?? ship.nearestId
+  if (wantRef && BY_ID[wantRef] && COMPACT.has(BY_ID[wantRef].category)) setReferenceBody(wantRef, simMs)
+  writePos(simMs)
+
   const q = ship.quat
-  const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q)
-  const up = new THREE.Vector3(0, 1, 0).applyQuaternion(q)
-  const right = new THREE.Vector3(1, 0, 0).applyQuaternion(q)
+  let fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q)
+  let up = new THREE.Vector3(0, 1, 0).applyQuaternion(q)
+  let right = new THREE.Vector3(1, 0, 0).applyQuaternion(q)
 
-  if (ship.autopilot.active && ship.autopilot.destinationId) {
-    // Autopilot alignment
-    const o = BY_ID[ship.autopilot.destinationId]
-    if (o) {
-      ship.autopilot.targetPos = positionOf(o, simMs)
-      const toTarget = new THREE.Vector3(...toThree(sub(ship.autopilot.targetPos, ship.pos))).normalize()
-      const targetQuat = new THREE.Quaternion().setFromRotationMatrix(
-        new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), toTarget, up)
-      )
-      // Smooth slerp toward target heading
-      ship.quat.slerp(targetQuat, Math.min(1, safeDt * 3.5))
+  const gearConfig = GEAR_SPEEDS[ship.gear]
+  ship.boost = !!input.boost && !ship.autopilot.active
+  const boostMult = ship.boost ? 3.0 : 1.0
+  let effectiveMaxSpeed = gearConfig.maxLyS * boostMult
+  let effectiveAccel = gearConfig.accelLyS2 * boostMult
 
-      // Angle to target
-      const dot = fwd.dot(toTarget)
-      if (dot > 0.98) {
-        ship.autopilot.phase = ship.autopilot.warpActive ? 'cruise' : 'accelerate'
-        ship.thrust = 1.0
-      } else {
-        ship.autopilot.phase = 'align'
-        ship.thrust = 0.25
-      }
+  let vel = new THREE.Vector3(...toThree(ship.vel))
+  const accelVector = new THREE.Vector3()
+
+  if (ship.autopilot.active && ship.autopilot.destinationId && BY_ID[ship.autopilot.destinationId]) {
+    // ------------------------------------------------------------------ AUTOPILOT (velocity-vector guidance)
+    const dest = BY_ID[ship.autopilot.destinationId]
+    ship.autopilot.targetPos = positionOf(dest, simMs)
+    const rel: Vec3 = ship.refBodyId === dest.id && ship.localKm ? scale(ship.localKm, -KM_TO_LY_EXACT) : sub(ship.autopilot.targetPos, ship.pos)
+    const dist = len(rel)
+    const toTarget = new THREE.Vector3(...toThree(rel)).normalize()
+    const destRadius = radiusLyOf(dest) || 1e-7
+    const safeArrivalDist = Math.max(destRadius * (dest.id === 'saturn' ? 4.2 : 2.6), 1e-12)
+    const rem = Math.max(0, dist - safeArrivalDist)
+
+    // gear management (downshift on approach so warp never overshoots)
+    if (rem <= 0.05 * LY_PER_AU && ship.gear === 4) {
+      ship.gear = 3
+      ship.autopilot.warpActive = false
+    }
+    if (rem <= 0.003 * LY_PER_AU && ship.gear === 3) ship.gear = 2
+    if (rem <= Math.max(destRadius * 15, 0.0001 * LY_PER_AU) && ship.gear === 2) ship.gear = 1
+    const g = GEAR_SPEEDS[ship.gear]
+    effectiveMaxSpeed = g.maxLyS
+    // Downshifting reduces the speed ceiling, not the braking authority: the autopilot may always decelerate as hard
+    // as needed to stop on the arrival shell (otherwise speed carried in from a higher gear overshoots the target).
+    const vNow = vel.length()
+    effectiveAccel = Math.max(g.accelLyS2, rem > 0 ? (1.25 * vNow * vNow) / (2 * rem) : 0)
+    ship.systemStatus = ship.autopilot.warpActive ? 'warp' : 'autopilot'
+
+    // attitude: turn the nose toward the target
+    const targetQuat = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), toTarget, up))
+    ship.quat.slerp(targetQuat, Math.min(1, safeDt * 3.5))
+    const aligned = fwd.dot(toTarget) > 0.95
+
+    // desired velocity along the line of sight; lateral drift is cancelled by the same correction
+    const vBrake = BRAKE_MARGIN * Math.sqrt(2 * effectiveAccel * rem)
+    const vDesired = Math.min(effectiveMaxSpeed, vBrake, Math.max(rem / APPROACH_TAU, MIN_PROXIMITY_SPEED_LYS))
+    const desired = toTarget.clone().multiplyScalar(aligned ? vDesired : Math.min(vDesired, vel.length()))
+    const dv = desired.clone().sub(vel)
+    const maxDv = effectiveAccel * safeDt * (aligned ? 1.5 : 0.5)
+    if (dv.length() > maxDv) dv.setLength(maxDv)
+    accelVector.copy(dv).multiplyScalar(1 / Math.max(safeDt, 1e-9))
+    vel.add(dv)
+    ship.thrust = Math.min(1, dv.length() / Math.max(effectiveAccel * safeDt, 1e-30))
+
+    const speed = vel.length()
+    ship.autopilot.phase = !aligned ? 'align' : vBrake < effectiveMaxSpeed && speed > 0.5 * vBrake ? 'decelerate' : speed >= 0.95 * effectiveMaxSpeed ? 'cruise' : 'accelerate'
+    const initial = Math.max(ship.autopilot.initialDistanceLy, safeArrivalDist * 2)
+    ship.autopilot.currentDistanceLy = dist
+    ship.autopilot.progress = Math.max(0, Math.min(1, 1 - rem / Math.max(initial - safeArrivalDist, 1e-30)))
+    ship.autopilot.etaSec = speed > 0 ? rem / speed : 0
+
+    if (rem <= safeArrivalDist * 0.05) {
+      // ARRIVAL: stop relative to the destination and hold station in its co-moving frame.
+      ship.autopilot.phase = 'arrive'
+      ship.autopilot.active = false
+      ship.autopilot.warpActive = false
+      ship.autopilot.progress = 1
+      ship.autopilot.etaSec = 0
+      ship.thrust = 0
+      ship.gear = 1
+      ship.systemStatus = 'nominal'
+      ship.arrivedId = dest.id
+      vel.set(0, 0, 0)
+      ship.angVel.set(0, 0, 0)
+      flightEvent(`Arrived at ${dest.name} — holding station`)
     }
   } else {
-    // Manual rotation
+    // ------------------------------------------------------------------ MANUAL FLIGHT
+    // attitude from keys
     const rotSpeed = 1.8 // rad/s
     if (ship.flightModel === 'assisted') {
-      // In assisted mode, input directly controls angular velocity, which dampens when released
       if (input.yaw || input.pitch || input.roll) {
-        ship.angVel.x = input.pitch * rotSpeed
-        ship.angVel.y = input.yaw * rotSpeed
-        ship.angVel.z = input.roll * rotSpeed
+        ship.angVel.set(input.pitch * rotSpeed, input.yaw * rotSpeed, input.roll * rotSpeed)
       } else {
         ship.angVel.multiplyScalar(Math.pow(0.001, safeDt * 6))
       }
     } else {
-      // In inertial mode, input applies torque/angular acceleration
       const torque = 3.2
       ship.angVel.x += input.pitch * torque * safeDt
       ship.angVel.y += input.yaw * torque * safeDt
       ship.angVel.z += input.roll * torque * safeDt
-      if (ship.stabilization && !input.yaw && !input.pitch && !input.roll) {
-        ship.angVel.multiplyScalar(Math.pow(0.02, safeDt * 3))
-      }
+      if (ship.stabilization && !input.yaw && !input.pitch && !input.roll) ship.angVel.multiplyScalar(Math.pow(0.02, safeDt * 3))
     }
-
-    // Apply angular velocity to quaternion
     if (ship.angVel.lengthSq() > 1e-8) {
-      const rot = new THREE.Quaternion().setFromEuler(
-        new THREE.Euler(
-          ship.angVel.x * safeDt,
-          ship.angVel.y * safeDt,
-          ship.angVel.z * safeDt,
-          'YXZ'
-        )
-      )
+      const rot = new THREE.Quaternion().setFromEuler(new THREE.Euler(-ship.angVel.x * safeDt, -ship.angVel.y * safeDt, -ship.angVel.z * safeDt, 'YXZ'))
       ship.quat.multiply(rot).normalize()
     }
-  }
-
-  // 2. Throttle & Thrust calculation
-  if (!ship.autopilot.active) {
-    if (input.thrustDelta !== 0) {
-      ship.thrust = Math.max(0, Math.min(1, ship.thrust + input.thrustDelta * safeDt * 1.5))
+    // mouse look: direct rotation (yaw about the ship's up axis, pitch about its right axis)
+    if (input.lookYaw || input.lookPitch) {
+      const yawQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -(input.lookYaw ?? 0))
+      const pitchQ = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), -(input.lookPitch ?? 0))
+      ship.quat.multiply(yawQ).multiply(pitchQ).normalize()
     }
-    ship.reverse = input.reverse
-    ship.boost = input.boost
+    fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(ship.quat)
+    up = new THREE.Vector3(0, 1, 0).applyQuaternion(ship.quat)
+    right = new THREE.Vector3(1, 0, 0).applyQuaternion(ship.quat)
+
+    // throttle lever
+    if (input.thrustDelta !== 0) ship.thrust = Math.max(0, Math.min(1, ship.thrust + input.thrustDelta * safeDt * 1.5))
+    ship.reverse = !!input.reverse && ship.thrust === 0
     ship.lateralThrust = input.strafeX
     ship.verticalThrust = input.strafeY
-  }
 
-  const gearConfig = GEAR_SPEEDS[ship.gear]
-  const boostMult = ship.boost ? 3.0 : 1.0
-  const effectiveMaxSpeed = gearConfig.maxLyS * boostMult
-  const effectiveAccel = gearConfig.accelLyS2 * boostMult
+    if (ship.thrust > 0) accelVector.add(fwd.clone().multiplyScalar(effectiveAccel * ship.thrust))
+    if (ship.reverse) accelVector.add(fwd.clone().multiplyScalar(-effectiveAccel * RCS_FRACTION))
+    if (ship.lateralThrust) accelVector.add(right.clone().multiplyScalar(ship.lateralThrust * effectiveAccel * RCS_FRACTION))
+    if (ship.verticalThrust) accelVector.add(up.clone().multiplyScalar(ship.verticalThrust * effectiveAccel * RCS_FRACTION))
+    vel.add(accelVector.clone().multiplyScalar(safeDt))
 
-  // Calculate forward acceleration in Three.js coords
-  let accelVector = new THREE.Vector3()
-  if (ship.thrust > 0) {
-    const dir = ship.reverse ? fwd.clone().negate() : fwd.clone()
-    accelVector.add(dir.multiplyScalar(effectiveAccel * ship.thrust))
-  }
-
-  // Lateral and vertical strafe thrust
-  if (ship.lateralThrust !== 0) {
-    accelVector.add(right.clone().multiplyScalar(ship.lateralThrust * effectiveAccel * 0.4))
-  }
-  if (ship.verticalThrust !== 0) {
-    accelVector.add(up.clone().multiplyScalar(ship.verticalThrust * effectiveAccel * 0.4))
-  }
-
-  // Convert acceleration to root frame
-  const accRoot = fromThree([accelVector.x, accelVector.y, accelVector.z])
-  ship.acc = accRoot
-
-  // 3. Update velocity
-  let curVelThree = new THREE.Vector3(...toThree(ship.vel))
-  curVelThree.add(accelVector.multiplyScalar(safeDt))
-
-  // Damping / stabilization
-  if (input.brake) {
-    curVelThree.multiplyScalar(Math.pow(0.01, safeDt * 4))
-  } else if (ship.flightModel === 'assisted' && ship.thrust === 0 && !ship.autopilot.active) {
-    // In assisted mode with no throttle, gently dampen velocity toward stop
-    curVelThree.multiplyScalar(Math.pow(0.05, safeDt * 1.5))
-  } else if (ship.stabilization && ship.thrust === 0 && !ship.autopilot.active) {
-    curVelThree.multiplyScalar(Math.pow(0.2, safeDt))
-  }
-
-  // Speed clamping to gear max
-  const curSpeed = curVelThree.length()
-  if (curSpeed > effectiveMaxSpeed) {
-    curVelThree.normalize().multiplyScalar(effectiveMaxSpeed)
-  }
-
-  ship.vel = fromThree([curVelThree.x, curVelThree.y, curVelThree.z])
-
-  // 4. Update position
-  const deltaPos = curVelThree.clone().multiplyScalar(safeDt)
-  ship.pos = add(ship.pos, fromThree([deltaPos.x, deltaPos.y, deltaPos.z]))
-
-  // 5. Update Autopilot progress and arrival logic
-  if (ship.autopilot.active && ship.autopilot.destinationId) {
-    const dist = len(sub(ship.autopilot.targetPos, ship.pos))
-    ship.autopilot.currentDistanceLy = dist
-    const destObj = BY_ID[ship.autopilot.destinationId]
-    const destRadius = destObj ? radiusLyOf(destObj) : 1e-7
-    const arrivalMult = destObj?.id === 'saturn' ? 4.2 : 2.6
-    const safeArrivalDist = Math.max(destRadius * arrivalMult, 1e-12)
-
-    // Progress percentage
-    const initial = Math.max(ship.autopilot.initialDistanceLy, safeArrivalDist * 2)
-    ship.autopilot.progress = Math.max(0, Math.min(1, 1 - (dist - safeArrivalDist) / (initial - safeArrivalDist)))
-
-    // Estimated time of arrival
-    const speedLyS = Math.max(curSpeed, 1e-12)
-    ship.autopilot.etaSec = Math.max(0, (dist - safeArrivalDist) / speedLyS)
-
-    // Deceleration, downshifting and safe approach speed throttling
-    if (dist > safeArrivalDist) {
-      const rem = dist - safeArrivalDist
-
-      // Automatic gear downshift on approach to avoid warp overshoot
-      if (rem <= 0.05 * LY_PER_AU && ship.gear === 4) {
-        ship.gear = 3
-        ship.autopilot.warpActive = false
-        if (ship.systemStatus === 'warp') ship.systemStatus = 'autopilot'
-      }
-      if (rem <= 0.003 * LY_PER_AU && ship.gear === 3) {
-        ship.gear = 2
-      }
-      if (rem <= Math.max(destRadius * 15, 0.0001 * LY_PER_AU) && ship.gear === 2) {
-        ship.gear = 1
-      }
-
-      // Approach speed clamp: maximum speed cannot exceed rem / 2.0s
-      const maxSafeSpeed = Math.max(rem / 2.0, 5 * KM_TO_LY)
-      if (curSpeed > maxSafeSpeed) {
-        curVelThree.normalize().multiplyScalar(maxSafeSpeed)
-        ship.vel = fromThree([curVelThree.x, curVelThree.y, curVelThree.z])
-      }
-
-      // Deceleration phase when within 2.5x safe arrival distance
-      if (dist <= safeArrivalDist * 2.5) {
-        ship.autopilot.phase = 'decelerate'
-        const fraction = Math.max(0.1, rem / (safeArrivalDist * 1.5))
-        ship.thrust = Math.min(ship.thrust, fraction)
-      }
+    const thrusting = ship.thrust > 0 || ship.reverse || !!ship.lateralThrust || !!ship.verticalThrust
+    if (input.brake) {
+      vel.multiplyScalar(Math.pow(0.01, safeDt * 4))
+    } else if (!thrusting && ship.flightModel === 'assisted') {
+      vel.multiplyScalar(Math.pow(0.05, safeDt * 1.5)) // assisted: coast to a stop
+    } else if (!thrusting && ship.stabilization) {
+      // inertial + RCS stabilisation: slow bleed; inertial without stabilisation: pure coast
+      vel.multiplyScalar(Math.pow(0.2, safeDt))
     }
 
-    if (dist <= safeArrivalDist * 1.05) {
-      // Arrived!
-      ship.autopilot.phase = 'arrive'
-      ship.autopilot.active = false
-      ship.autopilot.warpActive = false
-      ship.thrust = 0
-      ship.systemStatus = 'nominal'
-      ship.gear = 1 // Return to sublight maneuvering gear
-      curVelThree.clampLength(0, 10 * KM_TO_LY)
-      ship.vel = fromThree([curVelThree.x, curVelThree.y, curVelThree.z])
-    }
+    // speed limits: gear maximum, then a proximity governor so warp can never skip into or past a body
+    const proximityCap = Math.max(ship.nearestSurfaceLy * PROXIMITY_SPEED_PER_S, MIN_PROXIMITY_SPEED_LYS)
+    const cap = Math.min(effectiveMaxSpeed, Number.isFinite(proximityCap) ? proximityCap : effectiveMaxSpeed)
+    if (vel.length() > cap) vel.setLength(cap)
   }
 
-  // 6. Safe minimum distance clamping around nearest celestial surface (planets, moons, dwarf planets, asteroids, stars)
-  let nearestSurface = Infinity
-  let nearestObjId = 'earth'
-  for (const o of Object.values(BY_ID)) {
-    // Only physical compact bodies have solid/stellar surfaces that require collision avoidance
-    if (
-      o.category !== 'planet' &&
-      o.category !== 'moon' &&
-      o.category !== 'dwarf-planet' &&
-      o.category !== 'asteroid' &&
-      o.category !== 'star' &&
-      o.category !== 'star-system'
-    ) {
-      continue
-    }
-    const targetP = positionOf(o, simMs)
-    const d = len(sub(targetP, ship.pos))
-    const r = radiusLyOf(o)
-    const surf = d - r
-    if (surf < nearestSurface) {
-      nearestSurface = surf
-      nearestObjId = o.id
-    }
+  ship.acc = fromThree([accelVector.x, accelVector.y, accelVector.z])
+
+  // 2. Integrate position
+  const step = vel.clone().multiplyScalar(safeDt)
+  const stepRoot = fromThree([step.x, step.y, step.z])
+  if (ship.localKm && ship.refBodyId) {
+    ship.localKm = add(ship.localKm, scale(stepRoot, 1 / KM_TO_LY_EXACT))
+    writePos(simMs)
+  } else {
+    ship.pos = add(ship.pos, stepRoot)
+    lastWrittenPos = ship.pos
   }
 
-  // Proximity alert when within 1.5 visual radii of a surface
-  const nearestObj = BY_ID[nearestObjId]
-  const nearestRadius = nearestObj ? radiusLyOf(nearestObj) : 0
-  if (nearestSurface < nearestRadius * 0.5 && nearestRadius > 0) {
+  // 3. Nearest body, collision and proximity
+  const n = nearestCompactBody(ship.pos, simMs)
+  ship.nearestId = n.id
+  ship.nearestSurfaceLy = n.surfaceLy
+  if (n.radiusLy > 0 && n.surfaceLy < n.radiusLy * 0.5) {
     if (!ship.autopilot.active) ship.systemStatus = 'proximity-alert'
-    // Prevent physical penetration into planetary core
-    if (nearestSurface <= 0) {
-      const p = positionOf(nearestObj, simMs)
-      const outDir = new THREE.Vector3(...toThree(sub(ship.pos, p))).normalize()
-      const safeP = outDir.multiplyScalar(nearestRadius * 1.15)
-      ship.pos = add(p, fromThree([safeP.x, safeP.y, safeP.z]))
-      // Deflect velocity away from surface
-      curVelThree.reflect(outDir).multiplyScalar(0.3)
-      ship.vel = fromThree([curVelThree.x, curVelThree.y, curVelThree.z])
+    if (n.surfaceLy <= 0) {
+      // never inside a body: put the ship back on a safe shell and remove the inward velocity component
+      if (n.id !== ship.refBodyId) setReferenceBody(n.id, simMs)
+      const offKm = ship.localKm ?? [0, 0, 0]
+      let outDir = new THREE.Vector3(...toThree(offKm))
+      if (outDir.lengthSq() === 0) outDir = up.clone()
+      outDir.normalize()
+      const safeKm = fromThree([outDir.x, outDir.y, outDir.z])
+      ship.localKm = scale(safeKm, (n.radiusLy * 1.15) / KM_TO_LY_EXACT)
+      writePos(simMs)
+      const inward = vel.dot(outDir)
+      if (inward < 0) vel.sub(outDir.multiplyScalar(inward))
+      ship.nearestSurfaceLy = n.radiusLy * 0.15
+      flightEvent(`Collision avoided — ${BY_ID[n.id].name} surface`)
     }
   } else if (!ship.autopilot.active && ship.systemStatus === 'proximity-alert') {
     ship.systemStatus = 'nominal'
   }
 
-  // 7. Update HUD Telemetry readouts
+  ship.vel = fromThree([vel.x, vel.y, vel.z])
+
+  // When nothing else is chosen, navigate relative to the nearest body from the next step on.
+  // Manual flight: adopt the nearest body as reference, with hysteresis so a passing small moon does not flip it.
+  if (!ship.autopilot.active && !ship.arrivedId && ship.refBodyId !== ship.nearestId) {
+    const ref = ship.refBodyId ? BY_ID[ship.refBodyId] : null
+    const refSurf = ref ? len(ship.localKm ?? sub(ship.pos, positionOf(ref, simMs))) * (ship.localKm ? KM_TO_LY_EXACT : 1) - radiusLyOf(ref) : Infinity
+    if (!ref || ship.nearestSurfaceLy < 0.7 * refSurf) setReferenceBody(ship.nearestId, simMs)
+  }
+  if (ship.arrivedId && !ship.autopilot.active && (input.thrustDelta || input.reverse || input.strafeX || input.strafeY)) ship.arrivedId = null
+
+  // 4. HUD telemetry
   const speedLyS = len(ship.vel)
   ship.speedKmS = speedLyS / KM_TO_LY
   ship.speedC = speedLyS / C_LY_S
-  ship.gForce = Math.max(1, (accelVector.length() / (9.81 * KM_TO_LY)) + 1)
-
-  // Heading angles in degrees
+  ship.gForce = accelVector.length() / (9.80665e-3 * KM_TO_LY) // proper acceleration in standard g
+  fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(ship.quat)
   ship.headingDeg = {
     yaw: ((Math.atan2(fwd.x, -fwd.z) * 180) / Math.PI + 360) % 360,
     pitch: (Math.asin(Math.max(-1, Math.min(1, fwd.y))) * 180) / Math.PI,
+  }
+}
+
+/** Debug / browser-test handles (same convention as window.__nav and window.__store). */
+if (typeof window !== 'undefined') {
+  ;(window as any).__ship = ship
+  ;(window as any).__shipApi = {
+    engageAutopilot,
+    cancelAutopilot,
+    setCameraView,
+    initShipNear,
+    positionOf: (id: string, ms: number) => positionOf(BY_ID[id], ms),
   }
 }

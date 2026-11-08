@@ -8,7 +8,6 @@ import { sub, len, SUN_POS } from '../astro/coords'
 import { api, SimbadResult } from './api'
 import { labelState } from '../scene/labelState'
 import { Browser, Info, TimeBar, StatusBar, Diagnostics, TourCard, CAT_ICON } from './Shell'
-import { AudioPlayer } from './AudioPlayer'
 import { startEvent, eventState, subscribeEventState } from '../events/eventState'
 import {
   checkFirstTimeUser,
@@ -20,6 +19,7 @@ import {
 import { ScaleBreadcrumbs } from './ScaleBreadcrumbs'
 import { TravelProgressHUD } from '../travel/TravelProgressHUD'
 import { ModuleBoundary, ModuleLoader } from './ModuleBoundary'
+import { TopNav } from './TopNav'
 
 // Lazy-loaded heavy modules for production bundle optimization and code-splitting
 const DataPanel = lazy(() => import('./DataPanel').then((m) => ({ default: m.DataPanel })))
@@ -342,8 +342,16 @@ export function App() {
     )
   }
 
+  const showTimebar = phase !== 'intro' && phase !== 'travel' && !activeEventId && (inSolar || (phase === 'tour' && tourIdx >= 16))
+  const showBrowser = phase !== 'intro' && phase !== 'travel' && !activeEventId && leftOpen && phase !== 'tour'
+
   return (
-    <div className="app">
+    <div
+      className="app"
+      data-timebar={showTimebar ? 'on' : undefined}
+      data-left={showBrowser ? 'open' : undefined}
+      data-right={showInfo ? 'open' : undefined}
+    >
       <Boundary>
         <CosmicCanvas />
       </Boundary>
@@ -368,61 +376,19 @@ export function App() {
 
           <Search hasActiveModal={hasActiveModal} />
 
-          <nav className="topnav" aria-label="Navigation controls">
-            <button
-              className="btn find"
-              onClick={() => st.startTour()}
-              title="Guided journey from ~1 billion light-years to Earth"
-            >
-              ✦ FIND HOME
-            </button>
-            <button
-              className="btn travel-btn"
-              onClick={() => st.enterTravelMode()}
-              title="Enter Travel Mode: pilot a spacecraft through the Solar System"
-            >
-              🚀 TRAVEL MODE
-            </button>
-            <button
-              className="btn events-btn"
-              onClick={() => setEventsModalOpen(true)}
-              title="Cosmic Events Observatory: View 3D simulations of supernovae, pulsars, and black holes"
-            >
-              🌌 Cosmic Events
-            </button>
-            <button
-              className="btn academy-btn"
-              onClick={() => startTutorial(true)}
-              title="Cosmic Academy: Interactive training mission for new and returning explorers"
-            >
-              🎓 Academy
-            </button>
-            <AudioPlayer />
-            <span className="divider" />
-            <button className="btn ghost" onClick={() => st.goHome()} title="Fly camera directly to Earth">
-              ◉ Earth
-            </button>
-            <button className="btn ghost" onClick={() => st.travel('milky-way')} title="Fly camera to the Milky Way Galaxy">
-              ◎ Milky Way
-            </button>
-            <button className="btn ghost" onClick={() => st.travel('sun')} title="Fly camera to the Solar System">
-              ☀ Solar System
-            </button>
-            <span className="divider" />
-            <button
-              className={'btn ghost' + (dataOpen ? ' on' : '')}
-              onClick={() => set({ dataOpen: !dataOpen })}
-              title="Ingest and map unfamiliar astronomy datasets"
-            >
-              ⌬ Data Intelligence
-            </button>
-            <button className="btn ghost" onClick={() => setHelp(true)} title="Keyboard & navigation controls">
-              ? Help
-            </button>
-            <button className="btn ghost" onClick={() => setAbout(true)} title="Scientific notes & data integrity">
-              ⓘ Notes
-            </button>
-          </nav>
+          <TopNav
+            startTour={() => st.startTour()}
+            enterTravel={() => st.enterTravelMode()}
+            openEvents={() => setEventsModalOpen(true)}
+            startAcademy={() => startTutorial(true)}
+            goEarth={() => st.goHome()}
+            goMilkyWay={() => st.travel('milky-way')}
+            goSolarSystem={() => st.travel('sun')}
+            toggleData={() => set({ dataOpen: !dataOpen })}
+            openHelp={() => setHelp(true)}
+            openAbout={() => setAbout(true)}
+            dataOpen={dataOpen}
+          />
         </header>
       )}
 
@@ -525,7 +491,7 @@ export function App() {
           {phase === 'tour' && <TourCard />}
           {showInfo && <Info />}
 
-          {(inSolar || (phase === 'tour' && tourIdx >= 16)) && <TimeBar />}
+          {showTimebar && <TimeBar />}
 
           <StatusBar />
 
