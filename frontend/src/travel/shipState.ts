@@ -59,10 +59,12 @@ export function initShipNear(targetId: string, simMs: number) {
   const o = BY_ID[targetId] ?? BY_ID['earth'] ?? BY_ID['sun']
   const P = positionOf(o, simMs)
   const r = radiusLyOf(o)
-  const spawnDist = Math.max(r * 2.5, 0.0005 * LY_PER_AU, 1e-8)
+  const mult = o.id === 'saturn' ? 4.5 : o.category === 'star' ? 3.0 : 2.5
+  const spawnDist = Math.max(r * mult, 1e-12)
 
-  // Position ship slightly above and offset from the planet
-  const offset: Vec3 = [spawnDist * 0.7, spawnDist * 0.4, spawnDist * 0.6]
+  // Position ship slightly above and offset from the target body.
+  // We keep the offset in Y/Z to maintain full float64 precision away from the large galactic X offset (SUN_POS.x = -26673 ly).
+  const offset: Vec3 = [0, spawnDist * 0.7, spawnDist * 0.7]
   ship.pos = add(P, offset)
 
   // Face toward the target
@@ -108,12 +110,14 @@ export function engageAutopilot(targetId: string, simMs: number, useWarp: boolea
   }
 
   // Switch to suitable gear for distance
-  if (dist > 0.1 * LY_PER_AU) {
+  if (dist > 0.08 * LY_PER_AU) {
     ship.gear = 4 // Warp gear for interplanetary distances
   } else if (dist > 0.005 * LY_PER_AU) {
     ship.gear = 3
-  } else {
+  } else if (dist > 0.0005 * LY_PER_AU) {
     ship.gear = 2
+  } else {
+    ship.gear = 1
   }
 
   ship.systemStatus = ship.autopilot.warpActive ? 'warp' : 'autopilot'
@@ -303,7 +307,8 @@ export function stepShipPhysics(
     ship.autopilot.currentDistanceLy = dist
     const destObj = BY_ID[ship.autopilot.destinationId]
     const destRadius = destObj ? radiusLyOf(destObj) : 1e-7
-    const safeArrivalDist = Math.max(destRadius * 3, 0.0001 * LY_PER_AU, 1e-8)
+    const arrivalMult = destObj?.id === 'saturn' ? 4.2 : 2.6
+    const safeArrivalDist = Math.max(destRadius * arrivalMult, 1e-12)
 
     // Progress percentage
     const initial = Math.max(ship.autopilot.initialDistanceLy, safeArrivalDist * 2)
@@ -311,14 +316,38 @@ export function stepShipPhysics(
 
     // Estimated time of arrival
     const speedLyS = Math.max(curSpeed, 1e-12)
-    ship.autopilot.etaSec = (dist - safeArrivalDist) / speedLyS
+    ship.autopilot.etaSec = Math.max(0, (dist - safeArrivalDist) / speedLyS)
 
-    // Deceleration & arrival
-    if (dist <= safeArrivalDist * 1.8) {
-      ship.autopilot.phase = 'decelerate'
-      ship.thrust = Math.max(0.1, (dist - safeArrivalDist) / safeArrivalDist)
-      curVelThree.multiplyScalar(Math.pow(0.05, safeDt * 3))
-      ship.vel = fromThree([curVelThree.x, curVelThree.y, curVelThree.z])
+    // Deceleration, downshifting and safe approach speed throttling
+    if (dist > safeArrivalDist) {
+      const rem = dist - safeArrivalDist
+
+      // Automatic gear downshift on approach to avoid warp overshoot
+      if (rem <= 0.05 * LY_PER_AU && ship.gear === 4) {
+        ship.gear = 3
+        ship.autopilot.warpActive = false
+        if (ship.systemStatus === 'warp') ship.systemStatus = 'autopilot'
+      }
+      if (rem <= 0.003 * LY_PER_AU && ship.gear === 3) {
+        ship.gear = 2
+      }
+      if (rem <= Math.max(destRadius * 15, 0.0001 * LY_PER_AU) && ship.gear === 2) {
+        ship.gear = 1
+      }
+
+      // Approach speed clamp: maximum speed cannot exceed rem / 2.0s
+      const maxSafeSpeed = Math.max(rem / 2.0, 5 * KM_TO_LY)
+      if (curSpeed > maxSafeSpeed) {
+        curVelThree.normalize().multiplyScalar(maxSafeSpeed)
+        ship.vel = fromThree([curVelThree.x, curVelThree.y, curVelThree.z])
+      }
+
+      // Deceleration phase when within 2.5x safe arrival distance
+      if (dist <= safeArrivalDist * 2.5) {
+        ship.autopilot.phase = 'decelerate'
+        const fraction = Math.max(0.1, rem / (safeArrivalDist * 1.5))
+        ship.thrust = Math.min(ship.thrust, fraction)
+      }
     }
 
     if (dist <= safeArrivalDist * 1.05) {
@@ -329,15 +358,24 @@ export function stepShipPhysics(
       ship.thrust = 0
       ship.systemStatus = 'nominal'
       ship.gear = 1 // Return to sublight maneuvering gear
+      curVelThree.clampLength(0, 10 * KM_TO_LY)
+      ship.vel = fromThree([curVelThree.x, curVelThree.y, curVelThree.z])
     }
   }
 
-  // 6. Safe minimum distance clamping around nearest celestial surface (planets, moons, stars)
+  // 6. Safe minimum distance clamping around nearest celestial surface (planets, moons, dwarf planets, asteroids, stars)
   let nearestSurface = Infinity
   let nearestObjId = 'earth'
   for (const o of Object.values(BY_ID)) {
     // Only physical compact bodies have solid/stellar surfaces that require collision avoidance
-    if (o.category !== 'planet' && o.category !== 'moon' && o.category !== 'star' && o.category !== 'star-system') {
+    if (
+      o.category !== 'planet' &&
+      o.category !== 'moon' &&
+      o.category !== 'dwarf-planet' &&
+      o.category !== 'asteroid' &&
+      o.category !== 'star' &&
+      o.category !== 'star-system'
+    ) {
       continue
     }
     const targetP = positionOf(o, simMs)

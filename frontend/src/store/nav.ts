@@ -169,7 +169,10 @@ const EXTENDED = new Set(['galaxy', 'cluster', 'supercluster', 'group', 'sheet',
 export function updateNearest(ms: number) {
   let best = Infinity
   let bestId = 'sun'
+  const dSun = len(sub(SUN_POS, nav.pos))
+  const farFromSolar = dSun > 0.05
   for (const o of OBJECTS) {
+    if (farFromSolar && o.category === 'moon') continue
     const d = len(sub(positionOf(o, ms), nav.pos))
     const r = radiusLyOf(o)
     let surf = d - r

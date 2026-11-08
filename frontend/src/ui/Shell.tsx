@@ -21,13 +21,22 @@ export const CAT_ICON: Record<string, string> = {
   'star-cluster': '✧',
   planet: '●',
   moon: '○',
+  'dwarf-planet': '◐',
+  asteroid: '⬡',
 }
 
 const GROUPS: { title: string; categoryKey: string; ids: string[] }[] = [
   { title: 'Cosmic structures', categoryKey: 'cosmic', ids: ['laniakea', 'coma', 'virgo', 'local-sheet', 'local-group'] },
   { title: 'Galaxies', categoryKey: 'galaxies', ids: ['milky-way', 'andromeda', 'm33'] },
   { title: 'Milky Way landmarks', categoryKey: 'landmarks', ids: ['orion-arm', 'carina', 'alnitak', 'alnilam', 'mintaka', 'betelgeuse', 'pleiades', 'aldebaran'] },
-  { title: 'Solar System', categoryKey: 'solar', ids: ['sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'] },
+  { title: 'Solar System Planets', categoryKey: 'solar', ids: ['sun', 'mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'] },
+  { title: 'Dwarf Planets & Asteroids', categoryKey: 'solar', ids: ['ceres', 'vesta', 'pallas', 'hygiea', 'pluto', 'haumea', 'makemake', 'eris'] },
+  { title: 'Moons of Earth & Mars', categoryKey: 'solar', ids: ['moon', 'phobos', 'deimos'] },
+  { title: 'Moons of Jupiter', categoryKey: 'solar', ids: ['io', 'europa', 'ganymede', 'callisto', 'amalthea', 'thebe', 'metis', 'adrastea', 'himalia', 'elara'] },
+  { title: 'Moons of Saturn', categoryKey: 'solar', ids: ['mimas', 'enceladus', 'tethys', 'dione', 'rhea', 'titan', 'hyperion', 'iapetus', 'phoebe', 'janus', 'epimetheus', 'pan', 'atlas', 'prometheus', 'pandora', 'helene'] },
+  { title: 'Moons of Uranus', categoryKey: 'solar', ids: ['miranda', 'ariel', 'umbriel', 'titania', 'oberon', 'puck'] },
+  { title: 'Moons of Neptune', categoryKey: 'solar', ids: ['triton', 'proteus', 'nereid', 'larissa', 'galatea', 'despina'] },
+  { title: 'Moons of Pluto', categoryKey: 'solar', ids: ['charon', 'nix', 'hydra', 'kerberos', 'styx'] },
 ]
 
 /** Hook re-rendering a component at a fixed interval (for values read from the mutable nav state). */
@@ -194,7 +203,7 @@ export function Info() {
     })
   }
 
-  const isSolar = o.category === 'planet' || o.category === 'moon' || o.id === 'sun'
+  const isSolar = o.category === 'planet' || o.category === 'moon' || o.category === 'dwarf-planet' || o.category === 'asteroid' || o.id === 'sun'
 
   return (
     <aside className="panel right glass" aria-label="Object inspector">
@@ -443,7 +452,9 @@ export function Info() {
 
           {isSolar && (
             <p className="note">
-              ⚠ Planetary body radii{o.id === 'moon' ? ' and the Moon’s distance' : ''} are exaggerated for visual clarity. Orbital positions use an approximate Keplerian analytical model (JPL elements).
+              {o.position.kind === 'solar-body'
+                ? 'Deterministic Keplerian analytical orbital mechanics with secular precession (NASA/JPL SSD & IAU 2015). Surface features and irregular geometries rendered to true physical dimensions.'
+                : '⚠ Planetary body radii are exaggerated for visual clarity. Orbital positions use an approximate Keplerian analytical model (JPL elements).'}
             </p>
           )}
         </div>

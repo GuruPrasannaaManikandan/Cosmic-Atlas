@@ -1,9 +1,12 @@
-import { Vec3, raDecDistToRoot, galacticLBToUnit, sunRelativeToRoot, SUN_POS, LY_PER_AU, add } from '../astro/coords'
+import { Vec3, raDecDistToRoot, galacticLBToUnit, sunRelativeToRoot, SUN_POS, LY_PER_AU, add, scale } from '../astro/coords'
 import { planetRootPos, moonOffsetLy } from '../astro/ephemeris'
+import { SOLAR_BODIES, SOLAR_BODY_BY_ID, SolarBody, CHARON_PLUTO_MASS_RATIO, PLUTO_BODY, PLANET_RADIUS_KM } from './solarSystem'
+import { positionAtMs, periodDays, periapsisKm, apoapsisKm, KM_PER_AU } from '../astro/kepler'
 
 export type Category =
   | 'supercluster' | 'cluster' | 'group' | 'sheet' | 'galaxy' | 'galactic-structure'
   | 'nebula' | 'star' | 'star-cluster' | 'planet' | 'moon' | 'star-system'
+  | 'dwarf-planet' | 'asteroid'
 
 export type Provenance = 'curated-approximate' | 'illustrative' | 'computed-model' | 'live-catalogue' | 'user-dataset'
 export type Visual = 'cluster' | 'galaxy' | 'milkyway' | 'nebula' | 'star' | 'starcluster' | 'sun' | 'planet' | 'marker'
@@ -16,6 +19,7 @@ export type PositionSpec =
   | { kind: 'offset'; from: string; xyzLy: Vec3 } // illustrative offset from another object
   | { kind: 'planet'; body: string }
   | { kind: 'moon'; parent: string }
+  | { kind: 'solar-body'; id: string }
 
 export interface CosmicObject {
   id: string
@@ -200,33 +204,116 @@ export const OBJECTS: CosmicObject[] = [
     props: { 'True radius': '695,700 km', 'Display radius': 'Exaggerated (~10×)', 'Spectral type': 'G2V' }, importance: 1, viewDistanceLy: 0.0006,
   },
   ...[
-    ['mercury', 'Mercury', '#b5a79a', 0.006, '4,879 km diameter. Fastest planet; 88-day year.', { 'Mean radius': '2,439.7 km', 'Orbital period': '87.97 d', 'Semi-major axis': '0.387 AU' }],
-    ['venus', 'Venus', '#e8c98a', 0.009, 'Thick CO₂ atmosphere, hottest planet (~465 °C).', { 'Mean radius': '6,051.8 km', 'Orbital period': '224.7 d', 'Semi-major axis': '0.723 AU' }],
-    ['earth', 'Earth', '#4f9bff', 0.012, 'Our home planet; the only known world with life. Texture is procedural (illustrative), not a satellite image.', { 'Mean radius': '6,371.0 km', 'Orbital period': '365.256 d', 'Semi-major axis': '1.000 AU', 'Moons': '1' }],
-    ['mars', 'Mars', '#d9704a', 0.008, 'Cold desert world with the largest volcano in the Solar System.', { 'Mean radius': '3,389.5 km', 'Orbital period': '687.0 d', 'Semi-major axis': '1.524 AU' }],
-    ['jupiter', 'Jupiter', '#d8b48a', 0.07, 'Largest planet; gas giant with 95+ known moons.', { 'Mean radius': '69,911 km', 'Orbital period': '11.86 yr', 'Semi-major axis': '5.203 AU' }],
-    ['saturn', 'Saturn', '#e6d29a', 0.06, 'Gas giant with a prominent ring system (rings shown with schematic radii).', { 'Mean radius': '58,232 km', 'Orbital period': '29.46 yr', 'Semi-major axis': '9.537 AU' }],
-    ['uranus', 'Uranus', '#9fe3e8', 0.035, 'Ice giant rotating on its side (axial tilt 98°).', { 'Mean radius': '25,362 km', 'Orbital period': '84.0 yr', 'Semi-major axis': '19.19 AU' }],
-    ['neptune', 'Neptune', '#5877ff', 0.034, 'Ice giant with supersonic winds.', { 'Mean radius': '24,622 km', 'Orbital period': '164.8 yr', 'Semi-major axis': '30.07 AU' }],
-  ].map(([id, name, color, r, info, props]) => ({
+    ['mercury', 'Mercury', '#b5a79a', 2439.7, '4,879 km diameter. Fastest planet; 88-day year.', { 'Mean radius': '2,439.7 km', 'Orbital period': '87.97 d', 'Semi-major axis': '0.387 AU' }],
+    ['venus', 'Venus', '#e8c98a', 6051.8, 'Thick CO₂ atmosphere, hottest planet (~465 °C).', { 'Mean radius': '6,051.8 km', 'Orbital period': '224.7 d', 'Semi-major axis': '0.723 AU' }],
+    ['earth', 'Earth', '#4f9bff', 6371.0, 'Our home planet; the only known world with life. Photorealistic scientific surface map with specular oceans and dynamic clouds.', { 'Mean radius': '6,371.0 km', 'Orbital period': '365.256 d', 'Semi-major axis': '1.000 AU', 'Moons': '1 (Moon)' }],
+    ['mars', 'Mars', '#d9704a', 3389.5, 'Cold desert world with the largest volcano in the Solar System. Natural satellites: Phobos and Deimos.', { 'Mean radius': '3,389.5 km', 'Orbital period': '687.0 d', 'Semi-major axis': '1.524 AU', 'Moons': '2 (Phobos, Deimos)' }],
+    ['jupiter', 'Jupiter', '#d8b48a', 69911, 'Largest planet; gas giant with 95+ known moons including the four Galilean satellites.', { 'Mean radius': '69,911 km', 'Orbital period': '11.86 yr', 'Semi-major axis': '5.203 AU', 'Moons': '95+ (Io, Europa, Ganymede, Callisto...)' }],
+    ['saturn', 'Saturn', '#e6d29a', 58232, 'Gas giant with a prominent ring system and major moons including Titan and Enceladus.', { 'Mean radius': '58,232 km', 'Orbital period': '29.46 yr', 'Semi-major axis': '9.537 AU', 'Moons': '146+ (Titan, Enceladus, Rhea...)' }],
+    ['uranus', 'Uranus', '#9fe3e8', 25362, 'Ice giant rotating on its side (axial tilt 98°) with major moons Miranda, Ariel, Umbriel, Titania, Oberon.', { 'Mean radius': '25,362 km', 'Orbital period': '84.0 yr', 'Semi-major axis': '19.19 AU', 'Moons': '28+ (Titania, Oberon, Ariel...)' }],
+    ['neptune', 'Neptune', '#5877ff', 24622, 'Outermost major planet: ice giant with supersonic winds and retrograde giant moon Triton.', { 'Mean radius': '24,622 km', 'Orbital period': '164.8 yr', 'Semi-major axis': '30.07 AU', 'Moons': '16+ (Triton, Proteus, Nereid...)' }],
+  ].map(([id, name, color, rKm, info, props]) => ({
     id: id as string, name: name as string, aliases: [] as string[], category: 'planet' as Category, visual: 'planet' as Visual,
-    position: { kind: 'planet', body: id as string } as PositionSpec, parents: ['sun'], memberOf: [], nearby: [],
-    displayRadiusAU: r as number, color: color as string, provenance: 'computed-model' as Provenance, confidence: 'medium' as const,
-    source: { catalogue: 'JPL approximate Keplerian elements (1800–2050); NASA planetary fact sheets', note: 'Position is an approximate model, not JPL Horizons. Display radius exaggerated.' },
+    position: { kind: 'planet', body: id as string } as PositionSpec, parents: ['sun'], memberOf: ['solar-system'], nearby: [],
+    displayRadiusAU: (rKm as number) / KM_PER_AU, extentLy: ((rKm as number) * 2 * LY_PER_AU) / KM_PER_AU, color: color as string, provenance: 'computed-model' as Provenance, confidence: 'medium' as const,
+    source: { catalogue: 'JPL approximate Keplerian elements (1800–2050); NASA planetary fact sheets', note: 'Position is an approximate model, not JPL Horizons.' },
     info: info as string, props: props as Record<string, string>, importance: id === 'earth' || id === 'jupiter' || id === 'saturn' ? 0.9 : 0.6,
-    viewDistanceLy: (r as number) * 4 * LY_PER_AU,
+    viewDistanceLy: (id === 'saturn' ? 350000 : (rKm as number) * 3.5) * (LY_PER_AU / KM_PER_AU),
   } as CosmicObject)),
-  {
-    id: 'moon', name: 'Moon', aliases: ['Luna', 'The Moon'], category: 'moon', visual: 'planet',
-    position: { kind: 'moon', parent: 'earth' }, parents: ['earth'], memberOf: [], nearby: [],
-    displayRadiusAU: 0.0035, color: '#c9c9c9', provenance: 'illustrative', confidence: 'low', schematic: true,
-    source: { catalogue: 'NASA Moon Fact Sheet', note: 'Orbit drawn as a simplified circular orbit at an EXAGGERATED distance (real: 384,400 km = 0.00257 AU).' },
-    info: 'Earth\'s only natural satellite. Its displayed distance is exaggerated so that it is visible beside Earth.',
-    props: { 'Mean radius': '1,737.4 km', 'Orbital period': '27.32 d', 'True mean distance': '384,400 km' }, importance: 0.7, viewDistanceLy: 0.0035 * 4 * LY_PER_AU,
-  },
+  ...SOLAR_BODIES.map(solarBodyToCosmicObject),
 ]
 
 export const BY_ID: Record<string, CosmicObject> = Object.fromEntries(OBJECTS.map((o) => [o.id, o]))
+
+export const KM_TO_LY = LY_PER_AU / KM_PER_AU
+
+export function solarBodyToCosmicObject(b: SolarBody): CosmicObject {
+  const isMoon = b.cls === 'moon'
+  const rKm = b.physical.meanRadiusKm
+  const extentLy = (rKm * 2 * LY_PER_AU) / KM_PER_AU
+  const viewDistanceLy = Math.max((rKm * 3.5 * LY_PER_AU) / KM_PER_AU, 5e-12)
+
+  const props: Record<string, string> = {
+    'Mean radius': `${rKm.toLocaleString()} km${b.physical.radiusSigmaKm ? ` ± ${b.physical.radiusSigmaKm} km` : ''}`,
+  }
+  if (b.physical.triaxialKm) {
+    props['Triaxial shape'] = `${b.physical.triaxialKm.map((x) => x.toFixed(1)).join(' × ')} km`
+  }
+  if (b.physical.gmKm3s2) {
+    props['GM (mass parameter)'] = `${b.physical.gmKm3s2.toFixed(5)} km³/s²`
+  }
+  if (b.physical.densityGcc) {
+    props['Bulk density'] = `${b.physical.densityGcc.toFixed(3)} g/cm³`
+  }
+  if (b.rotation.kind === 'synchronous') {
+    props['Rotation'] = 'Synchronous (tidally locked to primary)'
+  } else if (b.rotation.kind === 'synchronous-binary') {
+    props['Rotation'] = `Mutually tidally locked with ${b.rotation.companion}`
+  } else if (b.rotation.kind === 'spin') {
+    props['Rotation period'] = `${b.rotation.periodHours.toFixed(2)} h`
+  } else {
+    props['Rotation'] = b.rotation.kind
+  }
+
+  props['Semi-major axis'] = `${b.orbit.elements.aKm.toLocaleString()} km (${(b.orbit.elements.aKm / KM_PER_AU).toFixed(4)} AU)`
+  props['Eccentricity'] = b.orbit.elements.e.toFixed(4)
+  props['Inclination'] = `${b.orbit.elements.iDeg.toFixed(2)}°`
+  props['Orbital period'] = `${periodDays(b.orbit.elements).toFixed(3)} d`
+  props['Periapsis'] = `${periapsisKm(b.orbit.elements).toLocaleString()} km`
+  props['Apoapsis'] = `${apoapsisKm(b.orbit.elements).toLocaleString()} km`
+  props['Reference frame'] = b.orbit.frameLabel
+
+  return {
+    id: b.id,
+    name: b.name,
+    aliases: b.aliases,
+    category: (b.cls === 'dwarf-planet' ? 'dwarf-planet' : b.cls === 'asteroid' ? 'asteroid' : 'moon') as Category,
+    visual: 'planet',
+    position: { kind: 'solar-body', id: b.id },
+    parents: [b.parent],
+    memberOf: isMoon ? [b.parent] : ['solar-system'],
+    nearby: [],
+    extentLy,
+    displayRadiusAU: rKm / KM_PER_AU,
+    color: b.appearance.color,
+    provenance: 'computed-model',
+    confidence: b.confidence,
+    source: {
+      catalogue: b.orbit.source,
+      note: b.notes ? b.notes.join(' ') : b.orbit.uncertainty,
+    },
+    info: b.info,
+    props,
+    importance: b.importance,
+    viewDistanceLy,
+  }
+}
+
+export function solarBodyRootPos(b: SolarBody, ms: number): Vec3 {
+  if (b.parent === 'sun') {
+    if (b.id === 'pluto') {
+      const bary = add(SUN_POS, scale(positionAtMs(PLUTO_BODY.orbit.elements, ms), KM_TO_LY))
+      const charonRel = positionAtMs(SOLAR_BODY_BY_ID.charon.orbit.elements, ms)
+      const plutoOffset = scale(charonRel, (-CHARON_PLUTO_MASS_RATIO / (1 + CHARON_PLUTO_MASS_RATIO)) * KM_TO_LY)
+      return add(bary, plutoOffset)
+    }
+    const relKm = positionAtMs(b.orbit.elements, ms)
+    return add(SUN_POS, scale(relKm, KM_TO_LY))
+  }
+  if (b.parent === 'pluto') {
+    const bary = add(SUN_POS, scale(positionAtMs(PLUTO_BODY.orbit.elements, ms), KM_TO_LY))
+    if (b.id === 'charon') {
+      const charonRel = positionAtMs(b.orbit.elements, ms)
+      const charonOffset = scale(charonRel, (1 / (1 + CHARON_PLUTO_MASS_RATIO)) * KM_TO_LY)
+      return add(bary, charonOffset)
+    }
+    const relKm = positionAtMs(b.orbit.elements, ms)
+    return add(bary, scale(relKm, KM_TO_LY))
+  }
+  const planetPos = planetRootPos(b.parent, ms)
+  const relKm = positionAtMs(b.orbit.elements, ms)
+  return add(planetPos, scale(relKm, KM_TO_LY))
+}
 
 /** Add an object from a live catalogue / user dataset at runtime (never overwrites bundled objects). */
 export function registerObject(o: CosmicObject): boolean {
@@ -238,15 +325,41 @@ export function registerObject(o: CosmicObject): boolean {
 export const MOON_DISPLAY_AU = 0.03
 
 const posCache = new Map<string, Vec3>()
+let frameCacheMs = -1
+const frameDynamicPosCache = new Map<string, Vec3>()
 
-/** Root-frame position (galactic ly). Time-dependent for planets/moon. */
+/** Root-frame position (galactic ly). Time-dependent for planets/moon/solar bodies. */
 export function positionOf(o: CosmicObject, ms: number): Vec3 {
   const p = o.position
   switch (p.kind) {
     case 'origin': return [0, 0, 0]
     case 'sun': return SUN_POS
-    case 'planet': return planetRootPos(p.body, ms)
-    case 'moon': return add(planetRootPos(p.parent, ms), moonOffsetLy(ms, MOON_DISPLAY_AU))
+    case 'planet':
+    case 'moon':
+    case 'solar-body': {
+      if (ms !== frameCacheMs) {
+        frameCacheMs = ms
+        frameDynamicPosCache.clear()
+      } else {
+        const cached = frameDynamicPosCache.get(o.id)
+        if (cached) return cached
+      }
+
+      let res: Vec3
+      if (p.kind === 'planet') {
+        res = planetRootPos(p.body, ms)
+      } else if (p.kind === 'moon') {
+        const b = SOLAR_BODY_BY_ID.moon
+        if (b) res = solarBodyRootPos(b, ms)
+        else res = add(planetRootPos(p.parent, ms), moonOffsetLy(ms, MOON_DISPLAY_AU))
+      } else {
+        const b = SOLAR_BODY_BY_ID[p.id]
+        if (!b) return SUN_POS
+        res = solarBodyRootPos(b, ms)
+      }
+      frameDynamicPosCache.set(o.id, res)
+      return res
+    }
     case 'offset': {
       if (o.id === 'local-group') { // schematic barycentre-ish: midway MW<->M31
         const m31 = positionOf(BY_ID.andromeda, ms)
@@ -266,7 +379,8 @@ export function positionOf(o: CosmicObject, ms: number): Vec3 {
   }
 }
 
-export const isDynamic = (o: CosmicObject) => o.position.kind === 'planet' || o.position.kind === 'moon'
+export const isDynamic = (o: CosmicObject) =>
+  o.position.kind === 'planet' || o.position.kind === 'moon' || o.position.kind === 'solar-body'
 
 /** Visual radius in ly (extent/2 or exaggerated display radius). */
 export function radiusLyOf(o: CosmicObject): number {

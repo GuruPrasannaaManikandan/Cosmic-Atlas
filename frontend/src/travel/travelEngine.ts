@@ -82,14 +82,19 @@ export function computeIntelligentFraming(o: CosmicObject, P: Vec3): { approachD
     if (toSun.lengthSq() > 0.01) {
       dir.copy(toSun).applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.55).add(new THREE.Vector3(0, 0.25, 0)).normalize()
     }
-    const approachDist = Math.max(o.viewDistanceLy, rTrue * 3.2, 5e-7)
+    const approachDist = Math.max(o.viewDistanceLy, rTrue * 3.2, 1e-10)
     return { approachDistanceLy: approachDist, targetDirection: dir }
   }
 
-  if (o.category === 'moon') {
-    // Approach on illuminated hemisphere without colliding with Earth
-    dir.set(0.4, 0.3, 0.85).normalize()
-    const approachDist = Math.max(o.viewDistanceLy, rTrue * 2.8, 1e-7)
+  if (o.category === 'moon' || o.category === 'dwarf-planet' || o.category === 'asteroid') {
+    // Approach on illuminated hemisphere
+    const toSun = new THREE.Vector3(...toThree(sub(SUN_POS, P))).normalize()
+    if (toSun.lengthSq() > 0.01) {
+      dir.copy(toSun).applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.45).add(new THREE.Vector3(0, 0.2, 0)).normalize()
+    } else {
+      dir.set(0.4, 0.3, 0.85).normalize()
+    }
+    const approachDist = Math.max(o.viewDistanceLy, rTrue * 3.0, 1e-12)
     return { approachDistanceLy: approachDist, targetDirection: dir }
   }
 
