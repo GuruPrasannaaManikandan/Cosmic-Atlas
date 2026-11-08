@@ -55,6 +55,84 @@ export const ASSET_REGISTRY: Record<string, AstronomicalAsset> = {
     category: 'mask',
     description: 'High-contrast water specular map for physically-based oceanic sun glint.',
   },
+  earth_normal: {
+    id: 'earth_normal',
+    name: 'Earth Topography Normal Map',
+    path: '/assets/astronomy/textures/earth_normal_2k.jpg',
+    type: 'mask',
+    source: 'NASA Shuttle Radar Topography Mission (SRTM) / Three.js',
+    license: 'Public Domain',
+    dimensions: [2048, 1024],
+    colorSpace: 'Linear',
+    transparent: false,
+    category: 'mask',
+    description: 'Tangent-space normal map of Earth continental topography and mountain ranges.',
+  },
+  earth_night: {
+    id: 'earth_night',
+    name: 'Earth at Night City Lights Map',
+    path: '/assets/astronomy/textures/earth_night_2k.jpg',
+    type: 'texture',
+    source: 'NASA Suomi NPP VIIRS Earth at Night',
+    license: 'Public Domain',
+    dimensions: [2048, 1024],
+    colorSpace: 'sRGB',
+    transparent: false,
+    category: 'planet',
+    description: 'Calibrated night-side human illumination and urban glow.',
+  },
+  mercury_albedo: {
+    id: 'mercury_albedo',
+    name: 'Mercury MESSENGER Global Mosaic',
+    path: '/assets/astronomy/textures/mercury_albedo_2k.jpg',
+    type: 'texture',
+    source: 'NASA MESSENGER MDIS / USGS Astrogeology',
+    license: 'Public Domain',
+    dimensions: [2048, 1024],
+    colorSpace: 'sRGB',
+    transparent: false,
+    category: 'planet',
+    description: 'High-resolution global photographic mosaic of Mercury showing impact craters and scarps.',
+  },
+  venus_atmosphere: {
+    id: 'venus_atmosphere',
+    name: 'Venus Pioneer / Magellan Atmosphere Map',
+    path: '/assets/astronomy/textures/venus_atmosphere_2k.jpg',
+    type: 'texture',
+    source: 'NASA Pioneer Venus Orbiter / Magellan',
+    license: 'Public Domain',
+    dimensions: [2048, 1024],
+    colorSpace: 'sRGB',
+    transparent: false,
+    category: 'planet',
+    description: 'Equirectangular UV and visible light texture of dense Venusian sulfuric acid clouds.',
+  },
+  uranus_color: {
+    id: 'uranus_color',
+    name: 'Uranus Voyager 2 Calibrated True-Color Map',
+    path: '/assets/astronomy/textures/uranus_color_2k.jpg',
+    type: 'texture',
+    source: 'NASA Voyager 2 ISS / USGS',
+    license: 'Public Domain',
+    dimensions: [2048, 1024],
+    colorSpace: 'sRGB',
+    transparent: false,
+    category: 'planet',
+    description: 'True-color cyan atmosphere of ice giant Uranus showing subtle polar hazes.',
+  },
+  neptune_color: {
+    id: 'neptune_color',
+    name: 'Neptune Voyager 2 Azure Atmosphere Map',
+    path: '/assets/astronomy/textures/neptune_color_2k.jpg',
+    type: 'texture',
+    source: 'NASA Voyager 2 ISS / USGS',
+    license: 'Public Domain',
+    dimensions: [2048, 1024],
+    colorSpace: 'sRGB',
+    transparent: false,
+    category: 'planet',
+    description: 'Deep azure atmospheric map of Neptune featuring high-altitude methane cirrus clouds and Great Dark Spot.',
+  },
   moon_albedo: {
     id: 'moon_albedo',
     name: 'Moon USGS/LRO Lunar Reconnaissance Albedo Map',
@@ -536,6 +614,30 @@ export function getEarthCloudsTexture(): THREE.Texture {
 
 export function getEarthSpecularTexture(): THREE.Texture {
   return loadScientificTexture('earth_specular', () => T.planetTexture('earth_specular', '#000000'))
+}
+
+export function getEarthNormalTexture(): THREE.Texture {
+  return loadScientificTexture('earth_normal')
+}
+
+export function getEarthNightTexture(): THREE.Texture {
+  return loadScientificTexture('earth_night')
+}
+
+export function getMercuryTexture(): THREE.Texture {
+  return loadScientificTexture('mercury_albedo', () => T.planetTexture('mercury', '#888888'))
+}
+
+export function getVenusTexture(): THREE.Texture {
+  return loadScientificTexture('venus_atmosphere', () => T.planetTexture('venus', '#e3bb7b'))
+}
+
+export function getUranusTexture(): THREE.Texture {
+  return loadScientificTexture('uranus_color', () => T.planetTexture('uranus', '#4b70dd'))
+}
+
+export function getNeptuneTexture(): THREE.Texture {
+  return loadScientificTexture('neptune_color', () => T.planetTexture('neptune', '#274687'))
 }
 
 export function getMoonTexture(): THREE.Texture {
