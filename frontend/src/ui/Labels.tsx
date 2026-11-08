@@ -6,6 +6,18 @@ import { nav } from '../store/nav'
 import { OBJECTS } from '../data/catalog'
 import { eventState } from '../events/eventState'
 
+const MOON_PARENT: Record<string, string> = {
+  moon: 'earth',
+  phobos: 'mars', deimos: 'mars',
+  io: 'jupiter', europa: 'jupiter', ganymede: 'jupiter', callisto: 'jupiter',
+  mimas: 'saturn', enceladus: 'saturn', tethys: 'saturn', dione: 'saturn',
+  rhea: 'saturn', titan: 'saturn', hyperion: 'saturn', iapetus: 'saturn',
+  phoebe: 'saturn', pan: 'saturn',
+  miranda: 'uranus', ariel: 'uranus', umbriel: 'uranus', titania: 'uranus', oberon: 'uranus',
+  triton: 'neptune', proteus: 'neptune', nereid: 'neptune',
+  charon: 'pluto',
+}
+
 function visible(it: (typeof labelState.items)[number], selectedId: string | null): boolean {
   const { o, dLy, rTrue } = it
   if (o.id === selectedId) return true
@@ -51,10 +63,34 @@ export function Labels() {
       }
       const W = w.clientWidth, H = w.clientHeight
       const shown: { id: string; x: number; y: number; pri: number }[] = []
+      const itemMap = new Map(labelState.items.map((i) => [i.id, i]))
       for (const it of labelState.items) {
         const el = els.current[it.id]
         if (!el) continue
         let ok = showLabels && visible(it, selected)
+        if (ok) {
+          // Check planetary and parent occlusion
+          const dIt = it.pos.length()
+          for (const occId of ['sun', 'mercury', 'venus', 'earth', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'moon']) {
+            if (it.id === occId) continue
+            const occ = itemMap.get(occId)
+            if (!occ) continue
+            const dOcc = occ.pos.length()
+            if (dIt > dOcc && dOcc > 0.0001) {
+              const dotVal = it.pos.dot(occ.pos) / (dIt * dOcc)
+              if (dotVal > 0.8) {
+                const sinSepSq = Math.max(0, 1 - dotVal * dotVal)
+                const occMultiplier = occId === 'saturn' ? 2.35 : 1.08
+                const occVis = (occ.rVisual || 1) * occMultiplier
+                const sinAngRadius = occVis / dOcc
+                if (sinSepSq < sinAngRadius * sinAngRadius) {
+                  ok = false // Geometrically occluded behind planet disk/rings
+                  break
+                }
+              }
+            }
+          }
+        }
         if (ok) {
           v.copy(it.pos).project(cam)
           ok = v.z < 1 && Math.abs(v.x) < 1.05 && Math.abs(v.y) < 1.05

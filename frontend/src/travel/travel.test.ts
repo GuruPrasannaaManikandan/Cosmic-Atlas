@@ -1,4 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import * as THREE from 'three'
+import { BY_ID, positionOf } from '../data/catalog'
+import { len, sub, add, toThree, LY_PER_AU } from '../astro/coords'
 import {
   ship,
   initShipNear,
@@ -12,6 +15,7 @@ import {
   cancelAutopilot,
   GEAR_SPEEDS,
   C_LY_S,
+  KM_TO_LY,
 } from './shipState'
 
 function createDefaultInput() {
@@ -159,5 +163,76 @@ describe('Travel Mode Physics & Ship Simulation', () => {
     stepShipPhysics(0.1, 0, input)
     // Check that ship status is valid and proximity alert or safe boundary logic fired
     expect(['proximity-alert', 'nominal', 'autopilot', 'warp']).toContain(ship.systemStatus)
+  })
+
+  it('spawns near small moons at realistic close-range distances, not tens of thousands of km', () => {
+    initShipNear('phobos', 0)
+    expect(ship.targetId).toBe('phobos')
+    const phobosObj = BY_ID['phobos']
+    expect(phobosObj).toBeDefined()
+    const pPos = positionOf(phobosObj, 0)
+    const distLy = len(sub(ship.pos, pPos))
+    const distKm = distLy / KM_TO_LY
+    // Phobos mean radius is ~11.2 km. Spawn distance should be around 25-50 km, not 75,000 km!
+    expect(distKm).toBeGreaterThan(15)
+    expect(distKm).toBeLessThan(100)
+  })
+
+  it('navigates autopilot to small moon and decelerates to safe arrival framing distance', () => {
+    // Place ship 80 km away from Phobos along Z axis, facing Phobos
+    const phobosObj = BY_ID['phobos']
+    const pPos = positionOf(phobosObj, 0)
+    ship.pos = add(pPos, [0, 0, 80 * KM_TO_LY])
+    ship.vel = [0, 0, 0]
+    // Point spacecraft heading toward Phobos (-Z in root is +Y in Three.js coords or align via Three)
+    const toPhobosThree = new THREE.Vector3(...toThree(sub(pPos, ship.pos))).normalize()
+    const lookM = new THREE.Matrix4().lookAt(new THREE.Vector3(0, 0, 0), toPhobosThree, new THREE.Vector3(0, 1, 0))
+    ship.quat.setFromRotationMatrix(lookM)
+
+    engageAutopilot('phobos', 0, false)
+    expect(ship.autopilot.active).toBe(true)
+    expect(ship.autopilot.destinationId).toBe('phobos')
+
+    // Step physics forward until arrival
+    for (let i = 0; i < 150; i++) {
+      if (!ship.autopilot.active) break
+      stepShipPhysics(0.1, 0, input)
+    }
+
+    const curDistKm = len(sub(ship.pos, pPos)) / KM_TO_LY
+    // Arrival framing distance should be ~25-45 km from Phobos, not 15,000 km!
+    expect(curDistKm).toBeLessThan(60)
+  })
+
+  it('throttles approach velocity to prevent warp overshoot', () => {
+    // Ship traveling toward Mars at high warp speed
+    engageAutopilot('mars', 0, true)
+    ship.gear = 4
+    const marsPos = positionOf(BY_ID['mars'], 0)
+    // Place ship 0.01 AU away (~1,500,000 km)
+    ship.pos = add(marsPos, [0.01 * LY_PER_AU, 0, 0])
+    ship.vel = [-50 * C_LY_S, 0, 0] // Flying toward Mars
+
+    // Step physics
+    stepShipPhysics(0.05, 0, input)
+
+    // Approaching within 0.01 AU, warp speed should be downshifted and throttled
+    expect(ship.gear).toBeLessThan(4)
+    expect(ship.autopilot.warpActive).toBe(false)
+  })
+
+  it('exposes full Solar System destination registry including moons, dwarf planets, and asteroids', () => {
+    const requiredDestinations = [
+      'sun', 'mercury', 'venus', 'earth', 'moon', 'mars', 'phobos', 'deimos',
+      'jupiter', 'io', 'europa', 'ganymede', 'callisto', 'amalthea',
+      'saturn', 'titan', 'enceladus', 'mimas', 'tethys', 'dione', 'rhea', 'iapetus',
+      'uranus', 'miranda', 'ariel', 'umbriel', 'titania', 'oberon',
+      'neptune', 'triton', 'proteus', 'nereid',
+      'pluto', 'charon', 'ceres', 'vesta', 'pallas', 'hygiea', 'eris', 'haumea', 'makemake'
+    ]
+    for (const id of requiredDestinations) {
+      expect(BY_ID[id]).toBeDefined()
+      expect(BY_ID[id].name.length).toBeGreaterThan(0)
+    }
   })
 })

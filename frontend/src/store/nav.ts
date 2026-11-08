@@ -33,6 +33,8 @@ export const nav = {
   listeners: new Set<() => void>(),
 }
 
+if (typeof window !== 'undefined') (window as any).__nav = nav
+
 export function onInterrupt(fn: () => void) { nav.listeners.add(fn); return () => nav.listeners.delete(fn) }
 
 export function interrupt() {
@@ -44,7 +46,7 @@ export function interrupt() {
 export function targetObject(id: string): CosmicObject { return BY_ID[id] }
 
 function lookAtQuat(from: THREE.Vector3, to: THREE.Vector3): THREE.Quaternion {
-  const m = new THREE.Matrix4().lookAt(from, to, new THREE.Vector3(0, 1, 0))
+  const m = new THREE.Matrix4().lookAt(to, from, new THREE.Vector3(0, 1, 0))
   return new THREE.Quaternion().setFromRotationMatrix(m)
 }
 
@@ -169,7 +171,10 @@ const EXTENDED = new Set(['galaxy', 'cluster', 'supercluster', 'group', 'sheet',
 export function updateNearest(ms: number) {
   let best = Infinity
   let bestId = 'sun'
+  const dSun = len(sub(SUN_POS, nav.pos))
+  const farFromSolar = dSun > 0.05
   for (const o of OBJECTS) {
+    if (farFromSolar && o.category === 'moon') continue
     const d = len(sub(positionOf(o, ms), nav.pos))
     const r = radiusLyOf(o)
     let surf = d - r
