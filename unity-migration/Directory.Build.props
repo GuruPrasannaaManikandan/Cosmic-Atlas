@@ -1,0 +1,16 @@
+<Project>
+  <!--
+    bin/ and obj/ are kept OUT of the repository:
+      * the Runtime/ folders are meant to be dropped into a Unity project unchanged, and Unity would try to compile
+        generated files under obj/;
+      * the repository path contains an apostrophe ("NASA's"), which breaks MSBuild item transforms used when copying
+        build outputs (error MSB3021). Building under %LOCALAPPDATA% avoids it.
+    Override with:  dotnet test -p:CosmicAtlasBuildRoot=<dir>
+  -->
+  <PropertyGroup>
+    <CosmicAtlasBuildRoot Condition="'$(CosmicAtlasBuildRoot)' == ''">$(LOCALAPPDATA)\CosmicAtlas\unity-migration-build\</CosmicAtlasBuildRoot>
+    <BaseIntermediateOutputPath>$(CosmicAtlasBuildRoot)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <BaseOutputPath>$(CosmicAtlasBuildRoot)bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+</Project>
