@@ -1,0 +1,8 @@
+{
+  "name": "com.cosmicatlas.astro",
+  "displayName": "Cosmic Atlas Astronomy Core",
+  "version": "0.1.0",
+  "unity": "6000.3",
+  "description": "Pure C# astronomy core shared with the Cosmic Atlas web app: coordinates, time scales, Keplerian ephemeris, catalogue model and hierarchical double-precision frames. Parity-tested against the TypeScript engine (unity-migration/tests).",
+  "author": { "name": "Cosmic Atlas" }
+}

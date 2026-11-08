@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<test-run id="2" testcasecount="25" result="Passed" total="25" passed="25" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:10Z" duration="2.4030253">
+  <test-suite type="TestSuite" id="1000" name="CosmicAtlas" fullname="CosmicAtlas" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:10Z" duration="2.403025" total="25" passed="25" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <properties>
+      <property name="platform" value="EditMode" />
+    </properties>
+    <test-suite type="Assembly" id="1034" name="CosmicAtlas.Rendering.Tests.EditMode.dll" fullname="A:/CA/unity/CosmicAtlas/Library/ScriptAssemblies/CosmicAtlas.Rendering.Tests.EditMode.dll" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:10Z" duration="2.396640" total="25" passed="25" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <properties>
+        <property name="_PID" value="13636" />
+        <property name="_APPDOMAIN" value="Unity Child Domain" />
+        <property name="platform" value="EditMode" />
+        <property name="EditorOnly" value="True" />
+      </properties>
+      <test-suite type="TestSuite" id="1035" name="CosmicAtlas" fullname="CosmicAtlas" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:10Z" duration="2.396340" total="25" passed="25" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <properties />
+        <test-suite type="TestSuite" id="1036" name="Rendering" fullname="CosmicAtlas.Rendering" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:10Z" duration="2.396235" total="25" passed="25" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <properties />
+          <test-suite type="TestSuite" id="1037" name="Tests" fullname="CosmicAtlas.Rendering.Tests" runstate="Runnable" testcasecount="25" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:10Z" duration="2.396069" total="25" passed="25" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <properties />
+            <test-suite type="TestFixture" id="1001" name="BlackbodyAndStarTests" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" testcasecount="10" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.039896" total="10" passed="10" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1012" name="Brightness_is_apparent_not_intrinsic" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Brightness_is_apparent_not_intrinsic" methodname="Brightness_is_apparent_not_intrinsic" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="704867912" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.013621" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1004" name="Gpu_blackbody_fit_agrees_with_the_cie_integration_in_hue_order" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Gpu_blackbody_fit_agrees_with_the_cie_integration_in_hue_order" methodname="Gpu_blackbody_fit_agrees_with_the_cie_integration_in_hue_order" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="1741229939" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.004727" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1002" name="Hotter_blackbodies_are_bluer" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Hotter_blackbodies_are_bluer" methodname="Hotter_blackbodies_are_bluer" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="826452331" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000689" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1003" name="Near_6500K_is_close_to_white_and_extremes_have_the_right_hue" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Near_6500K_is_close_to_white_and_extremes_have_the_right_hue" methodname="Near_6500K_is_close_to_white_and_extremes_have_the_right_hue" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="158404479" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000426" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-suite type="ParameterizedMethod" id="1010" name="Parses_MK_spectral_types" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Parses_MK_spectral_types" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" testcasecount="5" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.007868" total="5" passed="5" failed="0" inconclusive="0" skipped="0" asserts="0">
+                <properties />
+                <test-case id="1005" name="Parses_MK_spectral_types(&quot;G2V&quot;,G,2,MainSequence)" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Parses_MK_spectral_types(&quot;G2V&quot;,G,2,MainSequence)" methodname="Parses_MK_spectral_types" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="1734238941" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.004148" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1006" name="Parses_MK_spectral_types(&quot;K5+ III&quot;,K,5,Giant)" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Parses_MK_spectral_types(&quot;K5+ III&quot;,K,5,Giant)" methodname="Parses_MK_spectral_types" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="57749216" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000462" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1007" name="Parses_MK_spectral_types(&quot;M1-M2 Ia-ab&quot;,M,1,Supergiant)" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Parses_MK_spectral_types(&quot;M1-M2 Ia-ab&quot;,M,1,Supergiant)" methodname="Parses_MK_spectral_types" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="410774885" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000166" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1008" name="Parses_MK_spectral_types(&quot;B8 Ia&quot;,B,8,Supergiant)" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Parses_MK_spectral_types(&quot;B8 Ia&quot;,B,8,Supergiant)" methodname="Parses_MK_spectral_types" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="1336715400" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000088" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+                <test-case id="1009" name="Parses_MK_spectral_types(&quot;DA2&quot;,WhiteDwarf,2,Degenerate)" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Parses_MK_spectral_types(&quot;DA2&quot;,WhiteDwarf,2,Degenerate)" methodname="Parses_MK_spectral_types" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="1867857964" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000153" asserts="0">
+                  <properties>
+                    <property name="retryIteration" value="0" />
+                    <property name="repeatIteration" value="0" />
+                  </properties>
+                </test-case>
+              </test-suite>
+              <test-case id="1011" name="Stellar_laws_are_consistent" fullname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests.Stellar_laws_are_consistent" methodname="Stellar_laws_are_consistent" classname="CosmicAtlas.Rendering.Tests.BlackbodyAndStarTests" runstate="Runnable" seed="896676535" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000755" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1015" name="BlackHoleGeodesicTests" fullname="CosmicAtlas.Rendering.Tests.BlackHoleGeodesicTests" classname="CosmicAtlas.Rendering.Tests.BlackHoleGeodesicTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.011589" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1016" name="Shadow_edge_is_at_the_critical_impact_parameter" fullname="CosmicAtlas.Rendering.Tests.BlackHoleGeodesicTests.Shadow_edge_is_at_the_critical_impact_parameter" methodname="Shadow_edge_is_at_the_critical_impact_parameter" classname="CosmicAtlas.Rendering.Tests.BlackHoleGeodesicTests" runstate="Runnable" seed="2063238356" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.010961" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[critical impact parameter = 2.5979 r_s (expected 2.5981)
+]]></output>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1026" name="CometAndPulsarTests" fullname="CosmicAtlas.Rendering.Tests.CometAndPulsarTests" classname="CosmicAtlas.Rendering.Tests.CometAndPulsarTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.036503" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1027" name="Ion_tail_points_away_from_the_sun_and_dust_tail_lags_the_orbit" fullname="CosmicAtlas.Rendering.Tests.CometAndPulsarTests.Ion_tail_points_away_from_the_sun_and_dust_tail_lags_the_orbit" methodname="Ion_tail_points_away_from_the_sun_and_dust_tail_lags_the_orbit" classname="CosmicAtlas.Rendering.Tests.CometAndPulsarTests" runstate="Runnable" seed="787652514" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.034758" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1028" name="Propagation_keeps_a_circular_orbit_circular" fullname="CosmicAtlas.Rendering.Tests.CometAndPulsarTests.Propagation_keeps_a_circular_orbit_circular" methodname="Propagation_keeps_a_circular_orbit_circular" classname="CosmicAtlas.Rendering.Tests.CometAndPulsarTests" runstate="Runnable" seed="936984160" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000411" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1029" name="Pulse_peaks_when_a_beam_points_at_the_observer" fullname="CosmicAtlas.Rendering.Tests.CometAndPulsarTests.Pulse_peaks_when_a_beam_points_at_the_observer" methodname="Pulse_peaks_when_a_beam_points_at_the_observer" classname="CosmicAtlas.Rendering.Tests.CometAndPulsarTests" runstate="Runnable" seed="1136321202" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000468" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1013" name="EclipseGeometryTests" fullname="CosmicAtlas.Rendering.Tests.EclipseGeometryTests" classname="CosmicAtlas.Rendering.Tests.EclipseGeometryTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.001589" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1014" name="Overlap_limits_and_monotonic_penumbra" fullname="CosmicAtlas.Rendering.Tests.EclipseGeometryTests.Overlap_limits_and_monotonic_penumbra" methodname="Overlap_limits_and_monotonic_penumbra" classname="CosmicAtlas.Rendering.Tests.EclipseGeometryTests" runstate="Runnable" seed="451743227" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.000927" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1017" name="GalaxyAndSmallBodyTests" fullname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests" classname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests" runstate="Runnable" testcasecount="6" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:10Z" duration="2.167415" total="6" passed="6" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1023" name="Cratered_mesh_is_a_valid_closed_surface_with_the_requested_shape" fullname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests.Cratered_mesh_is_a_valid_closed_surface_with_the_requested_shape" methodname="Cratered_mesh_is_a_valid_closed_surface_with_the_requested_shape" classname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests" runstate="Runnable" seed="2025261556" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.029882" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1020" name="Dust_lies_on_the_concave_side_of_the_arms" fullname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests.Dust_lies_on_the_concave_side_of_the_arms" methodname="Dust_lies_on_the_concave_side_of_the_arms" classname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests" runstate="Runnable" seed="256953697" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.210541" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1021" name="Elliptical_has_no_dust_and_is_old" fullname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests.Elliptical_has_no_dust_and_is_old" methodname="Elliptical_has_no_dust_and_is_old" classname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests" runstate="Runnable" seed="1698771936" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.054102" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1019" name="Exponential_disk_mean_radius_is_two_scale_lengths" fullname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests.Exponential_disk_mean_radius_is_two_scale_lengths" methodname="Exponential_disk_mean_radius_is_two_scale_lengths" classname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests" runstate="Runnable" seed="778717706" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.001818" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1018" name="Hernquist_sampling_has_the_analytic_median" fullname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests.Hernquist_sampling_has_the_analytic_median" methodname="Hernquist_sampling_has_the_analytic_median" classname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests" runstate="Runnable" seed="150158762" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:08Z" duration="0.009622" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1022" name="Toomre_encounter_raises_tidal_tails" fullname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests.Toomre_encounter_raises_tidal_tails" methodname="Toomre_encounter_raises_tidal_tails" classname="CosmicAtlas.Rendering.Tests.GalaxyAndSmallBodyTests" runstate="Runnable" seed="410143175" result="Passed" start-time="2026-11-08 17:34:08Z" end-time="2026-11-08 17:34:10Z" duration="1.859928" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1024" name="MeshTests" fullname="CosmicAtlas.Rendering.Tests.MeshTests" classname="CosmicAtlas.Rendering.Tests.MeshTests" runstate="Runnable" testcasecount="1" result="Passed" start-time="2026-11-08 17:34:10Z" end-time="2026-11-08 17:34:10Z" duration="0.004282" total="1" passed="1" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1025" name="Sphere_triangles_face_outward" fullname="CosmicAtlas.Rendering.Tests.MeshTests.Sphere_triangles_face_outward" methodname="Sphere_triangles_face_outward" classname="CosmicAtlas.Rendering.Tests.MeshTests" runstate="Runnable" seed="273476985" result="Passed" start-time="2026-11-08 17:34:10Z" end-time="2026-11-08 17:34:10Z" duration="0.003251" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+            </test-suite>
+            <test-suite type="TestFixture" id="1030" name="QualityAndDataTests" fullname="CosmicAtlas.Rendering.Tests.QualityAndDataTests" classname="CosmicAtlas.Rendering.Tests.QualityAndDataTests" runstate="Runnable" testcasecount="3" result="Passed" start-time="2026-11-08 17:34:10Z" end-time="2026-11-08 17:34:10Z" duration="0.133757" total="3" passed="3" failed="0" inconclusive="0" skipped="0" asserts="0">
+              <properties />
+              <test-case id="1031" name="Auto_quality_is_conservative_on_integrated_gpus_and_the_web" fullname="CosmicAtlas.Rendering.Tests.QualityAndDataTests.Auto_quality_is_conservative_on_integrated_gpus_and_the_web" methodname="Auto_quality_is_conservative_on_integrated_gpus_and_the_web" classname="CosmicAtlas.Rendering.Tests.QualityAndDataTests" runstate="Runnable" seed="1761591431" result="Passed" start-time="2026-11-08 17:34:10Z" end-time="2026-11-08 17:34:10Z" duration="0.000633" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1033" name="Finds_a_real_galilean_shadow_transit_with_the_shared_kepler_engine" fullname="CosmicAtlas.Rendering.Tests.QualityAndDataTests.Finds_a_real_galilean_shadow_transit_with_the_shared_kepler_engine" methodname="Finds_a_real_galilean_shadow_transit_with_the_shared_kepler_engine" classname="CosmicAtlas.Rendering.Tests.QualityAndDataTests" runstate="Runnable" seed="2066610003" result="Passed" start-time="2026-11-08 17:34:10Z" end-time="2026-11-08 17:34:10Z" duration="0.128134" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+              </test-case>
+              <test-case id="1032" name="Resources_catalogue_is_the_parity_tested_artefact" fullname="CosmicAtlas.Rendering.Tests.QualityAndDataTests.Resources_catalogue_is_the_parity_tested_artefact" methodname="Resources_catalogue_is_the_parity_tested_artefact" classname="CosmicAtlas.Rendering.Tests.QualityAndDataTests" runstate="Runnable" seed="857394763" result="Passed" start-time="2026-11-08 17:34:10Z" end-time="2026-11-08 17:34:10Z" duration="0.004088" asserts="0">
+                <properties>
+                  <property name="retryIteration" value="0" />
+                  <property name="repeatIteration" value="0" />
+                </properties>
+                <output><![CDATA[Saving results to: C:/Users/srikr/AppData/LocalLow/DefaultCompany/CosmicAtlas\TestResults.xml
+]]></output>
+              </test-case>
+            </test-suite>
+          </test-suite>
+        </test-suite>
+      </test-suite>
+    </test-suite>
+  </test-suite>
+</test-run>
