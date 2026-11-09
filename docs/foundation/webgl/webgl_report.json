@@ -1,0 +1,468 @@
+{
+ "base": "http://127.0.0.1:8091",
+ "viewport": [
+  1366,
+  768
+ ],
+ "uncapped": true,
+ "headed": false,
+ "qualities": [
+  "Medium",
+  "Low",
+  "High"
+ ],
+ "checks": [
+  {
+   "check": "template: page loads and creates unityInstance",
+   "pass": true,
+   "detail": "6.1 s, error=None"
+  },
+  {
+   "check": "unity->js: AtlasReportReady published window.__atlas.ready",
+   "pass": true,
+   "detail": "stationCount=10 autoQuality=Low device=ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)"
+  },
+  {
+   "check": "shaders: every runtime Shader.Find shader resolves in the player",
+   "pass": true,
+   "detail": "missing=[]"
+  },
+  {
+   "check": "catalogue: model survives IL2CPP stripping (all collections populated)",
+   "pass": true,
+   "detail": "{\"schemaVersion\": 1, \"contentHash\": \"707d395cf4e1a718aa25f0a61c2958f96b5552b547ba27144541038a2a5c0ee4\", \"planetElements\": 8, \"planetPoles\": 9, \"planetRadiusKm\": 8, \"saturnRings\": 6, \"objects\": 79, \"solarBodies\": 54} earthElements keys=['El', 'Rate']"
+  },
+  {
+   "check": "stations: all 10 showcase stations built in the player",
+   "pass": true,
+   "detail": "stationCount=10"
+  },
+  {
+   "check": "unity->js: AtlasReportFrame publishes frame statistics",
+   "pass": true,
+   "detail": "avgFrameMs=157.6665496826172"
+  },
+  {
+   "check": "js->unity: SelectFromJs/SetQualityFromJs round trip echoed for every station and tier",
+   "pass": true,
+   "detail": "30 station x tier combinations echoed; failures=[]"
+  },
+  {
+   "check": "robustness: malformed SendMessage arguments ignored, frames keep coming",
+   "pass": true,
+   "detail": "bridge warnings=['[Bridge] SetQualityFromJs ignored unknown level: Bogus\\n', '[Bridge] SelectFromJs ignored malformed argument: x,y\\n']"
+  },
+  {
+   "check": "no console errors or uncaught page errors",
+   "pass": true,
+   "detail": "0 errors []"
+  },
+  {
+   "check": "failure path: template reports missing WebGL 2 clearly",
+   "pass": true,
+   "detail": "__atlasError='This 3D view needs WebGL 2, which is not available in this browser or is disabled (check hardware acceleration).'"
+  }
+ ],
+ "results": [
+  {
+   "quality": "Medium",
+   "station": 0,
+   "name": "Stars",
+   "medianFrameMs": 2.4,
+   "minFrameMs": 1.83,
+   "maxFrameMs": 3.0,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 40,
+   "jsHeapTotalMB": 48,
+   "screenshot": "webgl_00_Stars_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 1,
+   "name": "JupiterSystem",
+   "medianFrameMs": 1.77,
+   "minFrameMs": 1.53,
+   "maxFrameMs": 1.9,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 45,
+   "jsHeapTotalMB": 51,
+   "screenshot": "webgl_01_JupiterSystem_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 2,
+   "name": "Moons",
+   "medianFrameMs": 1.57,
+   "minFrameMs": 1.33,
+   "maxFrameMs": 1.63,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 42,
+   "jsHeapTotalMB": 55,
+   "screenshot": "webgl_02_Moons_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 3,
+   "name": "Earth",
+   "medianFrameMs": 2.03,
+   "minFrameMs": 1.7,
+   "maxFrameMs": 2.23,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 42,
+   "jsHeapTotalMB": 56,
+   "screenshot": "webgl_03_Earth_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 4,
+   "name": "BlackHole",
+   "medianFrameMs": 9.77,
+   "minFrameMs": 4.9,
+   "maxFrameMs": 10.23,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 44,
+   "jsHeapTotalMB": 57,
+   "screenshot": "webgl_04_BlackHole_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 5,
+   "name": "Nebula",
+   "medianFrameMs": 3.07,
+   "minFrameMs": 2.53,
+   "maxFrameMs": 19,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 40,
+   "jsHeapTotalMB": 55,
+   "screenshot": "webgl_05_Nebula_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 6,
+   "name": "Galaxies",
+   "medianFrameMs": 1.93,
+   "minFrameMs": 1.2,
+   "maxFrameMs": 2,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 44,
+   "jsHeapTotalMB": 55,
+   "screenshot": "webgl_06_Galaxies_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 7,
+   "name": "Pulsar",
+   "medianFrameMs": 2.0,
+   "minFrameMs": 1.77,
+   "maxFrameMs": 2.17,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 44,
+   "jsHeapTotalMB": 56,
+   "screenshot": "webgl_07_Pulsar_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 8,
+   "name": "SmallBodies",
+   "medianFrameMs": 1.43,
+   "minFrameMs": 1.1,
+   "maxFrameMs": 1.53,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 40,
+   "jsHeapTotalMB": 56,
+   "screenshot": "webgl_08_SmallBodies_Medium.png"
+  },
+  {
+   "quality": "Medium",
+   "station": 9,
+   "name": "Comet",
+   "medianFrameMs": 1.43,
+   "minFrameMs": 1.33,
+   "maxFrameMs": 1.7,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 40,
+   "jsHeapTotalMB": 43,
+   "screenshot": "webgl_09_Comet_Medium.png"
+  },
+  {
+   "quality": "Low",
+   "station": 0,
+   "name": "Stars",
+   "medianFrameMs": 1.67,
+   "minFrameMs": 1.57,
+   "maxFrameMs": 2.73,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 40,
+   "jsHeapTotalMB": 44
+  },
+  {
+   "quality": "Low",
+   "station": 1,
+   "name": "JupiterSystem",
+   "medianFrameMs": 1.4,
+   "minFrameMs": 1.27,
+   "maxFrameMs": 1.47,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 40,
+   "jsHeapTotalMB": 45
+  },
+  {
+   "quality": "Low",
+   "station": 2,
+   "name": "Moons",
+   "medianFrameMs": 1.53,
+   "minFrameMs": 1.33,
+   "maxFrameMs": 1.97,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 43,
+   "jsHeapTotalMB": 47
+  },
+  {
+   "quality": "Low",
+   "station": 3,
+   "name": "Earth",
+   "medianFrameMs": 1.5,
+   "minFrameMs": 1.33,
+   "maxFrameMs": 1.8,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 44,
+   "jsHeapTotalMB": 50,
+   "screenshot": "webgl_03_Earth_Low.png"
+  },
+  {
+   "quality": "Low",
+   "station": 4,
+   "name": "BlackHole",
+   "medianFrameMs": 4.1,
+   "minFrameMs": 3.67,
+   "maxFrameMs": 5.1,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 44,
+   "jsHeapTotalMB": 50,
+   "screenshot": "webgl_04_BlackHole_Low.png"
+  },
+  {
+   "quality": "Low",
+   "station": 5,
+   "name": "Nebula",
+   "medianFrameMs": 5.63,
+   "minFrameMs": 4.5,
+   "maxFrameMs": 6.9,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 43,
+   "jsHeapTotalMB": 50,
+   "screenshot": "webgl_05_Nebula_Low.png"
+  },
+  {
+   "quality": "Low",
+   "station": 6,
+   "name": "Galaxies",
+   "medianFrameMs": 1.57,
+   "minFrameMs": 1.3,
+   "maxFrameMs": 2.43,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 44,
+   "jsHeapTotalMB": 50
+  },
+  {
+   "quality": "Low",
+   "station": 7,
+   "name": "Pulsar",
+   "medianFrameMs": 1.53,
+   "minFrameMs": 1.47,
+   "maxFrameMs": 1.67,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 44,
+   "jsHeapTotalMB": 51
+  },
+  {
+   "quality": "Low",
+   "station": 8,
+   "name": "SmallBodies",
+   "medianFrameMs": 1.43,
+   "minFrameMs": 1.3,
+   "maxFrameMs": 1.47,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 45,
+   "jsHeapTotalMB": 51
+  },
+  {
+   "quality": "Low",
+   "station": 9,
+   "name": "Comet",
+   "medianFrameMs": 1.37,
+   "minFrameMs": 1.27,
+   "maxFrameMs": 1.47,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 43,
+   "jsHeapTotalMB": 52
+  },
+  {
+   "quality": "High",
+   "station": 0,
+   "name": "Stars",
+   "medianFrameMs": 1.37,
+   "minFrameMs": 1.3,
+   "maxFrameMs": 1.43,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 44,
+   "jsHeapTotalMB": 51
+  },
+  {
+   "quality": "High",
+   "station": 1,
+   "name": "JupiterSystem",
+   "medianFrameMs": 1.63,
+   "minFrameMs": 1.07,
+   "maxFrameMs": 2.63,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 46,
+   "jsHeapTotalMB": 56
+  },
+  {
+   "quality": "High",
+   "station": 2,
+   "name": "Moons",
+   "medianFrameMs": 1.8,
+   "minFrameMs": 1.33,
+   "maxFrameMs": 2.07,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 48,
+   "jsHeapTotalMB": 58
+  },
+  {
+   "quality": "High",
+   "station": 3,
+   "name": "Earth",
+   "medianFrameMs": 2.07,
+   "minFrameMs": 1.8,
+   "maxFrameMs": 2.2,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 43,
+   "jsHeapTotalMB": 58,
+   "screenshot": "webgl_03_Earth_High.png"
+  },
+  {
+   "quality": "High",
+   "station": 4,
+   "name": "BlackHole",
+   "medianFrameMs": 4.17,
+   "minFrameMs": 1.9,
+   "maxFrameMs": 6.57,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 47,
+   "jsHeapTotalMB": 58,
+   "screenshot": "webgl_04_BlackHole_High.png"
+  },
+  {
+   "quality": "High",
+   "station": 5,
+   "name": "Nebula",
+   "medianFrameMs": 7.87,
+   "minFrameMs": 7.73,
+   "maxFrameMs": 8.63,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 41,
+   "jsHeapTotalMB": 43,
+   "screenshot": "webgl_05_Nebula_High.png"
+  },
+  {
+   "quality": "High",
+   "station": 6,
+   "name": "Galaxies",
+   "medianFrameMs": 2.5,
+   "minFrameMs": 1.67,
+   "maxFrameMs": 6.9,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 41,
+   "jsHeapTotalMB": 43
+  },
+  {
+   "quality": "High",
+   "station": 7,
+   "name": "Pulsar",
+   "medianFrameMs": 2.47,
+   "minFrameMs": 2.27,
+   "maxFrameMs": 2.5,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 42,
+   "jsHeapTotalMB": 44
+  },
+  {
+   "quality": "High",
+   "station": 8,
+   "name": "SmallBodies",
+   "medianFrameMs": 1.93,
+   "minFrameMs": 1.77,
+   "maxFrameMs": 2.07,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 43,
+   "jsHeapTotalMB": 46
+  },
+  {
+   "quality": "High",
+   "station": 9,
+   "name": "Comet",
+   "medianFrameMs": 1.47,
+   "minFrameMs": 1.13,
+   "maxFrameMs": 1.63,
+   "wasmHeapMB": 166,
+   "jsHeapUsedMB": 42,
+   "jsHeapTotalMB": 46
+  }
+ ],
+ "browserVersion": "151.0.7922.34",
+ "loadSeconds": 6.1,
+ "pageError": null,
+ "atlas": {
+  "frames": 0,
+  "stationCount": 10,
+  "autoQuality": "Low",
+  "device": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "diagnostics": {
+   "missingShaders": [],
+   "catalog": {
+    "schemaVersion": 1,
+    "contentHash": "707d395cf4e1a718aa25f0a61c2958f96b5552b547ba27144541038a2a5c0ee4",
+    "planetElements": 8,
+    "planetPoles": 9,
+    "planetRadiusKm": 8,
+    "saturnRings": 6,
+    "objects": 79,
+    "solarBodies": 54,
+    "earthElements": {
+     "El": {
+      "A": 1.00000261,
+      "E": 0.01671123,
+      "I": -1.531e-05,
+      "L": 100.46457166,
+      "W": 102.93768193,
+      "Node": 0
+     },
+     "Rate": {
+      "A": 5.62e-06,
+      "E": -4.392e-05,
+      "I": -0.01294668,
+      "L": 35999.37244981,
+      "W": 0.32327364,
+      "Node": 0
+     }
+    }
+   }
+  },
+  "ready": true
+ },
+ "renderer": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "memoryAfterLoad": {
+  "wasmHeapMB": 166,
+  "jsHeapUsedMB": 39,
+  "jsHeapTotalMB": 48
+ },
+ "memoryAtEnd": {
+  "wasmHeapMB": 166,
+  "jsHeapUsedMB": 42,
+  "jsHeapTotalMB": 46
+ },
+ "consoleErrors": [],
+ "pass": true
+}
