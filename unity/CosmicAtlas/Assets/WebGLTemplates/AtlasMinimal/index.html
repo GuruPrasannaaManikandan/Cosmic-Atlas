@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{{ PRODUCT_NAME }}}</title>
+  <link rel="icon" href="data:,">
+  <style>
+    html, body { margin: 0; height: 100%; background: #000; color: #cbd5e1; font: 14px system-ui, sans-serif; overflow: hidden; }
+    #unity-canvas { width: 100%; height: 100%; display: block; background: #000; }
+    #atlas-status { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; max-width: 80vw; }
+    #atlas-status.error { color: #fca5a5; }
+  </style>
+</head>
+<body>
+  <canvas id="unity-canvas" tabindex="-1"></canvas>
+  <div id="atlas-status" role="status" aria-live="polite">Loading 3D renderer… 0%</div>
+  <script>
+    // Cosmic Atlas minimal host page: exposes window.unityInstance for the JS bridge (SendMessage) and shows a clear
+    // message instead of a blank page when WebGL 2 is unavailable or the player fails to start.
+    const status = document.getElementById('atlas-status');
+    const fail = (msg) => { status.textContent = msg; status.className = 'error'; window.__atlasError = msg; };
+    const probe = document.createElement('canvas').getContext('webgl2');
+    if (!probe) {
+      fail('This 3D view needs WebGL 2, which is not available in this browser or is disabled (check hardware acceleration).');
+    } else {
+      const buildUrl = 'Build';
+      const config = {
+        dataUrl: buildUrl + '/{{{ DATA_FILENAME }}}',
+        frameworkUrl: buildUrl + '/{{{ FRAMEWORK_FILENAME }}}',
+        codeUrl: buildUrl + '/{{{ CODE_FILENAME }}}',
+        streamingAssetsUrl: 'StreamingAssets',
+        companyName: '{{{ COMPANY_NAME }}}',
+        productName: '{{{ PRODUCT_NAME }}}',
+        productVersion: '{{{ PRODUCT_VERSION }}}',
+      };
+      const loader = document.createElement('script');
+      loader.src = buildUrl + '/{{{ LOADER_FILENAME }}}';
+      loader.onload = () => {
+        createUnityInstance(document.getElementById('unity-canvas'), config, (p) => {
+          status.textContent = 'Loading 3D renderer… ' + Math.round(p * 100) + '%';
+        }).then((instance) => {
+          window.unityInstance = instance;
+          status.remove();
+        }).catch((e) => fail('The 3D renderer failed to start: ' + e));
+      };
+      loader.onerror = () => fail('Could not download the 3D renderer.');
+      document.body.appendChild(loader);
+    }
+  </script>
+</body>
+</html>

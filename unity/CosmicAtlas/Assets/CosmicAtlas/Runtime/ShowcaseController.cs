@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using CosmicAtlas.Astro;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -20,6 +21,23 @@ namespace CosmicAtlas.Rendering
         float _yaw, _pitch, _dist;
         bool _help = true;
         float _smoothedDt = 1f / 60f;
+        float _accumDt; int _accumFrames;
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [DllImport("__Internal")] static extern void AtlasReportFrame(float avgMs, int station, int shot, int quality);
+        [DllImport("__Internal")] static extern void AtlasReportReady(int stationCount, string quality, string device, string diagnosticsJson);
+#else
+        static void AtlasReportFrame(float avgMs, int station, int shot, int quality) { }
+        static void AtlasReportReady(int stationCount, string quality, string device, string diagnosticsJson) { }
+#endif
+
+        /// <summary>Shaders reached only through Shader.Find at runtime (WebGLBuild force-includes exactly these).</summary>
+        public static readonly string[] RuntimeShaders =
+        {
+            "CosmicAtlas/StarSurface", "CosmicAtlas/StarGlow", "CosmicAtlas/PlanetSurface", "CosmicAtlas/Atmosphere",
+            "CosmicAtlas/BlackHole", "CosmicAtlas/Nebula", "CosmicAtlas/ParticleBillboard", "CosmicAtlas/PulsarBeam",
+            "Universal Render Pipeline/Unlit",
+        };
 
         public static Texture2D LoadTexture(string id) => Resources.Load<Texture2D>("AtlasTextures/" + id);
 
@@ -36,8 +54,63 @@ namespace CosmicAtlas.Rendering
             AtlasView.Camera = cam;
             AtlasQuality.Set(AtlasQuality.AutoSelectForThisDevice());
             var root = new GameObject("Showcase").transform;
-            Stations = ShowcaseFactory.Build(root, AtlasQuality.Settings, LoadTexture, LoadCatalog(), new DateTime(2026, 11, 8, 0, 0, 0, DateTimeKind.Utc));
+            var catalog = LoadCatalog();
+            Stations = ShowcaseFactory.Build(root, AtlasQuality.Settings, LoadTexture, catalog, new DateTime(2026, 11, 8, 0, 0, 0, DateTimeKind.Utc));
             Select(0, 0);
+            AtlasReportReady(Stations.Count, AtlasQuality.Level.ToString(), SystemInfo.graphicsDeviceName, Diagnostics(catalog));
+        }
+
+        /// <summary>
+        /// Build-integrity evidence for the host page / test harness: which runtime shaders Shader.Find could NOT
+        /// resolve in this player, and how much of the catalogue survived deserialisation (IL2CPP stripping removes
+        /// unused property setters, which would leave these collections null).
+        /// </summary>
+        static string Diagnostics(CatalogFile c)
+        {
+            var missing = new List<string>();
+            foreach (var n in RuntimeShaders) if (!Shader.Find(n)) missing.Add("\"" + n + "\"");
+            int Count<T>(ICollection<T> x) => x == null ? -1 : x.Count;
+            string earthA = "null";
+            if (c?.PlanetElements != null && c.PlanetElements.TryGetValue("earth", out var e) && e != null)
+                earthA = Newtonsoft.Json.JsonConvert.SerializeObject(e);
+            return "{\"missingShaders\":[" + string.Join(",", missing) + "]"
+                 + ",\"catalog\":{\"schemaVersion\":" + (c?.SchemaVersion ?? -1)
+                 + ",\"contentHash\":\"" + (c?.ContentHash ?? "") + "\""
+                 + ",\"planetElements\":" + Count(c?.PlanetElements)
+                 + ",\"planetPoles\":" + Count(c?.PlanetPoles)
+                 + ",\"planetRadiusKm\":" + Count(c?.PlanetRadiusKm)
+                 + ",\"saturnRings\":" + Count(c?.SaturnRings)
+                 + ",\"objects\":" + Count(c?.Objects)
+                 + ",\"solarBodies\":" + Count(c?.SolarBodies)
+                 + ",\"earthElements\":" + earthA + "}}";
+        }
+
+        /// <summary>JS → Unity (SendMessage): "station,shot".</summary>
+        public void SelectFromJs(string arg)
+        {
+            // malformed input from the page is ignored (logged), never thrown into the SendMessage call
+            var parts = (arg ?? "").Split(',');
+            int shot = 0;
+            if (!int.TryParse(parts[0], out int station) || (parts.Length > 1 && !int.TryParse(parts[1], out shot)))
+            {
+                Debug.LogWarning("[Bridge] SelectFromJs ignored malformed argument: " + arg);
+                return;
+            }
+            Select(station, shot);
+            _accumDt = 0; _accumFrames = 0;
+        }
+
+        /// <summary>JS → Unity (SendMessage): "Low" | "Medium" | "High" | "Ultra".</summary>
+        public void SetQualityFromJs(string level)
+        {
+            if (!Enum.TryParse(level, false, out AtlasQualityLevel q) || !Enum.IsDefined(typeof(AtlasQualityLevel), q))
+            {
+                Debug.LogWarning("[Bridge] SetQualityFromJs ignored unknown level: " + level);
+                return;
+            }
+            AtlasQuality.Set(q);
+            ApplyQuality(Stations, AtlasQuality.Settings);
+            _accumDt = 0; _accumFrames = 0;
         }
 
         public void Select(int station, int shot)
@@ -68,6 +141,12 @@ namespace CosmicAtlas.Rendering
         void Update()
         {
             _smoothedDt = Mathf.Lerp(_smoothedDt, Time.unscaledDeltaTime, 0.05f);
+            _accumDt += Time.unscaledDeltaTime; _accumFrames++;
+            if (_accumFrames >= 30)
+            {
+                AtlasReportFrame(_accumDt / _accumFrames * 1000f, _station, _shot, (int)AtlasQuality.Level);
+                _accumDt = 0; _accumFrames = 0;
+            }
             var kb = Keyboard.current; var mouse = Mouse.current;
             if (kb != null)
             {
