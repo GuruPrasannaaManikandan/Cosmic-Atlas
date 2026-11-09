@@ -19,9 +19,22 @@
     // Cosmic Atlas minimal host page: exposes window.unityInstance for the JS bridge (SendMessage) and shows a clear
     // message instead of a blank page when WebGL 2 is unavailable or the player fails to start.
     const status = document.getElementById('atlas-status');
-    const fail = (msg) => { status.textContent = msg; status.className = 'error'; window.__atlasError = msg; };
+    let started = false;
+    const fail = (msg) => {
+      if (started || window.__atlasError) return; // keep the FIRST (root-cause) message
+      status.textContent = msg; status.className = 'error'; window.__atlasError = msg;
+      console.error('[AtlasMinimal] ' + msg);
+    };
+    const SERVE_HINT = 'Serve the build folder over HTTP, e.g. "python scripts/e2e/serve_unity_webgl.py" and open http://127.0.0.1:8091/';
+    // Which file failed, and with what HTTP status (404 = file missing beside index.html, 0 = blocked/offline).
+    const describe = (url) => fetch(url, { method: 'HEAD', cache: 'no-store' })
+      .then((r) => url + ' (HTTP ' + r.status + (r.ok ? ', content-type ' + r.headers.get('content-type') : '') + ')')
+      .catch((e) => url + ' (' + e.message + ')');
     const probe = document.createElement('canvas').getContext('webgl2');
-    if (!probe) {
+    if (!/^https?:$/.test(location.protocol)) {
+      // Unity fetches Build/*.data and *.wasm, which browsers refuse for file:// pages and sandboxed previews.
+      fail('The 3D renderer cannot be downloaded from a ' + location.protocol + ' page. ' + SERVE_HINT);
+    } else if (!probe) {
       fail('This 3D view needs WebGL 2, which is not available in this browser or is disabled (check hardware acceleration).');
     } else {
       const buildUrl = 'Build';
@@ -33,18 +46,24 @@
         companyName: '{{{ COMPANY_NAME }}}',
         productName: '{{{ PRODUCT_NAME }}}',
         productVersion: '{{{ PRODUCT_VERSION }}}',
+        // Unity reports download/decompression/startup problems here (e.g. "Failed to download file Build/x.data");
+        // without this they only reached the console and the page stayed on the progress text.
+        showBanner: (msg, type) => { if (type === 'error') fail('The 3D renderer failed to load: ' + msg); else console.warn(msg); },
       };
+      // A rejected fetch inside the loader (network error, blocked scheme) can surface only as an unhandled rejection.
+      window.addEventListener('unhandledrejection', (ev) => fail('The 3D renderer failed to load: ' + (ev.reason && ev.reason.message || ev.reason)));
       const loader = document.createElement('script');
       loader.src = buildUrl + '/{{{ LOADER_FILENAME }}}';
       loader.onload = () => {
         createUnityInstance(document.getElementById('unity-canvas'), config, (p) => {
-          status.textContent = 'Loading 3D renderer… ' + Math.round(p * 100) + '%';
+          if (!window.__atlasError) status.textContent = 'Loading 3D renderer… ' + Math.round(p * 100) + '%';
         }).then((instance) => {
+          started = true;
           window.unityInstance = instance;
           status.remove();
-        }).catch((e) => fail('The 3D renderer failed to start: ' + e));
+        }).catch((e) => fail('The 3D renderer failed to start: ' + (e && e.message || e)));
       };
-      loader.onerror = () => fail('Could not download the 3D renderer.');
+      loader.onerror = () => describe(loader.src).then((d) => fail('Could not download the 3D renderer loader: ' + d + '. ' + SERVE_HINT));
       document.body.appendChild(loader);
     }
   </script>
