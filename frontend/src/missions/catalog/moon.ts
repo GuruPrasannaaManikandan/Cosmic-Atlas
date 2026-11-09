@@ -123,7 +123,7 @@ const lmDescent = (n: number, pos: [number, number, number, number]): PhysicalOb
   ],
   location: v(moonPos(pos[0], pos[1], LROC_ME, pos[2], pos[3]), [LROC, SITES]),
   currentStatus: v('on the lunar surface, imaged by the Lunar Reconnaissance Orbiter', [LROC]),
-  model: { id: n === 11 ? 'lm-descent-stage' : null, provenance: n === 11 ? 'Procedural reconstruction from NSSDCA dimensions (Apollo 11). Footpad size, leg geometry, foil colours and heading are approximations from public photographs, not measured values.' : 'No model yet.' },
+  model: { id: n === 11 ? 'lm-descent-stage' : null, provenance: n === 11 ? "Official NASA 3D Resources Apollo Lunar Module model with the ascent stage removed (it lifted off on 21 July 1969); its legs are stylised: footpad span 6.43 m vs NSSDCA's 9.4 m (about a third short); choose the dimension-accurate reconstruction for true proportions. Heading is approximate (ladder facing west, from crew photographs). A procedural reconstruction is shown while it loads." : 'No model yet (the NASA model is the Apollo 11-era LM; J-mission differences are not modelled).' },
   sources: [LROC, SITES, ...(n === 11 ? ['nssdca-a11-lm'] : [])],
 })
 

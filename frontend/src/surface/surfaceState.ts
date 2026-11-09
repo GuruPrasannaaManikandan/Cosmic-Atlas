@@ -20,6 +20,8 @@ export interface SurfaceUI {
   /** focused component while inspecting */
   component: string | null
   waypointId: string | null
+  /** Apollo LM: official NASA model (stylised legs) or the dimension-accurate procedural reconstruction */
+  lmModel: 'nasa' | 'reconstruction'
   /** HUD snapshot of the astronaut (updated ~10×/s) */
   player: { x: number; z: number; yaw: number; speed: number; grounded: boolean; camYaw: number }
   set: (p: Partial<SurfaceUI>) => void
@@ -38,6 +40,7 @@ const initial = {
   panel: null,
   component: null,
   waypointId: null,
+  lmModel: 'nasa' as 'nasa' | 'reconstruction',
   player: { x: 0, z: 0, yaw: 0, speed: 0, grounded: true, camYaw: 0 },
 }
 

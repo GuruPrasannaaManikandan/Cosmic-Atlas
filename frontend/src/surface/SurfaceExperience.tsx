@@ -8,6 +8,7 @@ import { MiniMap, SurfaceMap } from './SurfaceMap'
 import { DiscoveryPanel } from './DiscoveryPanel'
 import { sunDirectionAtLunarSite, elevationDeg, azimuthDeg } from './lighting'
 import { bearingDeg } from './geo'
+import { preloadNasaModel } from './models/NasaModel'
 
 const MOONWALK_MS = dateMs('1969-07-21T03:30:00Z')
 
@@ -145,6 +146,7 @@ export default function SurfaceExperience() {
   const siteId = useStore((s) => s.surfaceSiteId)
   const S = useSurface()
   useEffect(() => {
+    preloadNasaModel('apollo-lm')
     useSurface.getState().reset(siteId)
     return () => useSurface.getState().reset(null)
   }, [siteId])

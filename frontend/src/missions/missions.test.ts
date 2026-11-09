@@ -45,7 +45,7 @@ describe('mission catalogue', () => {
   it('missing values stay missing instead of being guessed', () => {
     expect(MISSION_BY_ID['chandrayaan-3'].landingSite!.value).toBeNull()
     expect(OBJECT_BY_ID['opportunity-rover'].location.value).toBeNull()
-    expect(MISSION_BY_ID['insight'].landingSite!.status).toBe('unverified')
+    expect(MISSION_BY_ID['mars-2020'].landingSite!.status).toBe('unverified') // Jezero coordinates not sourced yet
     expect(MISSION_BY_ID['huygens'].landingSite!.status).toBe('conflicting')
   })
 

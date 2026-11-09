@@ -82,8 +82,16 @@
    "check": "A7 cannot walk through the Lunar Module descent stage",
    "pass": true,
    "detail": {
-    "distFromLmCentre": 5.05,
-    "x": -5.03
+    "distFromLmCentre": 3.65,
+    "x": -3.64
+   }
+  },
+  {
+   "check": "A9 the Lunar Module on the surface is the official NASA model with its ascent stage removed",
+   "pass": true,
+   "detail": {
+    "removed": 85,
+    "height": 2.82
    }
   },
   {
@@ -115,6 +123,11 @@
   },
   {
    "check": "D4 inspecting a component focuses it",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "D4b the LM record offers the NASA model and the dimension-accurate reconstruction",
    "pass": true,
    "detail": ""
   },
@@ -162,7 +175,7 @@
    "check": "P1 surface frame rate (headless Chrome, balanced quality)",
    "pass": true,
    "detail": {
-    "fps": 59.8
+    "fps": 60.2
    }
   },
   {
@@ -214,7 +227,7 @@
  ],
  "errors": [],
  "metrics": {
-  "surfaceFps": 59.8
+  "surfaceFps": 60.2
  },
  "browser": "chrome 156.0.8078.81"
 }

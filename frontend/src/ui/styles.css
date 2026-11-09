@@ -4296,3 +4296,41 @@ option { background: #070d1e; color: #fff; }
   .surf-minimap { left: 12px; bottom: 30px; }
   .surf-provenance { display: none; }
 }
+
+/* ===================================================================== spacecraft archive (official NASA models) */
+.archive-backdrop { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; background: rgba(0, 0, 0, 0.6); padding: 16px; }
+.archive { position: relative; width: min(1280px, 100%); height: min(820px, 100%); display: flex; flex-direction: column; overflow: hidden; }
+.archive header { position: relative; padding: 12px 52px 10px 16px; border-bottom: 1px solid var(--line); }
+.archive h2 { margin: 4px 0 0; font-size: 19px; }
+.archive-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 230px 1fr 340px; }
+.archive-list { display: flex; flex-direction: column; gap: 6px; padding: 10px; overflow: auto; border-right: 1px solid var(--line); }
+.archive-list button { text-align: left; padding: 8px 10px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--glass-card); color: var(--txt); cursor: pointer; font-size: 13px; }
+.archive-list button.on { border-color: var(--line-hi); background: rgba(103, 232, 249, 0.12); }
+.archive-list .non-nasa { color: var(--warm); font-style: normal; }
+.archive-view { position: relative; min-width: 0; min-height: 0; }
+.archive-view canvas { display: block; }
+.archive-loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--mut); pointer-events: none; }
+.archive-loading.err { color: var(--err); }
+.archive-scale { position: absolute; left: 10px; bottom: 8px; }
+.archive-info { padding: 12px 14px; overflow: auto; border-left: 1px solid var(--line); font-size: 14px; line-height: 1.5; }
+.archive-info h3 { margin: 14px 0 4px; font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mut); }
+.archive-info .mono, .archive-checks .mono { font-family: var(--font-mono); }
+.archive-info .small { font-size: 12px; }
+.archive-info a { color: var(--cy); }
+.archive-checks { width: 100%; border-collapse: collapse; font-size: 12px; }
+.archive-checks td { padding: 4px 4px; border-bottom: 1px solid var(--line-subtle); }
+.archive-checks tr.ok td:last-child { color: var(--ok); font-weight: 700; }
+.archive-checks tr.warn td:last-child { color: var(--warm); font-weight: 700; }
+@media (max-width: 900px) {
+  .archive-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(260px, 1fr) auto; }
+  .archive-list { flex-direction: row; overflow-x: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  .archive-list button { white-space: nowrap; }
+  .archive-info { border-left: 0; border-top: 1px solid var(--line); max-height: 40vh; }
+}
+
+.model-variant { display: inline-flex; gap: 4px; margin: 6px 0 8px; flex-wrap: wrap; }
+.model-variant button { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--txt-dim); cursor: pointer; font-size: 12px; }
+.model-variant button.on { background: rgba(103, 232, 249, 0.14); border-color: var(--line-hi); color: var(--txt); }
+.archive-info .fidelity.high b { color: var(--ok); }
+.archive-info .fidelity.medium b { color: var(--warm); }
+.archive-info .fidelity.low b { color: var(--err); }

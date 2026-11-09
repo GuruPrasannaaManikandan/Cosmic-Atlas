@@ -37,6 +37,7 @@ const AcademyCompleteModal = lazy(() => import('../tutorial/AcademyCompleteModal
 const HelpModal = lazy(() => import('./HelpModal').then((m) => ({ default: m.HelpModal })))
 const AboutModal = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutModal })))
 const SurfaceExperience = lazy(() => import('../surface/SurfaceExperience'))
+const SpacecraftArchive = lazy(() => import('../surface/SpacecraftArchive'))
 
 class Boundary extends Component<{ children: ReactNode }, { err: Error | null }> {
   state = { err: null as Error | null }
@@ -339,6 +340,7 @@ export function App() {
   }, [])
   const [about, setAbout] = useState(false)
   const [help, setHelp] = useState(false)
+  const [archive, setArchive] = useState(false)
   const [eventsModalOpen, setEventsModalOpen] = useState(false)
   const [activeEventId, setActiveEventId] = useState(eventState.activeId)
   const [tutorialActive, setTutorialActive] = useState(tutorialState.isActive)
@@ -376,7 +378,7 @@ export function App() {
     return () => clearInterval(t)
   }, [])
 
-  const hasActiveModal = eventsModalOpen || help || about || navMapOpen || dataOpen || welcomeOpen || completeOpen
+  const hasActiveModal = archive || eventsModalOpen || help || about || navMapOpen || dataOpen || welcomeOpen || completeOpen
 
   const inSolar = len(sub(nav.pos, SUN_POS)) < 0.02
   const isTour = phase === 'tour'
@@ -411,6 +413,13 @@ export function App() {
       <Boundary>
         <CosmicCanvas />
       </Boundary>
+      {archive && (
+        <Boundary>
+          <Suspense fallback={<ModuleLoader label="Loading Spacecraft Archive…" />}>
+            <SpacecraftArchive onClose={() => setArchive(false)} />
+          </Suspense>
+        </Boundary>
+      )}
       {surfaceSiteId && (
         <Boundary>
           <Suspense fallback={<ModuleLoader label="Preparing the surface…" />}>
@@ -451,6 +460,7 @@ export function App() {
             toggleData={() => set({ dataOpen: !dataOpen })}
             openHelp={() => setHelp(true)}
             openAbout={() => setAbout(true)}
+            openArchive={() => setArchive(true)}
             dataOpen={dataOpen}
           />
         </header>

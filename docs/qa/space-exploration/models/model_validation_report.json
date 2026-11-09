@@ -1,0 +1,1301 @@
+{
+ "checks": [
+  {
+   "check": "V1 Spacecraft Archive opens from the top navigation and lists every official model",
+   "pass": true,
+   "detail": [
+    "Apollo Lunar Module \u2014 descent stage (as left on the Moon)",
+    "Mars Exploration Rover \u2014 Opportunity (MER-B)",
+    "Mars 2020 Perseverance rover",
+    "Ingenuity Mars Helicopter",
+    "Viking lander",
+    "InSight lander (solar panels deployed)",
+    "Huygens probe (ESA) \u00b7 ESA"
+   ]
+  },
+  {
+   "check": "M[apollo-lm] loads (Draco, self-hosted decoder) and is measured",
+   "pass": true,
+   "detail": {
+    "WxLxH": [
+     6.43,
+     6.43,
+     2.82
+    ],
+    "tris": 47024,
+    "scale": 1
+   }
+  },
+  {
+   "check": "M[apollo-lm] archive panel shows provenance and SHA-256",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[mer-b] loads (Draco, self-hosted decoder) and is measured",
+   "pass": true,
+   "detail": {
+    "WxLxH": [
+     1.78,
+     2.61,
+     1.5
+    ],
+    "tris": 3845,
+    "scale": 0.2053
+   }
+  },
+  {
+   "check": "M[mer-b] archive panel shows provenance and SHA-256",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[perseverance] loads (Draco, self-hosted decoder) and is measured",
+   "pass": true,
+   "detail": {
+    "WxLxH": [
+     2.7,
+     3.11,
+     2.24
+    ],
+    "tris": 199521,
+    "scale": 1
+   }
+  },
+  {
+   "check": "M[perseverance] Length: 3.11 m vs sourced 3 m (+3.6%, tol \u00b18%)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[perseverance] Width: 2.70 m vs sourced 2.7 m (+0.2%, tol \u00b18%)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[perseverance] Height (mast deployed): 2.24 m vs sourced 2.2 m (+1.7%, tol \u00b18%)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[perseverance] archive panel shows provenance and SHA-256",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[ingenuity] loads (Draco, self-hosted decoder) and is measured",
+   "pass": true,
+   "detail": {
+    "WxLxH": [
+     0.99,
+     1.11,
+     0.56
+    ],
+    "tris": 9124,
+    "scale": 1
+   }
+  },
+  {
+   "check": "M[ingenuity] Rotor span (tip to tip): 1.21 m vs sourced 1.2 m (+1.0%, tol \u00b16%)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[ingenuity] archive panel shows provenance and SHA-256",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[viking-lander] loads (Draco, self-hosted decoder) and is measured",
+   "pass": true,
+   "detail": {
+    "WxLxH": [
+     3.41,
+     2.55,
+     1.83
+    ],
+    "tris": 99526,
+    "scale": 0.2036
+   }
+  },
+  {
+   "check": "M[viking-lander] archive panel shows provenance and SHA-256",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[insight] loads (Draco, self-hosted decoder) and is measured",
+   "pass": true,
+   "detail": {
+    "WxLxH": [
+     6.14,
+     2.77,
+     1.58
+    ],
+    "tris": 146890,
+    "scale": 1
+   }
+  },
+  {
+   "check": "M[insight] archive panel shows provenance and SHA-256",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[huygens] loads (Draco, self-hosted decoder) and is measured",
+   "pass": true,
+   "detail": {
+    "WxLxH": [
+     1.0,
+     2.62,
+     2.62
+    ],
+    "tris": 684,
+    "scale": 1
+   }
+  },
+  {
+   "check": "M[huygens] Front shield diameter: 2.65 m vs sourced 2.7 m (-1.9%, tol \u00b16%)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M[huygens] archive panel shows provenance and SHA-256",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "Z1 no failed requests (models, textures, Draco decoder)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "Z2 no console errors",
+   "pass": true,
+   "detail": []
+  }
+ ],
+ "models": {
+  "apollo-lm": {
+   "scale": 1,
+   "measured": {
+    "width": 6.427394866943359,
+    "length": 6.426610469818115,
+    "height": 2.8222080171108246,
+    "maxHorizontal": 6.427840848988985,
+    "lowSpan": 6.4254873441401665,
+    "footTriangleSide": 4.335029125711165,
+    "minY": 0
+   },
+   "checks": [
+    {
+     "label": "Footpad span (outer edges of opposite pads)",
+     "measure": "lowSpan",
+     "expectedM": 9.4,
+     "tol": 0.06,
+     "source": "nssdca-a11-lm",
+     "note": "The NASA model's legs are stylised and too short: its footprint is about a third smaller than the real LM. The surface view offers a dimension-accurate reconstruction as an alternative (Inspect tab).",
+     "measuredM": 6.4254873441401665,
+     "deviation": -0.31643751658083336,
+     "pass": false
+    }
+   ],
+   "triangles": 47024,
+   "removedMeshes": 85,
+   "parts": [
+    {
+     "name": "group13_p2",
+     "min": [
+      -1.321,
+      0.804,
+      -1.3
+     ],
+     "max": [
+      1.377,
+      0.964,
+      1.305
+     ]
+    },
+    {
+     "name": "group13_pC_1",
+     "min": [
+      -0.496,
+      0.305,
+      -0.495
+     ],
+     "max": [
+      0.498,
+      1.013,
+      0.5
+     ]
+    },
+    {
+     "name": "group13_pC_2",
+     "min": [
+      -0.493,
+      0.305,
+      -0.492
+     ],
+     "max": [
+      0.495,
+      0.571,
+      0.496
+     ]
+    },
+    {
+     "name": "group31_10_1",
+     "min": [
+      -2.048,
+      0.858,
+      -2.048
+     ],
+     "max": [
+      2.048,
+      1.718,
+      2.048
+     ]
+    },
+    {
+     "name": "group31_10_2",
+     "min": [
+      -1.834,
+      1.085,
+      -1.833
+     ],
+     "max": [
+      1.834,
+      1.137,
+      1.833
+     ]
+    },
+    {
+     "name": "group31_11_1",
+     "min": [
+      -2.027,
+      1.098,
+      -2.027
+     ],
+     "max": [
+      2.027,
+      1.928,
+      2.027
+     ]
+    },
+    {
+     "name": "group31_11_2",
+     "min": [
+      -1.791,
+      1.668,
+      -1.791
+     ],
+     "max": [
+      1.791,
+      1.703,
+      1.791
+     ]
+    },
+    {
+     "name": "group31_12_1",
+     "min": [
+      -2.031,
+      1.125,
+      -2.031
+     ],
+     "max": [
+      2.031,
+      1.927,
+      2.031
+     ]
+    },
+    {
+     "name": "group31_12_2",
+     "min": [
+      -1.814,
+      1.676,
+      -1.814
+     ],
+     "max": [
+      1.814,
+      1.711,
+      1.814
+     ]
+    },
+    {
+     "name": "group31_13_1",
+     "min": [
+      -2.074,
+      0.775,
+      -2.073
+     ],
+     "max": [
+      2.074,
+      1.188,
+      2.073
+     ]
+    },
+    {
+     "name": "group31_13_2",
+     "min": [
+      -1.831,
+      0.872,
+      -1.831
+     ],
+     "max": [
+      1.831,
+      0.936,
+      1.831
+     ]
+    },
+    {
+     "name": "group31_14_1",
+     "min": [
+      -2.07,
+      0.818,
+      -2.069
+     ],
+     "max": [
+      2.07,
+      1.702,
+      2.069
+     ]
+    },
+    {
+     "name": "group31_14_2",
+     "min": [
+      -1.842,
+      1.053,
+      -1.842
+     ],
+     "max": [
+      1.842,
+      1.102,
+      1.842
+     ]
+    },
+    {
+     "name": "group31_15_1",
+     "min": [
+      -2.905,
+      0.044,
+      -2.906
+     ],
+     "max": [
+      2.905,
+      1.936,
+      2.906
+     ]
+    },
+    {
+     "name": "group31_15_2",
+     "min": [
+      -2.906,
+      0.044,
+      -2.889
+     ],
+     "max": [
+      2.906,
+      1.936,
+      2.889
+     ]
+    },
+    {
+     "name": "group31_16_1",
+     "min": [
+      -2.906,
+      0.044,
+      -2.889
+     ],
+     "max": [
+      2.906,
+      1.936,
+      2.889
+     ]
+    },
+    {
+     "name": "group31_16_2",
+     "min": [
+      -2.905,
+      0.044,
+      -2.906
+     ],
+     "max": [
+      2.905,
+      1.936,
+      2.906
+     ]
+    },
+    {
+     "name": "group31_17_1",
+     "min": [
+      -2.038,
+      1.895,
+      -2.038
+     ],
+     "max": [
+      2.038,
+      1.951,
+      2.038
+     ]
+    },
+    {
+     "name": "group31_17_2",
+     "min": [
+      -2.038,
+      1.895,
+      -2.038
+     ],
+     "max": [
+      2.038,
+      2.174,
+      2.038
+     ]
+    },
+    {
+     "name": "group31_18_1",
+     "min": [
+      -2.037,
+      1.896,
+      -2.039
+     ],
+     "max": [
+      2.037,
+      1.958,
+      2.039
+     ]
+    },
+    {
+     "name": "group31_18_2",
+     "min": [
+      -2.037,
+      1.896,
+      -2.039
+     ],
+     "max": [
+      2.037,
+      2.216,
+      2.039
+     ]
+    },
+    {
+     "name": "group31_19",
+     "min": [
+      -3.214,
+      0,
+      -3.213
+     ],
+     "max": [
+      3.214,
+      0.162,
+      3.213
+     ]
+    },
+    {
+     "name": "group31_20",
+     "min": [
+      -2.945,
+      0.067,
+      -2.945
+     ],
+     "max": [
+      2.945,
+      0.104,
+      2.945
+     ]
+    },
+    {
+     "name": "group31_21",
+     "min": [
+      -2.119,
+      0.793,
+      -2.119
+     ],
+     "max": [
+      2.119,
+      0.912,
+      2.119
+     ]
+    },
+    {
+     "name": "group31_22",
+     "min": [
+      -2.119,
+      0.742,
+      -2.119
+     ],
+     "max": [
+      2.119,
+      0.861,
+      2.119
+     ]
+    },
+    {
+     "name": "group31_g1",
+     "min": [
+      -1.541,
+      2.135,
+      -1.531
+     ],
+     "max": [
+      1.541,
+      2.221,
+      1.531
+     ]
+    },
+    {
+     "name": "group31_g2",
+     "min": [
+      -1.544,
+      1.389,
+      -1.533
+     ],
+     "max": [
+      1.544,
+      1.483,
+      1.533
+     ]
+    },
+    {
+     "name": "group31_g3",
+     "min": [
+      -1.544,
+      1.369,
+      -1.533
+     ],
+     "max": [
+      1.544,
+      1.464,
+      1.533
+     ]
+    },
+    {
+     "name": "group31_g4",
+     "min": [
+      -1.544,
+      1.013,
+      -1.533
+     ],
+     "max": [
+      1.544,
+      1.108,
+      1.533
+     ]
+    },
+    {
+     "name": "group31_g5",
+     "min": [
+      -1.544,
+      0.995,
+      -1.533
+     ],
+     "max": [
+      1.544,
+      1.089,
+      1.533
+     ]
+    },
+    {
+     "name": "group31_g6_1",
+     "min": [
+      -2.438,
+      0.768,
+      -2.438
+     ],
+     "max": [
+      2.438,
+      0.892,
+      2.438
+     ]
+    },
+    {
+     "name": "group31_g6_2",
+     "min": [
+      -2.57,
+      0.762,
+      -2.57
+     ],
+     "max": [
+      2.57,
+      0.892,
+      2.57
+     ]
+    },
+    {
+     "name": "group31_g7_1",
+     "min": [
+      -2.44,
+      0.746,
+      -2.44
+     ],
+     "max": [
+      2.44,
+      0.848,
+      2.44
+     ]
+    },
+    {
+     "name": "group31_g7_2",
+     "min": [
+      -2.573,
+      0.746,
+      -2.573
+     ],
+     "max": [
+      2.573,
+      0.848,
+      2.573
+     ]
+    },
+    {
+     "name": "group31_g8_1",
+     "min": [
+      -2.078,
+      0.777,
+      -2.078
+     ],
+     "max": [
+      2.078,
+      1.073,
+      2.078
+     ]
+    },
+    {
+     "name": "group31_g8_2",
+     "min": [
+      -1.997,
+      0.802,
+      -1.997
+     ],
+     "max": [
+      1.997,
+      1.048,
+      1.997
+     ]
+    },
+    {
+     "name": "group31_g9_1",
+     "min": [
+      -2.053,
+      0.816,
+      -2.053
+     ],
+     "max": [
+      2.053,
+      1.212,
+      2.053
+     ]
+    },
+    {
+     "name": "group31_g9_2",
+     "min": [
+      -1.819,
+      0.907,
+      -1.819
+     ],
+     "max": [
+      1.819,
+      0.972,
+      1.819
+     ]
+    },
+    {
+     "name": "group31_gr",
+     "min": [
+      -1.541,
+      2.1,
+      -1.531
+     ],
+     "max": [
+      1.541,
+      2.186,
+      1.531
+     ]
+    },
+    {
+     "name": "group73_g1",
+     "min": [
+      0.609,
+      2.032,
+      -1.486
+     ],
+     "max": [
+      1.253,
+      2.179,
+      -1.209
+     ]
+    },
+    {
+     "name": "group73_g2",
+     "min": [
+      0.619,
+      2.142,
+      -1.484
+     ],
+     "max": [
+      1.261,
+      2.298,
+      -1.205
+     ]
+    },
+    {
+     "name": "group73_gr",
+     "min": [
+      1.228,
+      2.028,
+      -1.24
+     ],
+     "max": [
+      1.504,
+      2.181,
+      -0.596
+     ]
+    },
+    {
+     "name": "group73_p1",
+     "min": [
+      -1.48,
+      2.148,
+      0.598
+     ],
+     "max": [
+      -1.212,
+      2.292,
+      1.246
+     ]
+    },
+    {
+     "name": "group73_p2",
+     "min": [
+      1.226,
+      2.141,
+      -1.24
+     ],
+     "max": [
+      1.493,
+      2.285,
+      -0.592
+     ]
+    },
+    {
+     "name": "group73_p3",
+     "min": [
+      -1.248,
+      2.148,
+      1.211
+     ],
+     "max": [
+      -0.606,
+      2.305,
+      1.49
+     ]
+    },
+    {
+     "name": "group73_pC",
+     "min": [
+      -1.24,
+      2.038,
+      1.215
+     ],
+     "max": [
+      -0.596,
+      2.185,
+      1.492
+     ]
+    },
+    {
+     "name": "group74_g1",
+     "min": [
+      -1.483,
+      2.032,
+      -1.244
+     ],
+     "max": [
+      -1.206,
+      2.179,
+      -0.6
+     ]
+    },
+    {
+     "name": "group74_g2",
+     "min": [
+      -1.48,
+      2.142,
+      -1.252
+     ],
+     "max": [
+      -1.202,
+      2.298,
+      -0.61
+     ]
+    },
+    {
+     "name": "group74_gr",
+     "min": [
+      -1.236,
+      2.028,
+      -1.494
+     ],
+     "max": [
+      -0.592,
+      2.181,
+      -1.219
+     ]
+    },
+    {
+     "name": "group74_p1",
+     "min": [
+      0.602,
+      2.148,
+      1.222
+     ],
+     "max": [
+      1.25,
+      2.292,
+      1.489
+     ]
+    },
+    {
+     "name": "group74_p2",
+     "min": [
+      -1.236,
+      2.141,
+      -1.483
+     ],
+     "max": [
+      -0.589,
+      2.285,
+      -1.216
+     ]
+    },
+    {
+     "name": "group74_p3",
+     "min": [
+      1.215,
+      2.148,
+      0.616
+     ],
+     "max": [
+      1.493,
+      2.305,
+      1.258
+     ]
+    },
+    {
+     "name": "group74_pC",
+     "min": [
+      1.219,
+      2.038,
+      0.606
+     ],
+     "max": [
+      1.496,
+      2.185,
+      1.25
+     ]
+    },
+    {
+     "name": "group75_10",
+     "min": [
+      1.207,
+      2.089,
+      -1.437
+     ],
+     "max": [
+      1.494,
+      2.816,
+      -1.159
+     ]
+    },
+    {
+     "name": "group75_11",
+     "min": [
+      -1.433,
+      2.089,
+      -1.485
+     ],
+     "max": [
+      -1.155,
+      2.816,
+      -1.198
+     ]
+    },
+    {
+     "name": "group75_p1",
+     "min": [
+      0.575,
+      2.167,
+      1.289
+     ],
+     "max": [
+      1.27,
+      2.815,
+      1.486
+     ]
+    },
+    {
+     "name": "group75_p3",
+     "min": [
+      1.293,
+      2.16,
+      -1.26
+     ],
+     "max": [
+      1.49,
+      2.808,
+      -0.565
+     ]
+    },
+    {
+     "name": "group75_p5",
+     "min": [
+      -1.256,
+      2.16,
+      -1.48
+     ],
+     "max": [
+      -0.562,
+      2.808,
+      -1.283
+     ]
+    },
+    {
+     "name": "group75_p9",
+     "min": [
+      1.168,
+      2.095,
+      1.204
+     ],
+     "max": [
+      1.446,
+      2.822,
+      1.491
+     ]
+    },
+    {
+     "name": "group75_pP",
+     "min": [
+      -1.481,
+      2.095,
+      1.165
+     ],
+     "max": [
+      -1.194,
+      2.822,
+      1.442
+     ]
+    },
+    {
+     "name": "pCube3",
+     "min": [
+      -0.24,
+      2.106,
+      1.174
+     ],
+     "max": [
+      0.3,
+      2.359,
+      2.077
+     ]
+    },
+    {
+     "name": "pCylinde11",
+     "min": [
+      -0.237,
+      2.116,
+      1.176
+     ],
+     "max": [
+      -0.199,
+      2.603,
+      2.069
+     ]
+    },
+    {
+     "name": "pCylinder1",
+     "min": [
+      -1.507,
+      0.964,
+      -1.505
+     ],
+     "max": [
+      1.508,
+      2.321,
+      1.51
+     ]
+    },
+    {
+     "name": "pCylinder2",
+     "min": [
+      0.251,
+      2.116,
+      1.176
+     ],
+     "max": [
+      0.289,
+      2.603,
+      2.069
+     ]
+    },
+    {
+     "name": "pCylinder3002",
+     "min": [
+      -2.053,
+      0.84,
+      -2.053
+     ],
+     "max": [
+      2.053,
+      1.031,
+      2.053
+     ]
+    },
+    {
+     "name": "pCylinder3002_1",
+     "min": [
+      -1.984,
+      0.845,
+      -1.984
+     ],
+     "max": [
+      1.984,
+      1.026,
+      1.984
+     ]
+    },
+    {
+     "name": "pCylinder6",
+     "min": [
+      -1.491,
+      2.034,
+      0.602
+     ],
+     "max": [
+      -1.215,
+      2.188,
+      1.246
+     ]
+    },
+    {
+     "name": "pCylinder7",
+     "min": [
+      0.606,
+      2.034,
+      1.224
+     ],
+     "max": [
+      1.249,
+      2.188,
+      1.5
+     ]
+    },
+    {
+     "name": "pCylinder8",
+     "min": [
+      -1.477,
+      2.167,
+      0.571
+     ],
+     "max": [
+      -1.28,
+      2.815,
+      1.266
+     ]
+    },
+    {
+     "name": "polySurfa1",
+     "min": [
+      -0.229,
+      0.48,
+      2.145
+     ],
+     "max": [
+      0.145,
+      1.844,
+      2.798
+     ]
+    },
+    {
+     "name": "pPlane1",
+     "min": [
+      -1.504,
+      0.976,
+      0.632
+     ],
+     "max": [
+      -1.076,
+      1.68,
+      1.06
+     ]
+    },
+    {
+     "name": "pPlane2",
+     "min": [
+      0.856,
+      0.987,
+      0.855
+     ],
+     "max": [
+      1.284,
+      1.69,
+      1.283
+     ]
+    }
+   ]
+  },
+  "mer-b": {
+   "scale": 0.20532963659732512,
+   "measured": {
+    "width": 1.7844522500310265,
+    "length": 2.609372331164313,
+    "height": 1.5,
+    "maxHorizontal": 2.825864935417604,
+    "lowSpan": 2.5719340419035683,
+    "footTriangleSide": 1.1615624678165541,
+    "minY": 3.301315726472742e-05
+   },
+   "checks": [],
+   "triangles": 3845,
+   "removedMeshes": 0
+  },
+  "perseverance": {
+   "scale": 1,
+   "measured": {
+    "width": 2.7045702934265137,
+    "length": 3.108273399271882,
+    "height": 2.2373522448085694,
+    "maxHorizontal": 3.9280653704558954,
+    "lowSpan": 3.8847528699800233,
+    "footTriangleSide": 2.0705790127157675,
+    "minY": 0
+   },
+   "checks": [
+    {
+     "label": "Length",
+     "measure": "length",
+     "expectedM": 3,
+     "tol": 0.08,
+     "source": "nasa-perseverance-components",
+     "measuredM": 3.108273399271882,
+     "deviation": 0.03609113309062728,
+     "pass": true
+    },
+    {
+     "label": "Width",
+     "measure": "width",
+     "expectedM": 2.7,
+     "tol": 0.08,
+     "source": "nasa-perseverance-components",
+     "measuredM": 2.7045702934265137,
+     "deviation": 0.0016927012690790718,
+     "pass": true
+    },
+    {
+     "label": "Height (mast deployed)",
+     "measure": "height",
+     "expectedM": 2.2,
+     "tol": 0.08,
+     "source": "nasa-perseverance-components",
+     "note": "NASA height includes the deployed mast",
+     "measuredM": 2.2373522448085694,
+     "deviation": 0.0169782930948042,
+     "pass": true
+    }
+   ],
+   "triangles": 199521,
+   "removedMeshes": 0
+  },
+  "ingenuity": {
+   "scale": 1,
+   "measured": {
+    "width": 0.9863763424150398,
+    "length": 1.1063556160406232,
+    "height": 0.5620433719650111,
+    "maxHorizontal": 1.2121124653615336,
+    "lowSpan": 0.8996705544472586,
+    "footTriangleSide": 0.5820740876604016,
+    "minY": 0.019911628407233317
+   },
+   "checks": [
+    {
+     "label": "Rotor span (tip to tip)",
+     "measure": "maxHorizontal",
+     "expectedM": 1.2,
+     "tol": 0.06,
+     "source": "nasa-ingenuity",
+     "measuredM": 1.2121124653615336,
+     "deviation": 0.010093721134611378,
+     "pass": true
+    }
+   ],
+   "triangles": 9124,
+   "removedMeshes": 0
+  },
+  "viking-lander": {
+   "scale": 0.203551395151539,
+   "measured": {
+    "width": 3.407331214561513,
+    "length": 2.5548774762626465,
+    "height": 1.82630371323634,
+    "maxHorizontal": 3.813013147317246,
+    "lowSpan": 3.813013147317246,
+    "footTriangleSide": 2.197030299885841,
+    "minY": 2.5863457556174474e-09
+   },
+   "checks": [],
+   "triangles": 99526,
+   "removedMeshes": 0
+  },
+  "insight": {
+   "scale": 1,
+   "measured": {
+    "width": 6.135377252299609,
+    "length": 2.7730459540718337,
+    "height": 1.5840198853984475,
+    "maxHorizontal": 6.163186493499418,
+    "lowSpan": 3.0692698677468315,
+    "footTriangleSide": 2.2171291542204328,
+    "minY": 0
+   },
+   "checks": [],
+   "triangles": 146890,
+   "removedMeshes": 0
+  },
+  "huygens": {
+   "scale": 1,
+   "measured": {
+    "width": 1.0000004768371582,
+    "length": 2.615347385406494,
+    "height": 2.615347385406494,
+    "maxHorizontal": 2.649508816905895,
+    "lowSpan": 1.2154372565091136,
+    "footTriangleSide": 0.6432304782725614,
+    "minY": 0
+   },
+   "checks": [
+    {
+     "label": "Front shield diameter",
+     "measure": "maxHorizontal",
+     "expectedM": 2.7,
+     "tol": 0.06,
+     "source": "esa-huygens-engineering",
+     "measuredM": 2.649508816905895,
+     "deviation": -0.018700438183001954,
+     "pass": true
+    }
+   ],
+   "triangles": 684,
+   "removedMeshes": 0
+  }
+ },
+ "errors": [],
+ "deviations": [
+  {
+   "model": "apollo-lm",
+   "label": "Footpad span (outer edges of opposite pads)",
+   "measuredM": 6.4254873441401665,
+   "expectedM": 9.4,
+   "deviation": -0.31643751658083336,
+   "tol": 0.06,
+   "source": "nssdca-a11-lm"
+  }
+ ]
+}

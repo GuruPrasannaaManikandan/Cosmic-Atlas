@@ -30,7 +30,10 @@ export interface SceneEnv {
   sunUp: boolean
 }
 
-function useEnv(site: SurfaceSite, simMs: number): SceneEnv {
+/** collider / anchor table key for an object, given the LM model variant in use */
+export const modelKey = (modelId: string | null, lmModel: 'nasa' | 'reconstruction') => (modelId === 'lm-descent-stage' && lmModel === 'nasa' ? 'lm-descent-stage-nasa' : modelId ?? '')
+
+function useEnv(site: SurfaceSite, simMs: number, lmModel: 'nasa' | 'reconstruction'): SceneEnv {
   const terrain = useMemo(
     () => new Terrain({ seed: site.terrainSeed, halfExtentM: site.halfExtentM, anchors: site.objects.map((o) => ({ x: o.x, z: o.z, dy: o.dy, flatR: o.objectId.includes('lm') ? 6 : 2.5 })) }),
     [site],
@@ -54,13 +57,13 @@ function useEnv(site: SurfaceSite, simMs: number): SceneEnv {
   const colliders = useMemo(() => {
     const cs: Collider[] = terrain.rockColliders()
     for (const p of placed) {
-      for (const [cx, cz, r, h] of COLLIDERS[p.modelId ?? ''] ?? [[0, 0, 0.5, 1]]) {
+      for (const [cx, cz, r, h] of COLLIDERS[modelKey(p.modelId, lmModel)] ?? [[0, 0, 0.5, 1]]) {
         const c = Math.cos(p.rotY), s = Math.sin(p.rotY)
         cs.push({ x: p.x + cx * c + cz * s, z: p.z - cx * s + cz * c, r, h, id: p.id })
       }
     }
     return cs
-  }, [terrain, placed])
+  }, [terrain, placed, lmModel])
   const sun = useMemo(() => sunDirectionAtLunarSite(simMs, site.origin.latDeg, site.origin.lonEastDeg), [simMs, site])
   return { site, terrain, colliders, placed, sunDir: new THREE.Vector3(...sun), earthDir, sunUp: sun[1] > 0 }
 }
@@ -444,7 +447,7 @@ function Player({ env }: { env: SceneEnv }) {
     const desired = new THREE.Vector3()
     if (S.panel) {
       const p = env.placed.find((x) => x.id === S.panel!.objectId)!
-      const anchors = COMPONENT_ANCHORS[p.modelId ?? ''] ?? {}
+      const anchors = COMPONENT_ANCHORS[modelKey(p.modelId, S.lmModel)] ?? {}
       const local = S.component && anchors[S.component] ? anchors[S.component] : [0, p.modelId === 'lm-descent-stage' ? 2 : 0.5, 0]
       const v = new THREE.Vector3(...local).applyAxisAngle(new THREE.Vector3(0, 1, 0), p.rotY)
       target.set(p.x + v.x, p.y + v.y, p.z + v.z)
@@ -541,12 +544,13 @@ function Player({ env }: { env: SceneEnv }) {
 function Hardware({ env }: { env: SceneEnv }) {
   const panel = useSurface((s) => s.panel)
   const comp = useSurface((s) => s.component)
+  const lmModel = useSurface((s) => s.lmModel)
   return (
     <>
       {env.placed.map((p) =>
         p.modelId ? (
           <group key={p.id} position={[p.x, p.y, p.z]} rotation={[0, p.rotY, 0]}>
-            <HardwareModel modelId={p.modelId} highlight={panel?.objectId === p.id ? comp : null} tilt={p.tilt} />
+            <HardwareModel modelId={p.modelId} highlight={panel?.objectId === p.id ? comp : null} tilt={p.tilt} variant={lmModel} />
           </group>
         ) : null,
       )}
@@ -570,7 +574,8 @@ function Waypoint({ env }: { env: SceneEnv }) {
 export function SurfaceScene({ site }: { site: SurfaceSite }) {
   const simMs = useStore((s) => s.simMs)
   const quality = useStore((s) => s.quality)
-  const env = useEnv(site, simMs)
+  const lmModel = useSurface((s) => s.lmModel)
+  const env = useEnv(site, simMs, lmModel)
   const segments = quality === 'performance' ? 260 : quality === 'balanced' ? 400 : 520
   return (
     <Canvas

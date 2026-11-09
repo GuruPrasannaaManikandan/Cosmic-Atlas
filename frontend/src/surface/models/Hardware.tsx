@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { Component, ReactNode, Suspense, useMemo } from 'react'
 import * as THREE from 'three'
 import { MAT } from './materials'
+import { NasaModel } from './NasaModel'
 
 /**
  * Procedural reconstructions of the Apollo 11 hardware left at Tranquility Base.
@@ -17,6 +18,8 @@ import { MAT } from './materials'
 
 export const COMPONENT_ANCHORS: Record<string, Record<string, [number, number, number]>> = {
   'lm-descent-stage': { body: [0, 2.4, 0], legs: [0, 0.8, 4.0], ladder: [0, 1.6, 3.2], engine: [0, 1.1, 0] },
+  // NASA 3D Resources LM (measured on the loaded model: deck top 2.32 m, ladder on the +z leg, pads on the axes)
+  'lm-descent-stage-nasa': { body: [0, 1.6, 0], legs: [0, 0.5, 2.8], ladder: [0, 1.2, 2.47], engine: [0, 0.7, 0] },
   'easep-pse': { seismometer: [0, 0.35, 0], 'solar-panels': [0.9, 0.45, 0], antenna: [0.15, 0.9, 0.2], 'dust-detector': [-0.2, 0.45, -0.25] },
   lrrr: { array: [0, 0.55, 0], support: [0, 0.2, 0.15] },
 }
@@ -28,6 +31,13 @@ export const COLLIDERS: Record<string, [number, number, number, number][]> = {
     [0, -4.23, 0.5, 0.4],
     [4.23, 0, 0.5, 0.4],
     [-4.23, 0, 0.5, 0.4],
+  ],
+  'lm-descent-stage-nasa': [
+    [0, 0, 2.1, 2.9],
+    [0, 2.8, 0.45, 0.3],
+    [0, -2.8, 0.45, 0.3],
+    [2.8, 0, 0.45, 0.3],
+    [-2.8, 0, 0.45, 0.3],
   ],
   'easep-pse': [[0, 0, 0.75, 0.9]],
   lrrr: [[0, 0, 0.45, 0.8]],
@@ -211,8 +221,41 @@ export function Retroreflector({ highlight, tiltRad = 0.9 }: { highlight?: strin
   )
 }
 
-export function HardwareModel({ modelId, highlight, tilt }: { modelId: string; highlight?: string | null; tilt?: number }) {
-  if (modelId === 'lm-descent-stage') return <LunarModuleDescentStage highlight={highlight} />
+/** if the NASA model fails to load (offline, blocked), fall back to the reconstruction instead of an empty site */
+class FallbackBoundary extends Component<{ children: ReactNode; fallback: ReactNode }, { err: boolean }> {
+  state = { err: false }
+  static getDerivedStateFromError() {
+    return { err: true }
+  }
+  render() {
+    return this.state.err ? this.props.fallback : this.props.children
+  }
+}
+
+/** the NASA model's materials can't be highlighted per part, so the focused part gets a marker ring instead */
+function FocusMarker({ at }: { at: [number, number, number] }) {
+  return (
+    <mesh position={at} rotation={[-Math.PI / 2, 0, 0]}>
+      <torusGeometry args={[0.45, 0.03, 8, 40]} />
+      <meshBasicMaterial color="#58b6ff" toneMapped={false} />
+    </mesh>
+  )
+}
+
+export function HardwareModel({ modelId, highlight, tilt, variant = 'nasa' }: { modelId: string; highlight?: string | null; tilt?: number; variant?: 'nasa' | 'reconstruction' }) {
+  if (modelId === 'lm-descent-stage') {
+    const recon = <LunarModuleDescentStage highlight={highlight} />
+    if (variant === 'reconstruction') return recon
+    const at = highlight ? COMPONENT_ANCHORS['lm-descent-stage-nasa'][highlight] : null
+    return (
+      <FallbackBoundary fallback={recon}>
+        <Suspense fallback={recon}>
+          <NasaModel id="apollo-lm" />
+        </Suspense>
+        {at && <FocusMarker at={at} />}
+      </FallbackBoundary>
+    )
+  }
   if (modelId === 'easep-pse') return <EasepStation highlight={highlight} />
   if (modelId === 'lrrr') return <Retroreflector highlight={highlight} tiltRad={tilt ?? 0.4} />
   return null

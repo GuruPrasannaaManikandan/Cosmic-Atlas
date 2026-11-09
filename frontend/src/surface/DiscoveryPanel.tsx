@@ -93,6 +93,7 @@ function Narration({ lines }: { lines: string[] }) {
 export function DiscoveryPanel() {
   const panel = useSurface((s) => s.panel)!
   const component = useSurface((s) => s.component)
+  const lmModel = useSurface((s) => s.lmModel)
   const set = useSurface((s) => s.set)
   const [expanded, setExpanded] = useState(false)
   const obj = OBJECT_BY_ID[panel.objectId]
@@ -134,8 +135,21 @@ export function DiscoveryPanel() {
                 {obj.components.find((c) => c.id === component)?.description} <Cite ids={obj.components.find((c) => c.id === component)?.sources ?? []} />
               </p>
             )}
+            {obj.model.id === 'lm-descent-stage' && (
+              <div className="seg model-variant" role="group" aria-label="3D model">
+                <button className={lmModel === 'nasa' ? 'on' : ''} aria-pressed={lmModel === 'nasa'} onClick={() => set({ lmModel: 'nasa' })}>
+                  NASA official model
+                </button>
+                <button className={lmModel === 'reconstruction' ? 'on' : ''} aria-pressed={lmModel === 'reconstruction'} onClick={() => set({ lmModel: 'reconstruction' })}>
+                  Dimension-accurate reconstruction
+                </button>
+              </div>
+            )}
             <p className="provenance">
-              <b>3D model:</b> {obj.model.provenance}
+              <b>3D model:</b>{' '}
+              {obj.model.id === 'lm-descent-stage' && lmModel === 'reconstruction'
+                ? 'Procedural reconstruction built to the NSSDCA dimensions (4.2 m octagonal stage, 1.5 m clearance, 9.4 m footpad span, ~1 m engine skirt). Footpad size, strut layout and foil layout are approximations.'
+                : obj.model.provenance}
             </p>
           </>
         )}
