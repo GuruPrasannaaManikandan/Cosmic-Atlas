@@ -8,7 +8,8 @@
 import * as THREE from 'three'
 import { BY_ID, positionOf, radiusLyOf, CosmicObject } from '../data/catalog'
 import { Vec3, add, fromThree, len, sub, toThree, SUN_POS, LY_PER_AU } from '../astro/coords'
-import { ease, logLerp, travelDuration, adaptiveScale } from '../astro/scale'
+import { travelDuration, adaptiveScale } from '../astro/scale'
+import { flightPose } from './flightPath'
 import { nav, onInterrupt, updateNearest } from '../store/nav'
 import { audio } from '../audio/CosmicAudioEngine'
 
@@ -27,8 +28,22 @@ export type TravelPhase =
   | 'error'
   | 'cancelled'
 
+/** User-configurable flight settings (time compression factor and reduced motion). */
+export const travelSettings = {
+  /** 0.5 = slow (cinematic), 1 = normal, 2 = fast */
+  speed: 1,
+  /** suppress warp streaks and use a gentler camera turn */
+  reduceMotion: typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches,
+}
+
 export interface TravelEngineState {
   phase: TravelPhase
+  /** body the flight departed from (nearest body at departure) */
+  fromName: string | null
+  /** real light-travel time for the remaining distance (s) - the flight itself is time-compressed */
+  lightTimeSec: number
+  /** current camera speed in units of c (display only) */
+  speedC: number
   targetId: string | null
   targetName: string | null
   targetCategory: string | null
@@ -41,6 +56,9 @@ export interface TravelEngineState {
 
 export const travelEngineState: TravelEngineState = {
   phase: 'idle',
+  fromName: null,
+  lightTimeSec: 0,
+  speedC: 0,
   targetId: null,
   targetName: null,
   targetCategory: null,
@@ -149,10 +167,14 @@ interface ActiveFlight {
   dir1: THREE.Vector3
   d0: number
   d1: number
+  /** camera orientation at departure: the heading turns from here toward the target */
+  q0: THREE.Quaternion
   t: number
   dur: number
   onArrive?: () => void
 }
+
+const SEC_PER_YEAR = 365.25 * 86400
 
 let currentFlight: ActiveFlight | null = null
 
@@ -208,8 +230,11 @@ export function initiateTravel(id: string, ms: number, opts: { onArrive?: () => 
     return
   }
 
-  // Compute duration with smooth curve
-  const dur = travelDuration(d0, d1)
+  // Duration from the actual departure distance (log of the zoom ratio, 3-11 s), divided by the user's
+  // time-compression setting. This is a compressed, educational flight - the HUD shows the real light time.
+  const dur = travelDuration(d0, d1) / Math.max(0.25, travelSettings.speed)
+  const fromId = nav.followId ?? nav.nearestId // the body being viewed, else the nearest one
+  travelEngineState.fromName = fromId && BY_ID[fromId] && fromId !== id ? BY_ID[fromId].name : null
 
   // Clear previous follow state
   nav.followId = null
@@ -221,6 +246,7 @@ export function initiateTravel(id: string, ms: number, opts: { onArrive?: () => 
     dir1,
     d0,
     d1,
+    q0: nav.quat.clone(),
     t: 0,
     dur,
     onArrive: opts.onArrive,
@@ -244,9 +270,11 @@ export function cancelTravel() {
   if (currentFlight || travelEngineState.phase === 'traveling') {
     currentFlight = null
     nav.flight = null
+    // nav.pos / nav.quat are left exactly where the flight was: the next flight departs from here
     travelEngineState.phase = 'cancelled'
     travelEngineState.etaSec = 0
     travelEngineState.speedLySec = 0
+    travelEngineState.speedC = 0
     audio.playUiClick('click')
     notify()
 
@@ -255,7 +283,7 @@ export function cancelTravel() {
         travelEngineState.phase = 'idle'
         notify()
       }
-    }, 1500)
+    }, 1200)
   }
 }
 
@@ -277,25 +305,22 @@ export function stepTravel(dt: number, ms: number) {
   }
 
   const f = currentFlight
+  const prevPos = nav.pos
   f.t = Math.min(1, f.t + dt / f.dur)
-  const e = ease(f.t)
   const o = BY_ID[f.targetId]
   const P = positionOf(o, ms)
+  const pose = flightPose(f, P, f.t)
+  nav.pos = pose.pos
+  nav.quat.copy(pose.quat)
 
-  const dist = logLerp(f.d0, f.d1, e)
-  const dir = new THREE.Vector3().copy(f.dir0).lerp(f.dir1, e).normalize()
-  const off: Vec3 = [dir.x * dist, dir.y * dist, dir.z * dist]
-
-  nav.pos = add(P, fromThree(off))
-  nav.quat.copy(lookAtQuat(new THREE.Vector3(0, 0, 0), dir.clone().multiplyScalar(-1)))
-
-  // Update telemetry
-  const remainingTime = Math.max(0, f.dur * (1 - f.t))
-  const remainingDist = dist
+  // Telemetry from the actual motion this frame
+  const step = len(sub(nav.pos, prevPos))
   travelEngineState.progress = f.t
-  travelEngineState.etaSec = remainingTime
-  travelEngineState.distanceLy = remainingDist
-  travelEngineState.speedLySec = (f.d0 - dist) / Math.max(0.01, f.t * f.dur)
+  travelEngineState.etaSec = Math.max(0, f.dur * (1 - f.t))
+  travelEngineState.distanceLy = pose.dist
+  travelEngineState.speedLySec = dt > 0 ? step / dt : 0
+  travelEngineState.speedC = travelEngineState.speedLySec * SEC_PER_YEAR
+  travelEngineState.lightTimeSec = pose.dist * SEC_PER_YEAR
 
   if (f.t >= 1) {
     // Arrival

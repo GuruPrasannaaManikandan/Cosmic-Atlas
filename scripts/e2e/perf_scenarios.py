@@ -75,6 +75,8 @@ async def main(a) -> int:
         await page.wait_for_timeout(2500)
 
         async def measure(name, setup, during=None):
+            if a.only and name not in a.only.split(","):
+                return
             await setup()
             await page.wait_for_timeout(2500)  # warm-up (texture upload / shader compile)
             heap0 = await page.evaluate(HEAP)
@@ -176,4 +178,5 @@ if __name__ == "__main__":
     ap.add_argument("--size", default="1920x1080")
     ap.add_argument("--seconds", type=int, default=60)
     ap.add_argument("--soak", type=int, default=0)
+    ap.add_argument("--only", default="", help="comma-separated scenario names to run")
     sys.exit(asyncio.run(main(ap.parse_args())))

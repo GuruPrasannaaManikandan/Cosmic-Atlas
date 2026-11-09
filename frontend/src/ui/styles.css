@@ -4019,14 +4019,14 @@ option { background: #070d1e; color: #fff; }
 
 /* phones / portrait tablets: the bottom stack wraps and grows, so reserve more space for it */
 @media (max-width: 768px) {
-  :root { --stack-base: 132px; --stack-time: 246px; }
+  :root { --stack-base: 168px; --stack-time: 282px; } /* dock wraps to an extra row (flight settings, timeline toggle) */
   .timebar { bottom: 132px; max-width: calc(100vw - 2 * var(--gutter)); } /* clears a wrapped dock (was 10 px overlap) */
   .dock { max-width: calc(100vw - 2 * var(--gutter)); }
 }
 
 /* ---- Phones: compact two-row dock, compact clock, breadcrumbs without the telemetry chips ----------- */
 @media (max-width: 560px) {
-  :root { --stack-base: 104px; --stack-time: 226px; } /* the time bar wraps on phones: keep panels above it */
+  :root { --stack-base: 130px; --stack-time: 252px; } /* the time bar and dock wrap on phones: keep panels above them */
   .dock {
     display: grid;
     grid-template-columns: repeat(4, auto);
@@ -4047,4 +4047,124 @@ option { background: #070d1e; color: #fff; }
   }
   .timebar > .eyebrow, .timebar > .pill { display: none; }
   .breadcrumbs-telemetry { display: none; }
+}
+
+/* ===== Travel / flight overhaul: compact instruments, contextual panels (2026-11) ========================= */
+:root {
+  --z-hud: 31;
+  --inst-bg: rgba(8, 12, 20, 0.78);
+  --inst-line: rgba(148, 197, 255, 0.16);
+  --inst-acc: #7dd3fc;
+  --inst-txt: #dbe7f5;
+  --inst-mut: #8ea3bd;
+}
+/* warp-flight instrument: slim strip under the header, never over the centre of the view */
+.flight-hud {
+  position: fixed;
+  top: calc(var(--panel-top, 112px) + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-hud, 30);
+  width: min(380px, calc(100vw - 2 * var(--gutter, 12px)));
+  padding: 7px 10px 6px;
+  border-radius: 10px;
+  border: 1px solid var(--inst-line);
+  background: var(--inst-bg);
+  backdrop-filter: blur(8px);
+  color: var(--inst-txt);
+  font: 12px/1.3 system-ui, sans-serif;
+  pointer-events: auto;
+}
+.flight-hud-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.flight-hud-mode { font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--inst-acc); flex: none; }
+.flight-hud-mode.ok { color: #86efac; }
+.flight-hud-mode.err { color: #fca5a5; }
+.flight-hud-route { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.flight-hud-from { color: var(--inst-mut); }
+.flight-hud-eta { font-variant-numeric: tabular-nums; color: var(--inst-txt); flex: none; }
+.flight-hud-cancel {
+  flex: none; width: 22px; height: 22px; border-radius: 6px; padding: 0; line-height: 20px;
+  border: 1px solid var(--inst-line); background: transparent; color: var(--inst-mut); cursor: pointer; font-size: 11px;
+}
+.flight-hud-cancel:hover, .flight-hud-cancel:focus-visible { color: #fff; border-color: rgba(252, 165, 165, 0.6); outline: none; }
+.flight-hud-bar { height: 2px; margin: 6px 0 4px; background: rgba(148, 197, 255, 0.12); border-radius: 2px; overflow: hidden; }
+.flight-hud-fill { height: 100%; background: var(--inst-acc); transition: width 0.12s linear; }
+.flight-hud-sub { font-size: 11px; color: var(--inst-mut); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.flight-hud--arriving, .flight-hud--cancelled { width: auto; }
+
+/* compact selection chip: name + on-demand actions instead of an auto-opened Inspector */
+.sel-chip {
+  position: fixed;
+  top: calc(var(--panel-top, 112px) + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-hud, 30);
+  display: flex; align-items: center; gap: 8px;
+  max-width: calc(100vw - 2 * var(--gutter, 12px));
+  padding: 5px 6px 5px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--inst-line);
+  background: var(--inst-bg);
+  color: var(--inst-txt);
+  font: 12.5px/1.2 system-ui, sans-serif;
+}
+.sel-chip-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.sel-chip-cat { color: var(--inst-mut); font-size: 11px; text-transform: capitalize; white-space: nowrap; }
+.sel-chip-btn, .sel-chip-x {
+  height: 26px; padding: 0 9px; border-radius: 7px; border: 1px solid var(--inst-line);
+  background: rgba(125, 211, 252, 0.06); color: var(--inst-txt); font-size: 12px; cursor: pointer; white-space: nowrap;
+}
+.sel-chip-x { width: 26px; padding: 0; color: var(--inst-mut); background: transparent; }
+.sel-chip-btn:hover, .sel-chip-x:hover, .sel-chip-btn:focus-visible, .sel-chip-x:focus-visible { border-color: rgba(125, 211, 252, 0.55); color: #fff; outline: none; }
+@media (max-width: 480px) { .sel-chip-cat { display: none; } .sel-chip-btn { padding: 0 7px; } }
+
+/* timeline toggle lives in the dock */
+.time-toggle { font-variant-numeric: tabular-nums; }
+
+/* panels slide in rather than pop */
+.panel, .timebar { transition: opacity 0.18s ease, transform 0.22s ease; }
+@media (prefers-reduced-motion: reduce) { .panel, .timebar, .flight-hud-fill { transition: none; } }
+
+/* navigation map: docked, non-modal overlay (scene stays visible) with a minimized strip */
+.navmap-overlay {
+  position: fixed;
+  /* below the Travel HUD's top bar (~66 px) and above its bottom-right destination card */
+  inset: 78px var(--gutter, 12px) var(--gutter, 12px) auto;
+  z-index: 60;
+  display: flex;
+  pointer-events: none;
+}
+.navmap-overlay .navmap-card {
+  pointer-events: auto;
+  width: min(560px, calc(100vw - 2 * var(--gutter, 12px)));
+  max-width: none;
+  max-height: 100%;
+  padding: 16px;
+  background: var(--inst-bg, rgba(8, 12, 20, 0.86));
+  border: 1px solid var(--inst-line, rgba(148, 197, 255, 0.16));
+}
+.navmap-overlay .navmap-card h2 { font-size: 16px; margin: 2px 0 0; }
+.navmap-overlay .navmap-card .hint { font-size: 11.5px; }
+.navmap-mini {
+  position: fixed;
+  right: var(--gutter, 12px);
+  top: 78px;
+  z-index: 60;
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 6px 6px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--inst-line, rgba(148, 197, 255, 0.16));
+  background: var(--inst-bg, rgba(8, 12, 20, 0.86));
+  color: var(--inst-txt, #dbe7f5);
+  font: 12px system-ui, sans-serif;
+}
+.navmap-mini-label { font-size: 10.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--inst-acc, #7dd3fc); }
+.navmap-mini-btn { width: 24px; height: 24px; padding: 0; border-radius: 6px; border: 1px solid var(--inst-line, rgba(148, 197, 255, 0.16)); background: transparent; color: var(--inst-txt, #dbe7f5); cursor: pointer; }
+@media (max-width: 860px) { .navmap-overlay { inset: 78px var(--gutter, 12px) var(--gutter, 12px); } .navmap-overlay .navmap-card { width: 100%; } }
+
+/* narrow screens: stack panels and the time bar above the MEASURED dock (it wraps to several rows) */
+@media (max-width: 768px) {
+  .timebar { bottom: calc(var(--dock-h, 112px) + var(--gutter, 12px) + 6px); }
+  .panel, .datapanel { bottom: calc(var(--dock-h, 112px) + var(--gutter, 12px) + 8px); }
+  .app[data-timebar] .panel, .app[data-timebar] .datapanel { bottom: calc(var(--dock-h, 112px) + var(--timebar-h, 96px) + var(--gutter, 12px) + 16px); }
 }

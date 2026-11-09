@@ -1,9 +1,11 @@
 import { create } from 'zustand'
 import { BY_ID } from '../data/catalog'
 import { TOUR } from '../data/tour'
-import { flyTo, interrupt, nav, onInterrupt } from './nav'
+import { flyTo, interrupt, nav, onInterrupt, updateNearest } from './nav'
+import { len, sub, SUN_POS } from '../astro/coords'
+import { positionOf } from '../data/catalog'
 import { MS_PER_DAY } from '../astro/ephemeris'
-import { ship, initShipNear, cancelAutopilot } from '../travel/shipState'
+import { ship, initShipNear, initShipAt, cancelAutopilot, engageAutopilot } from '../travel/shipState'
 import { initiateTravel, setTravelArrivalHandler, cancelTravel } from '../travel/travelEngine'
 
 export type Phase = 'intro' | 'explore' | 'tour' | 'travel'
@@ -27,6 +29,8 @@ interface State {
   showLabels: boolean
   leftOpen: boolean
   rightOpen: boolean
+  /** Timeline (Time Engine) shown on demand */
+  timeOpen: boolean
   dataOpen: boolean
   navMapOpen: boolean
   error: string | null
@@ -112,8 +116,10 @@ export const useStore = create<State>((set, get) => {
     showOrbits: true,
     showGrid: false,
     showLabels: true,
-    leftOpen: true,
-    rightOpen: true,
+    // contextual UI: the 3-D universe is the primary interface - panels open on demand
+    leftOpen: false,
+    rightOpen: false,
+    timeOpen: false,
     dataOpen: false,
     navMapOpen: false,
     error: null,
@@ -121,10 +127,18 @@ export const useStore = create<State>((set, get) => {
     datasetPoints: [],
     objectsVersion: 0,
     setPhase: (p) => set({ phase: p }),
-    select: (id) => set({ selectedId: id, rightOpen: id ? true : get().rightOpen }),
+    // selecting shows a compact selection chip; the Inspector opens on demand (chip 'Details' or the I key)
+    select: (id) => set({ selectedId: id, rightOpen: id ? get().rightOpen : false }),
     travel: (id, instant = false, viewDistanceLy?: number) => {
       clearDwell()
       const s = get()
+      if (s.phase === 'travel') {
+        // In Travel Mode every destination request (search, label double-click, breadcrumbs) is flown by the
+        // SPACECRAFT from its current position - never by the detached observer camera.
+        set({ selectedId: id })
+        engageAutopilot(id, s.simMs)
+        return
+      }
       if (s.phase === 'tour') set({ tourStatus: 'interrupted' })
       set({ selectedId: id, breadcrumbs: [...s.breadcrumbs, id].slice(-8) })
       initiateTravel(id, get().simMs, { instant, viewDistanceLy })
@@ -164,14 +178,24 @@ export const useStore = create<State>((set, get) => {
       clearDwell()
       interrupt()
       nav.followId = null
-      const currentTarget = targetId ?? get().selectedId ?? 'earth'
-      initShipNear(currentTarget, get().simMs)
-      set({ phase: 'travel', navMapOpen: false, selectedId: currentTarget })
+      const ms = get().simMs
+      const fallback = targetId ?? get().selectedId ?? 'earth'
+      // Continuity: inside the Solar System the spacecraft starts exactly where the observer is (position and
+      // orientation, at rest relative to the nearest body). Only from cosmic/galactic views (e.g. the welcome
+      // screen) is it placed next to the requested body to begin a journey.
+      const inSystem = len(sub(nav.pos, SUN_POS)) < 0.01
+      if (inSystem) initShipAt(nav.pos, nav.quat, ms, nav.followId ?? get().selectedId)
+      else initShipNear(fallback, ms)
+      updateNearest(ms)
+      set({ phase: 'travel', navMapOpen: false, selectedId: inSystem ? get().selectedId ?? ship.refBodyId : fallback })
     },
     exitTravelMode: () => {
       cancelAutopilot()
       nav.pos = [...ship.pos]
       nav.quat.copy(ship.quat)
+      // keep co-moving with the body the ship was flying near, so time does not carry it away from the view
+      nav.followId = ship.refBodyId && BY_ID[ship.refBodyId] ? ship.refBodyId : null
+      nav.lastFollowPos = nav.followId ? positionOf(BY_ID[nav.followId], get().simMs) : null
       set({ phase: 'explore', navMapOpen: false })
     },
     set: (p) => set(p as never),

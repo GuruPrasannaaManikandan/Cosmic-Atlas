@@ -48,7 +48,14 @@ async def main(base: str) -> int:
         await page.wait_for_timeout(1200)
         sel = await page.evaluate(f"() => ({ST}.selectedId)")
         rec("Search 'Saturn' + Enter selects Saturn", sel == "saturn", sel)
-        rec("Inspector opens for the selection", await page.evaluate(f"() => {ST}.rightOpen"), "")
+        # contextual UI: selection shows a compact chip (hidden while flying); the Inspector opens on demand
+        await page.wait_for_function("() => !window.__nav.flight", timeout=60000)
+        await page.wait_for_timeout(500)
+        chip = await page.locator(".sel-chip").count()
+        if chip:
+            await page.get_by_role("button", name="Details").click()
+            await page.wait_for_timeout(300)
+        rec("Selection chip appears and 'Details' opens the Inspector", chip == 1 and await page.evaluate(f"() => {ST}.rightOpen"), f"chip={chip}")
         # navigation: the selection flies the camera to Saturn (wait for the flight to finish, then Saturn is nearest)
         try:
             await page.wait_for_function("() => !window.__nav.flight", timeout=45000)

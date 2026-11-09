@@ -135,6 +135,8 @@ export function TravelHUD() {
             className="icon-btn"
             onClick={() => setShowHelp(!showHelp)}
             title="Flight Controls Help"
+            aria-label="Flight controls help"
+            aria-expanded={showHelp}
           >
             ?
           </button>

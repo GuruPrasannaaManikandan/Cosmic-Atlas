@@ -6,6 +6,7 @@ import * as THREE from 'three'
 import { Vec3, add, fromThree, len, scale, sub, toThree, SUN_POS } from '../astro/coords'
 import { BY_ID, positionOf, radiusLyOf, OBJECTS, CosmicObject } from '../data/catalog'
 import { ease, logLerp, travelDuration } from '../astro/scale'
+import { flightPose } from '../travel/flightPath'
 
 export interface Flight {
   targetId: string
@@ -13,6 +14,8 @@ export interface Flight {
   dir1: THREE.Vector3
   d0: number
   d1: number
+  /** camera orientation at departure (heading turns smoothly from here) */
+  q0?: THREE.Quaternion
   t: number
   dur: number
   onArrive?: () => void
@@ -91,7 +94,7 @@ export function flyTo(id: string, ms: number, opts: { onArrive?: () => void; vie
   }
   nav.followId = null
   nav.lastFollowPos = null
-  nav.flight = { targetId: id, dir0, dir1, d0, d1, t: 0, dur: travelDuration(d0, d1), onArrive: opts.onArrive }
+  nav.flight = { targetId: id, dir0, dir1, d0, d1, q0: nav.quat.clone(), t: 0, dur: travelDuration(d0, d1), onArrive: opts.onArrive }
 }
 
 /** Advance navigation; returns nothing. dt in seconds. */
@@ -99,14 +102,11 @@ export function stepNavigation(dt: number, ms: number, input: { yaw: number; pit
   const f = nav.flight
   if (f) {
     f.t = Math.min(1, f.t + dt / f.dur)
-    const e = ease(f.t)
     const o = BY_ID[f.targetId]
     const P = positionOf(o, ms)
-    const dist = logLerp(f.d0, f.d1, e)
-    const dir = new THREE.Vector3().copy(f.dir0).lerp(f.dir1, e).normalize()
-    const off: Vec3 = [dir.x * dist, dir.y * dist, dir.z * dist]
-    nav.pos = add(P, fromThree(off))
-    nav.quat.copy(lookAtQuat(new THREE.Vector3(0, 0, 0), dir.clone().multiplyScalar(-1)))
+    const pose = flightPose(f, P, f.t) // shared path: slerped direction, smooth heading turn
+    nav.pos = pose.pos
+    nav.quat.copy(pose.quat)
     if (f.t >= 1) {
       nav.flight = null
       nav.followId = f.targetId
