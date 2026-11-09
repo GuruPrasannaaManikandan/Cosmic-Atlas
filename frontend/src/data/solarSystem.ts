@@ -87,7 +87,8 @@ const D2R = Math.PI / 180
 /** IAU 2015 (Archinal et al. 2018) north-pole directions at J2000 and mean radii (km) of the planets that host moons. */
 export const PLANET_POLES: Record<string, { raDeg: number; decDeg: number; source: string }> = {
   earth: { raDeg: 0, decDeg: 90, source: 'IAU 2015 (ICRF pole, precession ignored)' },
-  mars: { raDeg: 317.269202, decDeg: 54.432516, source: 'IAU 2015' },
+  // IAU 2009 J2000 value: the IAU 2015 constant terms (317.269, 54.433) alone omit that model's large periodic terms (~1.5 deg)
+  mars: { raDeg: 317.68143, decDeg: 52.8865, source: 'IAU WGCCRE 2009, evaluated at J2000' },
   jupiter: { raDeg: 268.056595, decDeg: 64.495303, source: 'IAU 2015' },
   saturn: { raDeg: 40.589, decDeg: 83.537, source: 'IAU 2015' },
   uranus: { raDeg: 257.311, decDeg: -15.175, source: 'IAU 2015 (IAU north pole; Uranus rotates retrograde about it)' },

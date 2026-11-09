@@ -205,7 +205,7 @@ export const ASSET_REGISTRY: Record<string, AstronomicalAsset> = {
     colorSpace: 'sRGB',
     transparent: false,
     category: 'planet',
-    description: 'Deep azure atmospheric map of Neptune featuring high-altitude methane cirrus clouds and Great Dark Spot.',
+    description: 'Deep azure atmospheric map of Neptune with high-altitude methane cirrus bands. The map bakes in the 1989 Voyager 2 Great Dark Spot and Dark Spot 2; the renderer shows them only for sim dates 1989-1994 (they were gone in Hubble images by Nov 1994) and always hides an unsourced northern oval (src/astro/planetFrames.ts NEPTUNE_MAP_SPOTS).',
   },
   moon_albedo: {
     id: 'moon_albedo',
