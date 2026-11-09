@@ -42,6 +42,11 @@ Shader "CosmicAtlas/Nebula"
                 float _Density; float _DustDensity; float _Emission; float _NoiseScale; float _Steps; float _Seed; float _StarCount;
             CBUFFER_END
             float4 _NebulaStars[8]; // xyz object space, w = relative ionising luminosity (set by NebulaVolume.cs)
+            // Baked tileable fbm (NoiseVolume.cs): R 6-octave structure, G/B 3-octave warp, A 5-octave dust.
+            // One texture period = 8 noise cells, so sampling at x/8 matches the former procedural Fbm3(x).
+            TEXTURE3D(_NoiseVol); SAMPLER(sampler_NoiseVol);
+            static const float INV_CELLS = 1.0 / 8.0;
+            float4 Vol(float3 x) { return SAMPLE_TEXTURE3D_LOD(_NoiseVol, sampler_NoiseVol, x * INV_CELLS, 0); }
 
             struct A { float4 pos : POSITION; };
             struct V { float4 pos : SV_POSITION; float3 pOS : TEXCOORD0; };
@@ -55,7 +60,7 @@ Shader "CosmicAtlas/Nebula"
             {
                 ion = 0; ionHi = 0;
                 float wind = 0;
-                float3 nearest = 0; float nd = 1e5;
+                float3 pull = 0; float pullW = 0;
                 int n = (int)_StarCount;
                 [loop] for (int s = 0; s < 8; s++)
                 {
@@ -65,18 +70,32 @@ Shader "CosmicAtlas/Nebula"
                     ion += _NebulaStars[s].w * exp(-r * 4.0);
                     ionHi += _NebulaStars[s].w * exp(-r * 7.0);
                     wind += _NebulaStars[s].w * exp(-r * 22.0); // the wind-blown bubble is much smaller than the ionised zone
-                    if (r < nd) { nd = r; nearest = d / max(r, 1e-4); }
+                    float wS = _NebulaStars[s].w * exp(-r * 6.0);   // smooth weight: no hard nearest-star switch
+                    pull += wS * d / max(r, 1e-4); pullW += wS;
                 }
-                // stretch noise coordinates along the direction to the nearest ionising star -> columns pointing at it
+                // stretch noise coordinates along the (luminosity-weighted) direction to the ionising stars -> columns
+                // pointing at them. A hard nearest-star choice made the stretch jump on the planes midway between
+                // stars (visible straight creases); the weighted direction is continuous, and its coherence
+                // |sum w d| / sum w fades the stretch where stars pull in opposing directions.
+                float pullLen = length(pull);
+                float3 dirS = pull / max(pullLen, 1e-6);
+                float coherence = saturate(pullLen / max(pullW, 1e-6));
                 float3 q = p * _NoiseScale;
-                float along = dot(q, nearest);
-                q += nearest * along * -0.55;
-                float3 w = float3(Fbm3(q + _Seed, 3), Fbm3(q + _Seed + 19.3, 3), Fbm3(q + _Seed + 7.7, 3));
-                float f = Fbm3(q * 2.4 + w * 1.8 + _Seed * 3.1, 6);
+                float along = dot(q, dirS);
+                q += dirS * along * (-0.55 * coherence);
+                // 3 texture fetches replace ~20 octaves of procedural noise per step
+                float4 wv = Vol(q + _Seed);
+                float3 w = float3(wv.g, wv.b, Vol(q + _Seed + 7.7).g);
+                // base structure + two zero-mean detail fetches. The 64^3 volume resolves only ~3 octaves per period;
+                // the detail fetches at ~4x and ~16x frequency restore the high octaves of the former 6-octave
+                // procedural fbm with comparable amplitude (fbm octave amplitudes 1/8..1/32), at 2 extra texture reads.
+                float f = Vol(q * 2.4 + w * 1.8 + _Seed * 3.1).r
+                        + (Vol(q * 9.7 + w * 3.0 + 13.0).r - 0.5) * 0.40
+                        + (Vol(q * 37.0 + w * 5.0 + 29.0).r - 0.5) * 0.22;
                 float shell = smoothstep(0.5, 0.25, length(p));            // soft outer boundary of the cloud
                 float cavity = 1.0 - saturate(wind * 1.2);                  // stellar winds clear the immediate surroundings
                 gas = saturate(f - 0.40) * 2.8 * shell * cavity * _Density;
-                dust = saturate(Fbm3(q * 1.3 + 41.0 + _Seed, 5) - 0.42) * 4.0 * shell * saturate(1.0 - ion * 0.8) * _DustDensity;
+                dust = saturate(wv.a - 0.42) * 4.0 * shell * saturate(1.0 - ion * 0.8) * _DustDensity;
             }
 
             float2 RayBox(float3 ro, float3 rd)

@@ -215,6 +215,7 @@ namespace CosmicAtlas.Rendering
             Object.DestroyImmediate(cube);
             go.AddComponent<MeshFilter>().sharedMesh = mesh;
             var m = Mat.Make("CosmicAtlas/Nebula");
+            m.SetTexture("_NoiseVol", NoiseVolume.Get(64));
             m.SetFloat("_Steps", steps);
             m.SetFloat("_Seed", seed);
             m.SetFloat("_StarCount", stars.Length);
