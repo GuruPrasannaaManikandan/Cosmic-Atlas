@@ -16,7 +16,7 @@
   {
    "check": "E2 site picker: Tranquility Base explorable, other Apollo sites catalogued, Chandrayaan-3 labelled non-NASA",
    "pass": true,
-   "detail": "CHOOSE A LANDING SITE\nExplore the Moon\n\u2715\nTranquility Base \u2014 Apollo 11\n0.67416\u00b0N, 23.47314\u00b0E \u00b7 3 historical objects at their LRO-measured positions\nDescend \u25be\nApollo 12\n3.0128\u00b0S, -23.4219\u00b0E \u00b7 catalogued"
+   "detail": "CHOOSE A LANDING SITE\nExplore the Moon\n\u2715\nTranquility Base \u2014 Apollo 11\n0.67416\u00b0N, 23.47314\u00b0E \u00b7 3 historical objects at their LRO-measured positions\nDescend \u25be\nOceanus Procellarum \u2014 Apollo 12\n3.01280\u00b0S, "
   },
   {
    "check": "E3 descent: surface canvas renders, orbital UI hidden",
@@ -32,7 +32,7 @@
    "detail": {
     "pos": [
      -14,
-     -0.7775237736730641,
+     -0.22409263249014688,
      10
     ]
    }
@@ -152,7 +152,7 @@
    "detail": ""
   },
   {
-   "check": "M1 M opens the surface map listing the hardware with distances",
+   "check": "M1 M opens the surface map listing the hardware with distances and the terrain source",
    "pass": true,
    "detail": "SURFACE MAP\nTranquility Base \u2014 Apollo 11\n\nYou: 0.67348\u00b0N 23.47300\u00b0E \u00b7 Mean Earth/Polar Axis frame\n\n\uff0b\n\uff0d\nCenter on me\nClose (M)\nHISTORICAL HARDWARE\nLaser Ranging "
   },
@@ -175,7 +175,7 @@
    "check": "P1 surface frame rate (headless Chrome, balanced quality)",
    "pass": true,
    "detail": {
-    "fps": 60.2
+    "fps": 60.1
    }
   },
   {
@@ -227,7 +227,7 @@
  ],
  "errors": [],
  "metrics": {
-  "surfaceFps": 60.2
+  "surfaceFps": 60.1
  },
  "browser": "chrome 156.0.8078.81"
 }

@@ -17,6 +17,7 @@
 | E | Historical Mission Timeline Architecture | [historical-trajectories/ARCHITECTURE.md](historical-trajectories/ARCHITECTURE.md) |
 | F | Phased Development Plan | below |
 | QA | Chrome evidence (screenshots + JSON) | `docs/qa/space-exploration/` |
+| P3b | **Phase 3b report — six Apollo sites on LROC terrain, LRV/ALSEP, touch** | [PHASE_3B_REPORT.md](PHASE_3B_REPORT.md) |
 | P2 | **Phase 2 report — official NASA models, archive, validation** | [PHASE_2_REPORT.md](PHASE_2_REPORT.md), [3d-asset-provenance/ASSET_PROVENANCE.md](3d-asset-provenance/ASSET_PROVENANCE.md) |
 
 ## What was built

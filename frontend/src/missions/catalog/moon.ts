@@ -123,11 +123,11 @@ const lmDescent = (n: number, pos: [number, number, number, number]): PhysicalOb
   ],
   location: v(moonPos(pos[0], pos[1], LROC_ME, pos[2], pos[3]), [LROC, SITES]),
   currentStatus: v('on the lunar surface, imaged by the Lunar Reconnaissance Orbiter', [LROC]),
-  model: { id: n === 11 ? 'lm-descent-stage' : null, provenance: n === 11 ? "Official NASA 3D Resources Apollo Lunar Module model with the ascent stage removed (it lifted off on 21 July 1969); its legs are stylised: footpad span 6.43 m vs NSSDCA's 9.4 m (about a third short); choose the dimension-accurate reconstruction for true proportions. Heading is approximate (ladder facing west, from crew photographs). A procedural reconstruction is shown while it loads." : 'No model yet (the NASA model is the Apollo 11-era LM; J-mission differences are not modelled).' },
+  model: { id: 'lm-descent-stage', provenance: n === 11 ? "Official NASA 3D Resources Apollo Lunar Module model with the ascent stage removed (it lifted off on 21 July 1969); its legs are stylised: footpad span 6.43 m vs NSSDCA's 9.4 m (about a third short); choose the dimension-accurate reconstruction for true proportions. Heading is approximate (ladder facing west, from crew photographs). A procedural reconstruction is shown while it loads." : `Official NASA 3D Resources Apollo Lunar Module model (an Apollo 11-era LM) with the ascent stage removed. ${n >= 15 ? 'The extended J-mission descent stage (Apollo 15-17) and its LRV bay are not modelled. ' : ''}Heading is not sourced.` },
   sources: [LROC, SITES, ...(n === 11 ? ['nssdca-a11-lm'] : [])],
 })
 
-const simple = (id: string, mission: string, name: string, category: PhysicalObject['category'], pos: [number, number, number?, number?], datum: string, src: string[], design: string): PhysicalObject => ({
+const simple = (id: string, mission: string, name: string, category: PhysicalObject['category'], pos: [number, number, number?, number?], datum: string, src: string[], design: string, model: PhysicalObject['model'] = { id: null, provenance: 'No model yet - shown as a position marker.' }, extra: Partial<PhysicalObject> = {}): PhysicalObject => ({
   id,
   missionId: mission,
   name,
@@ -140,8 +140,34 @@ const simple = (id: string, mission: string, name: string, category: PhysicalObj
   components: [],
   location: v(moonPos(pos[0], pos[1], datum, pos[2], pos[3]), src),
   currentStatus: v('on the lunar surface', src),
-  model: { id: null, provenance: 'No model yet.' },
+  model,
   sources: src,
+  ...extra,
+})
+
+const ALSEP_MODEL = { id: 'alsep-central', provenance: 'Procedural reconstruction of the ALSEP central station (25 kg box with a sunshield and a 58 cm axial-helical antenna, NSSDCA). Box and sunshield dimensions are approximate. The SNAP-27 RTG and the instruments are not placed: their positions are not sourced.' }
+const ALSEP_FACTS = (n: number): Partial<PhysicalObject> => ({
+  massKg: v(25, ['nssdca-a15-lm-alsep'], 'central station (NSSDCA Apollo 15 record; same ALSEP design)'),
+  dimensions: v('central station: a 25 kg box with a stowed volume of 34,800 cm3; 58 cm long, 3.8 cm diameter axial-helical antenna', ['nssdca-a15-lm-alsep']),
+  design: 'Apollo Lunar Surface Experiments Package: a central station that collected data from the experiments laid out around it and radioed it to Earth, powered by a SNAP-27 radioisotope thermoelectric generator (about 70 W).',
+  components: [
+    { id: 'antenna', name: 'Axial-helical antenna', description: '58 cm long, 3.8 cm diameter antenna pointed at Earth.', sources: ['nssdca-a15-lm-alsep'] },
+    { id: 'station', name: 'Central station', description: 'Received commands and sent the experiments\' data to Earth.', sources: ['nssdca-a15-lm-alsep'] },
+  ],
+  currentStatus: v('switched off on 30 September 1977', ['nssdca-a15-lm-alsep'], n === 15 ? 'NSSDCA: shut down along with the other ALSEP stations' : 'NSSDCA (Apollo 15 record): all ALSEP stations were shut down together on this date'),
+})
+const LRV_MODEL = { id: 'lrv', provenance: 'Procedural reconstruction built to NSSDCA dimensions (3.1 m frame, 2.3 m wheelbase, 1.14 m height, 81.8 cm x 23 cm wire-mesh wheels, two seats, T-handle controller, mesh dish antenna on a front mast). Track width, seat and console shapes are approximate.' }
+const LRV_FACTS = (km: number): Partial<PhysicalObject> => ({
+  massKg: v(210, ['nssdca-lrv']),
+  dimensions: v('frame 3.1 m long; wheelbase 2.3 m; maximum height 1.14 m; wheels 81.8 cm diameter, 23 cm wide; ground clearance 36 cm loaded', ['nssdca-lrv']),
+  design: `Battery-powered electric car that folded into the Lunar Module for the trip. Each wheel had its own motor; the crew steered with a T-shaped hand controller. On this mission it was driven ${km} km (NSSDCA).`,
+  components: [
+    { id: 'wheels', name: 'Wire-mesh wheels', description: '81.8 cm tyres of woven zinc-coated steel strands with titanium chevrons for grip; no air inside.', sources: ['nssdca-lrv'] },
+    { id: 'controls', name: 'Hand controller and seats', description: 'Two foldable seats; a T-shaped hand controller between them for drive, steering and brakes.', sources: ['nssdca-lrv'] },
+    { id: 'antenna', name: 'High-gain antenna', description: 'A large mesh dish antenna on a mast at the front centre of the rover.', sources: ['nssdca-lrv'] },
+    { id: 'chassis', name: 'Folding chassis', description: 'A three-part aluminium chassis hinged so it could fold up into the Lunar Module.', sources: ['nssdca-lrv'] },
+  ],
+  builtBy: 'NASA (prime contractor not yet sourced)',
 })
 
 export const MOON_OBJECTS: PhysicalObject[] = [
@@ -187,20 +213,20 @@ export const MOON_OBJECTS: PhysicalObject[] = [
     sources: ['nssdca-a11-lrrr', SITES],
   },
   lmDescent(12, [-3.0128, 336.5781, -1422, 2.2]),
-  simple('a12-alsep', 'apollo-12', 'Apollo 12 ALSEP central station', 'surface-experiment', [-3.0098, 336.5751, -1422, 2.2], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.'),
+  simple('a12-alsep', 'apollo-12', 'Apollo 12 ALSEP central station', 'surface-experiment', [-3.0098, 336.5751, -1422, 2.2], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.', ALSEP_MODEL, ALSEP_FACTS(12)),
   lmDescent(14, [-3.64589, 342.52806, -1062, 0.4]),
-  simple('a14-alsep', 'apollo-14', 'Apollo 14 ALSEP central station', 'surface-experiment', [-3.64419, 342.52232, -1064, 0.4], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.'),
-  simple('a14-lrrr', 'apollo-14', 'Apollo 14 Laser Ranging Retroreflector', 'retroreflector', [-3.64417, -17.47865], ME_DE421, [SITES], 'Passive corner-cube retroreflector array.'),
+  simple('a14-alsep', 'apollo-14', 'Apollo 14 ALSEP central station', 'surface-experiment', [-3.64419, 342.52232, -1064, 0.4], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.', ALSEP_MODEL, ALSEP_FACTS(14)),
+  simple('a14-lrrr', 'apollo-14', 'Apollo 14 Laser Ranging Retroreflector', 'retroreflector', [-3.64417, -17.47865], ME_DE421, [SITES], 'Passive corner-cube retroreflector array.', { id: 'lrrr', provenance: 'Same procedural retroreflector as Apollo 11 (approximate; the Apollo 14 array size and cube count are not yet sourced).' }),
   lmDescent(15, [26.13239, 3.6333, -1931, 1.0]),
-  simple('a15-alsep', 'apollo-15', 'Apollo 15 ALSEP central station', 'surface-experiment', [26.13406, 3.62991, -1924, 0.5], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.'),
-  simple('a15-lrrr', 'apollo-15', 'Apollo 15 Laser Ranging Retroreflector', 'retroreflector', [26.13341, 3.6285], ME_DE421, [SITES], 'Passive corner-cube retroreflector array.'),
-  simple('a15-lrv', 'apollo-15', 'Apollo 15 Lunar Roving Vehicle', 'roving-vehicle', [26.13174, 3.63803, -1928, 0.5], LROC_ME, [LROC], 'Lunar Roving Vehicle, parked at its final position.'),
+  simple('a15-alsep', 'apollo-15', 'Apollo 15 ALSEP central station', 'surface-experiment', [26.13406, 3.62991, -1924, 0.5], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.', ALSEP_MODEL, { ...ALSEP_FACTS(15), sources: [LROC, SITES, 'nssdca-a15-lm-alsep'] }),
+  simple('a15-lrrr', 'apollo-15', 'Apollo 15 Laser Ranging Retroreflector', 'retroreflector', [26.13341, 3.6285], ME_DE421, [SITES], 'Passive corner-cube retroreflector array.', { id: 'lrrr', provenance: 'Same procedural retroreflector as Apollo 11 (approximate; the larger Apollo 15 array is not yet sourced).' }),
+  simple('a15-lrv', 'apollo-15', 'Apollo 15 Lunar Roving Vehicle', 'roving-vehicle', [26.13174, 3.63803, -1928, 0.5], LROC_ME, [LROC, 'nssdca-lrv'], 'Lunar Roving Vehicle, parked at its final position.', LRV_MODEL, LRV_FACTS(27.8)),
   lmDescent(16, [-8.9734, 15.5011, 8, 3.0]),
-  simple('a16-alsep', 'apollo-16', 'Apollo 16 ALSEP central station', 'surface-experiment', [-8.9759, 15.4986, 12, 3.0], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.'),
-  simple('a16-lrv', 'apollo-16', 'Apollo 16 Lunar Roving Vehicle', 'roving-vehicle', [-8.9729, 15.5037, 10, 3.7], LROC_ME, [LROC], 'Lunar Roving Vehicle, parked at its final position.'),
+  simple('a16-alsep', 'apollo-16', 'Apollo 16 ALSEP central station', 'surface-experiment', [-8.9759, 15.4986, 12, 3.0], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.', ALSEP_MODEL, ALSEP_FACTS(16)),
+  simple('a16-lrv', 'apollo-16', 'Apollo 16 Lunar Roving Vehicle', 'roving-vehicle', [-8.9729, 15.5037, 10, 3.7], LROC_ME, [LROC, 'nssdca-lrv'], 'Lunar Roving Vehicle, parked at its final position.', LRV_MODEL, LRV_FACTS(26.7)),
   lmDescent(17, [20.1911, 30.7723, -2626, 3.5]),
-  simple('a17-alsep', 'apollo-17', 'Apollo 17 ALSEP central station', 'surface-experiment', [20.1923, 30.7655, -2622, 3.5], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.'),
-  simple('a17-lrv', 'apollo-17', 'Apollo 17 Lunar Roving Vehicle', 'roving-vehicle', [20.1896, 30.7769, -2628, 3.2], LROC_ME, [LROC], 'Lunar Roving Vehicle, parked at its final position.'),
+  simple('a17-alsep', 'apollo-17', 'Apollo 17 ALSEP central station', 'surface-experiment', [20.1923, 30.7655, -2622, 3.5], LROC_ME, [LROC, SITES], 'Apollo Lunar Surface Experiments Package.', ALSEP_MODEL, ALSEP_FACTS(17)),
+  simple('a17-lrv', 'apollo-17', 'Apollo 17 Lunar Roving Vehicle', 'roving-vehicle', [20.1896, 30.7769, -2628, 3.2], LROC_ME, [LROC, 'nssdca-lrv'], 'Lunar Roving Vehicle, parked at its final position.', LRV_MODEL, LRV_FACTS(35.9)),
   simple('a17-sep', 'apollo-17', 'Apollo 17 Surface Electrical Properties experiment', 'surface-experiment', [20.192, 30.7768, -2627, 3.7], LROC_ME, [LROC], 'LROC lists it as "Apollo 17 SEP".'),
   {
     id: 'ch3-lander',

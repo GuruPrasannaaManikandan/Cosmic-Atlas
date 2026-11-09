@@ -59,7 +59,19 @@ export interface TerrainSpec {
   anchors: { x: number; z: number; dy: number; flatR: number }[]
 }
 
-export class Terrain {
+/** what the controller, renderer and map need from any site terrain (procedural or measured) */
+export interface SiteTerrain {
+  readonly kind: 'procedural' | 'dtm'
+  readonly rocks: Rock[]
+  heightAt(x: number, z: number): number
+  /** height for the distant horizon ring (beyond the data / walkable area) */
+  farHeightAt(x: number, z: number): number
+  normalAt(x: number, z: number, e?: number): [number, number, number]
+  rockColliders(minR?: number): Collider[]
+}
+
+export class Terrain implements SiteTerrain {
+  readonly kind = 'procedural' as const
   readonly craters: Crater[] = []
   readonly rocks: Rock[] = []
   readonly spec: TerrainSpec
@@ -125,6 +137,10 @@ export class Terrain {
     return h
   }
 
+  farHeightAt(x: number, z: number): number {
+    return this.heightAt(x, z)
+  }
+
   normalAt(x: number, z: number, e = 0.25): [number, number, number] {
     const hx = this.heightAt(x + e, z) - this.heightAt(x - e, z)
     const hz = this.heightAt(x, z + e) - this.heightAt(x, z - e)
@@ -136,4 +152,140 @@ export class Terrain {
   rockColliders(minR = 0.28): Collider[] {
     return this.rocks.filter((r) => r.r >= minR).map((r) => ({ x: r.x, z: r.z, r: r.r * 0.9, h: r.r * r.squash * 1.6 }))
   }
+}
+
+// ------------------------------------------------------------------ measured terrain (LROC NAC DTM)
+
+export interface DtmMeta {
+  site: string
+  apollo: number
+  width: number
+  height: number
+  cellM: number
+  x0: number
+  z0: number
+  hMin: number
+  hMax: number
+  lmHeightDtm: number
+  lmElevationLroc: number
+  lmDeltaM: number | null
+  validFraction: number
+  source: { product: string; productPage: string; file: string; crs: string; postSpacingM: number; bytesRead: number; accuracy: string }
+}
+
+/** decode the uint16 heightmap (0 = no data) to metres relative to the LM, filling gaps from their neighbours */
+export function decodeDtm(meta: DtmMeta, buf: ArrayBuffer): Float32Array {
+  const q = new Uint16Array(buf)
+  const W = meta.width, H = meta.height
+  if (q.length !== W * H) throw new Error(`terrain ${meta.site}: ${q.length} samples, expected ${W * H}`)
+  const span = meta.hMax - meta.hMin
+  const h = new Float32Array(W * H)
+  let sum = 0, n = 0
+  for (let i = 0; i < q.length; i++) {
+    if (q[i] === 0) h[i] = NaN
+    else {
+      h[i] = meta.hMin + ((q[i] - 1) / 65534) * span - meta.lmHeightDtm
+      sum += h[i]
+      n++
+    }
+  }
+  const mean = n ? sum / n : 0
+  // gap fill: repeated neighbour averaging, then the mean for anything still empty
+  for (let pass = 0; pass < 200; pass++) {
+    let left = 0
+    const next = h.slice()
+    for (let j = 0; j < H; j++)
+      for (let i = 0; i < W; i++) {
+        const k = j * W + i
+        if (!Number.isNaN(h[k])) continue
+        let s = 0, c = 0
+        if (i > 0 && !Number.isNaN(h[k - 1])) { s += h[k - 1]; c++ }
+        if (i < W - 1 && !Number.isNaN(h[k + 1])) { s += h[k + 1]; c++ }
+        if (j > 0 && !Number.isNaN(h[k - W])) { s += h[k - W]; c++ }
+        if (j < H - 1 && !Number.isNaN(h[k + W])) { s += h[k + W]; c++ }
+        if (c) next[k] = s / c
+        else left++
+      }
+    h.set(next)
+    if (!left) break
+  }
+  for (let i = 0; i < h.length; i++) if (Number.isNaN(h[i])) h[i] = mean
+  return h
+}
+
+export class DtmTerrain implements SiteTerrain {
+  readonly kind = 'dtm' as const
+  readonly rocks: Rock[] = []
+  readonly meta: DtmMeta
+  private h: Float32Array
+  private anchors: { x: number; z: number; y: number; flatR: number }[]
+  readonly mean: number
+
+  constructor(meta: DtmMeta, heights: Float32Array, spec: { seed: number; halfExtentM: number; anchors: { x: number; z: number; flatR: number }[] }) {
+    this.meta = meta
+    this.h = heights
+    let s = 0
+    for (const v of heights) s += v
+    this.mean = s / heights.length
+    // hardware sits on the measured surface: a small flat pad at the DTM height of each object
+    this.anchors = spec.anchors.map((a) => ({ ...a, y: this.raw(a.x, a.z) }))
+    const rnd = mulberry32(spec.seed)
+    const clear = (x: number, z: number, pad: number) => this.anchors.every((a) => Math.hypot(x - a.x, z - a.z) > a.flatR + pad)
+    // boulders are below the DTM's 2 m post spacing, so these are illustrative (labelled in the UI)
+    for (let i = 0; i < 1500 && this.rocks.length < 380; i++) {
+      const r = 0.06 + 0.8 * Math.pow(rnd(), 3.4)
+      const x = (rnd() * 2 - 1) * spec.halfExtentM, z = (rnd() * 2 - 1) * spec.halfExtentM
+      if (clear(x, z, 2.5)) this.rocks.push({ x, z, r, rotY: rnd() * Math.PI * 2, squash: 0.45 + rnd() * 0.4, seed: Math.floor(rnd() * 1e9) })
+    }
+  }
+
+  /** bilinear sample of the DTM (clamped at the data edge) */
+  raw(x: number, z: number): number {
+    const m = this.meta
+    const fx = Math.min(Math.max((x - m.x0) / m.cellM, 0), m.width - 1.001)
+    const fz = Math.min(Math.max((z - m.z0) / m.cellM, 0), m.height - 1.001)
+    const i = Math.floor(fx), j = Math.floor(fz)
+    const tx = fx - i, tz = fz - j
+    const W = m.width, h = this.h
+    const k = j * W + i
+    return h[k] * (1 - tx) * (1 - tz) + h[k + 1] * tx * (1 - tz) + h[k + W] * (1 - tx) * tz + h[k + W + 1] * tx * tz
+  }
+
+  heightAt(x: number, z: number): number {
+    let y = this.raw(x, z)
+    for (const a of this.anchors) {
+      const d = Math.hypot(x - a.x, z - a.z)
+      if (d < a.flatR * 1.6) {
+        const t = Math.min(1, Math.max(0, (a.flatR * 1.6 - d) / (a.flatR * 0.6)))
+        const k = t * t * (3 - 2 * t)
+        y = y * (1 - k) + a.y * k
+      }
+    }
+    return y
+  }
+
+  farHeightAt(x: number, z: number): number {
+    const m = this.meta
+    const inside = x >= m.x0 && z >= m.z0 && x <= m.x0 + (m.width - 1) * m.cellM && z <= m.z0 + (m.height - 1) * m.cellM
+    return inside ? this.raw(x, z) : this.mean
+  }
+
+  normalAt(x: number, z: number, e = 0.5): [number, number, number] {
+    const hx = this.heightAt(x + e, z) - this.heightAt(x - e, z)
+    const hz = this.heightAt(x, z + e) - this.heightAt(x, z - e)
+    const n: [number, number, number] = [-hx, 2 * e, -hz]
+    const l = Math.hypot(...n)
+    return [n[0] / l, n[1] / l, n[2] / l]
+  }
+
+  rockColliders(minR = 0.28): Collider[] {
+    return this.rocks.filter((r) => r.r >= minR).map((r) => ({ x: r.x, z: r.z, r: r.r * 0.9, h: r.r * r.squash * 1.6 }))
+  }
+}
+
+export async function loadDtm(url: string): Promise<{ meta: DtmMeta; heights: Float32Array }> {
+  const meta = (await (await fetch(url)).json()) as DtmMeta
+  const res = await fetch(url.replace(/\.json$/, '.bin'))
+  if (!res.ok) throw new Error(`terrain ${meta.site}: HTTP ${res.status}`)
+  return { meta, heights: decodeDtm(meta, await res.arrayBuffer()) }
 }

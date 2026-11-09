@@ -46,6 +46,21 @@ Full SHA-256 values are in `frontend/src/surface/models/nasaModels.ts`.
 | Laser Ranging Retroreflector | NSSDCA description; aimed at Earth's mean direction | In use; panel size and cube count approximate |
 | Astronaut | Stylised Apollo-era EVA suit | In use; generic explorer |
 
+## Terrain data (Phase 3b)
+
+| Site | LROC product | Post | Rows read (of the full file) | Bytes read | Committed |
+|---|---|---|---|---|---|
+| Apollo 11 | NAC_DTM_APOLLO11 | 2 m | ±800 m N-S, full width | 6.8 MB | 2.4 MB |
+| Apollo 12 | NAC_DTM_APOLLO12 | 2 m | ±800 m | 7.9 MB | 2.4 MB |
+| Apollo 14 | NAC_DTM_APOLLO14 | 2 m | ±800 m | 6.9 MB | 2.4 MB |
+| Apollo 15 | NAC_DTM_APOLLO15 | 2 m | ±800 m | 8.2 MB | 2.9 MB |
+| Apollo 16 | NAC_DTM_APOLLO16 | 2 m | ±400 m | 19.4 MB | 1.2 MB |
+| Apollo 17 | NAC_DTM_APOLLO17 | 5 m | ±1000 m | 16.2 MB | 1.0 MB |
+
+- **Source:** official NASA PDS LROC RDR V1.0, served from `pds.mcp.nasa.gov`.
+- **Script:** `scripts/terrain/extract_lroc_dtm.py`. It records the file URL, CRS, rows read and the LM height check in every `*.json` sidecar.
+- **Data notes:** heights are relative to the 1737.4 km sphere and stored relative to the LM. Rocks smaller than the post spacing are procedural and labelled.
+
 ## Not yet available as NASA glTF
 
 - **Curiosity:** `.blend` only (10 MB). It needs a Blender → glTF conversion; Blender is not installed here.

@@ -4,25 +4,30 @@ import * as THREE from 'three'
 import { useStore } from '../store/store'
 import { OBJECT_BY_ID } from '../missions'
 import { SurfaceSite, SURFACE_BODIES } from './sites'
-import { Terrain, Collider, mulberry32 } from './terrain'
+import { Terrain, DtmTerrain, SiteTerrain, Collider, mulberry32, DtmMeta } from './terrain'
 import { stepCharacter, newCharacter, paramsForGravity, gaitPose, CharacterState, forwardOf } from './controller'
 import { sunDirectionAtLunarSite, meanEarthDirectionAtLunarSite, elevationDeg, azimuthDeg } from './lighting'
 import { useSurface, surfaceDebug } from './surfaceState'
 import { Astronaut, AstronautHandle } from './models/Astronaut'
-import { HardwareModel, COLLIDERS, COMPONENT_ANCHORS } from './models/Hardware'
+import { HardwareModel, COLLIDERS, COMPONENT_ANCHORS, PositionMarker } from './models/Hardware'
 import { regolithMap, regolithBump } from './models/materials'
 
 const D2R = Math.PI / 180
 
 /** shared with the 2-D map: the terrain height grid generated for the mesh */
-export const terrainGrid: { size: number; extent: number; heights: Float32Array | null; terrain: Terrain | null } = { size: 0, extent: 0, heights: null, terrain: null }
+export const terrainGrid: { size: number; extent: number; heights: Float32Array | null; terrain: SiteTerrain | null } = { size: 0, extent: 0, heights: null, terrain: null }
+
+/** measured terrain handed in by SurfaceExperience (null = procedural) */
+export type DtmData = { meta: DtmMeta; heights: Float32Array } | null
 
 /** keyboard state, owned by the scene */
 const keys = new Set<string>()
+/** on-screen (touch) input, merged with the keyboard every frame */
+export const virtualInput = { forward: 0, right: 0, run: false, jump: false }
 
 export interface SceneEnv {
   site: SurfaceSite
-  terrain: Terrain
+  terrain: SiteTerrain
   colliders: Collider[]
   placed: { id: string; modelId: string | null; x: number; y: number; z: number; rotY: number; tilt?: number }[]
   sunDir: THREE.Vector3
@@ -33,11 +38,12 @@ export interface SceneEnv {
 /** collider / anchor table key for an object, given the LM model variant in use */
 export const modelKey = (modelId: string | null, lmModel: 'nasa' | 'reconstruction') => (modelId === 'lm-descent-stage' && lmModel === 'nasa' ? 'lm-descent-stage-nasa' : modelId ?? '')
 
-function useEnv(site: SurfaceSite, simMs: number, lmModel: 'nasa' | 'reconstruction'): SceneEnv {
-  const terrain = useMemo(
-    () => new Terrain({ seed: site.terrainSeed, halfExtentM: site.halfExtentM, anchors: site.objects.map((o) => ({ x: o.x, z: o.z, dy: o.dy, flatR: o.objectId.includes('lm') ? 6 : 2.5 })) }),
-    [site],
-  )
+function useEnv(site: SurfaceSite, simMs: number, lmModel: 'nasa' | 'reconstruction', dtm: DtmData): SceneEnv {
+  const terrain = useMemo<SiteTerrain>(() => {
+    const anchors = site.objects.map((o) => ({ x: o.x, z: o.z, dy: o.dy, flatR: o.objectId.includes('lm') ? 6 : o.objectId.includes('lrv') ? 3.5 : 2.5 }))
+    if (dtm) return new DtmTerrain(dtm.meta, dtm.heights, { seed: site.terrain.seed, halfExtentM: site.halfExtentM, anchors })
+    return new Terrain({ seed: site.terrain.seed, halfExtentM: Math.min(site.halfExtentM, 400), anchors })
+  }, [site, dtm])
   const earthDir = useMemo(() => new THREE.Vector3(...meanEarthDirectionAtLunarSite(site.origin.latDeg, site.origin.lonEastDeg)), [site])
   const placed = useMemo(
     () =>
@@ -57,7 +63,7 @@ function useEnv(site: SurfaceSite, simMs: number, lmModel: 'nasa' | 'reconstruct
   const colliders = useMemo(() => {
     const cs: Collider[] = terrain.rockColliders()
     for (const p of placed) {
-      for (const [cx, cz, r, h] of COLLIDERS[modelKey(p.modelId, lmModel)] ?? [[0, 0, 0.5, 1]]) {
+      for (const [cx, cz, r, h] of COLLIDERS[modelKey(p.modelId, lmModel)] ?? (p.modelId ? [[0, 0, 0.5, 1]] : [])) {
         const c = Math.cos(p.rotY), s = Math.sin(p.rotY)
         cs.push({ x: p.x + cx * c + cz * s, z: p.z - cx * s + cz * c, r, h, id: p.id })
       }
@@ -92,7 +98,7 @@ function TerrainMesh({ env, segments }: { env: SceneEnv; segments: number }) {
       const x = fp.getX(i), z = fp.getZ(i)
       const inside = Math.abs(x) < ext - 30 && Math.abs(z) < ext - 30
       const d2 = x * x + z * z
-      fp.setY(i, (inside ? -2 : env.terrain.heightAt(x, z)) - d2 / (2 * R))
+      fp.setY(i, (inside ? env.terrain.farHeightAt(x, z) - 3 : env.terrain.farHeightAt(x, z)) - d2 / (2 * R))
     }
     fg.computeVertexNormals()
     return { geo: g, far: fg }
@@ -101,6 +107,7 @@ function TerrainMesh({ env, segments }: { env: SceneEnv; segments: number }) {
     const m = new THREE.MeshStandardMaterial({ color: '#9b9993', roughness: 0.98, metalness: 0, map: regolithMap(), bumpMap: regolithBump(), bumpScale: 1.2 })
     m.map!.repeat.set(90, 90)
     m.bumpMap!.repeat.set(260, 260)
+    withPatchCutout(m)
     return m
   }, [])
   const farMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#8f8d88', roughness: 1, metalness: 0 }), [])
@@ -112,7 +119,68 @@ function TerrainMesh({ env, segments }: { env: SceneEnv; segments: number }) {
   )
 }
 
-function Rocks({ terrain }: { terrain: Terrain }) {
+/** fine terrain patch (1.5 m spacing) that follows the astronaut; the base mesh is cut out underneath it */
+const PATCH = { half: 150, seg: 200, cx: 0, cz: 0 }
+const patchUniforms = { uPatchC: { value: new THREE.Vector2(1e9, 1e9) }, uPatchHalf: { value: PATCH.half - 2 } }
+
+function withPatchCutout(m: THREE.MeshStandardMaterial) {
+  m.onBeforeCompile = (sh) => {
+    Object.assign(sh.uniforms, patchUniforms)
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vWXZ;').replace('#include <worldpos_vertex>', '#include <worldpos_vertex>\nvWXZ = (modelMatrix * vec4(transformed, 1.0)).xz;')
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying vec2 vWXZ;\nuniform vec2 uPatchC;\nuniform float uPatchHalf;')
+      .replace('void main() {', 'void main() {\n  if (abs(vWXZ.x - uPatchC.x) < uPatchHalf && abs(vWXZ.y - uPatchC.y) < uPatchHalf) discard;')
+  }
+  m.customProgramCacheKey = () => 'patch-cutout'
+}
+
+export function DetailPatch({ terrain, follow }: { terrain: SiteTerrain; follow: { current: { x: number; z: number } } }) {
+  const mesh = useRef<THREE.Mesh>(null)
+  const geo = useMemo(() => {
+    const g = new THREE.PlaneGeometry(PATCH.half * 2, PATCH.half * 2, PATCH.seg, PATCH.seg)
+    g.rotateX(-Math.PI / 2)
+    return g
+  }, [])
+  const mat = useMemo(() => {
+    const m = new THREE.MeshStandardMaterial({ color: '#9b9993', roughness: 0.98, metalness: 0, map: regolithMap(), bumpMap: regolithBump(), bumpScale: 1.2 })
+    return m
+  }, [])
+  const rebuild = (cx: number, cz: number) => {
+    const pos = geo.attributes.position as THREE.BufferAttribute
+    const n = PATCH.seg + 1
+    const step = (PATCH.half * 2) / PATCH.seg
+    for (let j = 0; j < n; j++)
+      for (let i = 0; i < n; i++) {
+        const k = j * n + i
+        const x = cx - PATCH.half + i * step, z = cz - PATCH.half + j * step
+        pos.setXYZ(k, x - cx, terrain.heightAt(x, z), z - cz)
+      }
+    pos.needsUpdate = true
+    geo.computeVertexNormals()
+    geo.computeBoundingSphere()
+    // world-aligned texture coordinates so the regolith texture doesn't swim when the patch moves
+    const uv = geo.attributes.uv as THREE.BufferAttribute
+    for (let k = 0; k < uv.count; k++) uv.setXY(k, (pos.getX(k) + cx) / 8, (pos.getZ(k) + cz) / 8)
+    uv.needsUpdate = true
+    mesh.current?.position.set(cx, 0, cz)
+    PATCH.cx = cx
+    PATCH.cz = cz
+    patchUniforms.uPatchC.value.set(cx, cz)
+  }
+  useEffect(() => {
+    PATCH.cx = 1e9
+    return () => {
+      patchUniforms.uPatchC.value.set(1e9, 1e9)
+    }
+  }, [terrain])
+  useFrame(() => {
+    const p = follow.current
+    if (Math.hypot(p.x - PATCH.cx, p.z - PATCH.cz) > 40) rebuild(Math.round(p.x / 10) * 10, Math.round(p.z / 10) * 10)
+  })
+  return <mesh ref={mesh} geometry={geo} material={mat} receiveShadow />
+}
+
+function Rocks({ terrain }: { terrain: SiteTerrain }) {
   const { geos, mat, groups } = useMemo(() => {
     const geos = [0, 1, 2].map((v) => {
       const g = new THREE.IcosahedronGeometry(1, 2)
@@ -129,7 +197,7 @@ function Rocks({ terrain }: { terrain: Terrain }) {
       return g
     })
     const mat = new THREE.MeshStandardMaterial({ color: '#7b7974', roughness: 0.96, flatShading: true })
-    const groups: Terrain['rocks'][] = [[], [], []]
+    const groups: SiteTerrain['rocks'][] = [[], [], []]
     terrain.rocks.forEach((rk) => groups[rk.seed % 3].push(rk))
     return { geos, mat, groups }
   }, [terrain])
@@ -248,6 +316,7 @@ function Player({ env }: { env: SceneEnv }) {
   const params = useMemo(() => paramsForGravity(g, env.site.halfExtentM), [g, env.site])
   const ground = env.terrain
   const lm = env.placed[0]
+  const followRef = useRef({ x: 0, z: 0 })
   const start = useMemo(() => ({ x: lm.x - 14, z: lm.z + 10 }), [lm])
   const ch = useRef<CharacterState>(newCharacter(start.x, start.z, ground, Math.atan2(-(lm.x - start.x), -(lm.z - start.z))))
   const look = useRef({ yaw: ch.current.yaw, pitch: -0.22, dist: 4.4, inspYaw: 0.6, inspPitch: -0.35, inspDist: 7 })
@@ -274,12 +343,14 @@ function Player({ env }: { env: SceneEnv }) {
     }
     surfaceDebug.character = () => ({ ...ch.current, camYaw: look.current.yaw, camPitch: look.current.pitch })
     surfaceDebug.camera = () => ({ pos: camera.position.toArray(), mode: useSurface.getState().camMode })
+    surfaceDebug.terrain = () => ({ daylightMs: env.site.daylight.ms, kind: ground.kind, product: ground.kind === 'dtm' ? (ground as DtmTerrain).meta.source.product : null, objects: env.placed.map((p) => ({ id: p.id, x: p.x, z: p.z, y: p.y, model: p.modelId })) })
     return () => {
       surfaceDebug.teleport = undefined
       surfaceDebug.character = undefined
       surfaceDebug.camera = undefined
+      surfaceDebug.terrain = undefined
     }
-  }, [ground, camera])
+  }, [ground, camera, env.placed])
 
   // input: keyboard, pointer lock / drag look, wheel zoom
   useEffect(() => {
@@ -383,14 +454,16 @@ function Player({ env }: { env: SceneEnv }) {
     const inp = frozen
       ? { forward: 0, right: 0, run: false, jump: false, camYaw: L.yaw }
       : {
-          forward: (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0),
-          right: (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0),
-          run: keys.has('ShiftLeft') || keys.has('ShiftRight'),
-          jump: keys.has('Space'),
+          forward: Math.max(-1, Math.min(1, (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + virtualInput.forward)),
+          right: Math.max(-1, Math.min(1, (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + virtualInput.right)),
+          run: keys.has('ShiftLeft') || keys.has('ShiftRight') || virtualInput.run,
+          jump: keys.has('Space') || virtualInput.jump,
           camYaw: L.yaw,
         }
     if (!S.paused) ch.current = stepCharacter(ch.current, inp, params, ground, env.colliders, dt)
     const c = ch.current
+    followRef.current.x = c.pos[0]
+    followRef.current.z = c.pos[2]
     const speed = Math.hypot(c.vel[0], c.vel[2])
 
     // inspection opens on the object's front (LRRR: its Earth-facing array; LM: the ladder side)
@@ -451,7 +524,8 @@ function Player({ env }: { env: SceneEnv }) {
       const local = S.component && anchors[S.component] ? anchors[S.component] : [0, p.modelId === 'lm-descent-stage' ? 2 : 0.5, 0]
       const v = new THREE.Vector3(...local).applyAxisAngle(new THREE.Vector3(0, 1, 0), p.rotY)
       target.set(p.x + v.x, p.y + v.y, p.z + v.z)
-      const dist = S.component ? Math.min(L.inspDist, p.modelId === 'lm-descent-stage' ? 5 : 2.2) : p.modelId === 'lm-descent-stage' ? L.inspDist * 1.5 : L.inspDist * 0.45
+      const big = p.modelId === 'lm-descent-stage' ? 1.5 : p.modelId === 'lrv' ? 0.95 : 0.45
+      const dist = S.component ? Math.min(L.inspDist, p.modelId === 'lm-descent-stage' ? 5 : p.modelId === 'lrv' ? 3 : 2.2) : L.inspDist * big
       desired.set(target.x + Math.sin(L.inspYaw) * Math.cos(L.inspPitch) * dist, target.y - Math.sin(L.inspPitch) * dist, target.z + Math.cos(L.inspYaw) * Math.cos(L.inspPitch) * dist)
     } else if (S.camMode === 'first') {
       const fwd = forwardOf(L.yaw)
@@ -532,6 +606,7 @@ function Player({ env }: { env: SceneEnv }) {
         shadow-normalBias={0.04}
       />
       <pointLight ref={inspectLight} intensity={0} distance={30} decay={1.2} color="#e8eeff" />
+      <DetailPatch terrain={env.terrain} follow={followRef} />
       <Astronaut ref={astro} visibleBody={useSurface((s) => s.camMode) !== 'first'} />
       <instancedMesh ref={prints} args={[printGeo, printMat, 500]} receiveShadow frustumCulled={false} />
       <points geometry={dust.geo} frustumCulled={false}>
@@ -547,13 +622,11 @@ function Hardware({ env }: { env: SceneEnv }) {
   const lmModel = useSurface((s) => s.lmModel)
   return (
     <>
-      {env.placed.map((p) =>
-        p.modelId ? (
-          <group key={p.id} position={[p.x, p.y, p.z]} rotation={[0, p.rotY, 0]}>
-            <HardwareModel modelId={p.modelId} highlight={panel?.objectId === p.id ? comp : null} tilt={p.tilt} variant={lmModel} />
-          </group>
-        ) : null,
-      )}
+      {env.placed.map((p) => (
+        <group key={p.id} position={[p.x, p.y, p.z]} rotation={[0, p.rotY, 0]}>
+          {p.modelId ? <HardwareModel modelId={p.modelId} highlight={panel?.objectId === p.id ? comp : null} tilt={p.tilt} variant={lmModel} /> : <PositionMarker />}
+        </group>
+      ))}
     </>
   )
 }
@@ -571,11 +644,11 @@ function Waypoint({ env }: { env: SceneEnv }) {
   )
 }
 
-export function SurfaceScene({ site }: { site: SurfaceSite }) {
+export function SurfaceScene({ site, dtm }: { site: SurfaceSite; dtm: DtmData }) {
   const simMs = useStore((s) => s.simMs)
   const quality = useStore((s) => s.quality)
   const lmModel = useSurface((s) => s.lmModel)
-  const env = useEnv(site, simMs, lmModel)
+  const env = useEnv(site, simMs, lmModel, dtm)
   const segments = quality === 'performance' ? 260 : quality === 'balanced' ? 400 : 520
   return (
     <Canvas

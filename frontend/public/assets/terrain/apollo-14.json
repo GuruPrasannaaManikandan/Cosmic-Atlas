@@ -1,0 +1,30 @@
+{
+ "site": "apollo-14",
+ "apollo": 14,
+ "width": 1501,
+ "height": 801,
+ "cellM": 2.0000000000006,
+ "x0": -1500.0,
+ "z0": -800.0,
+ "hMin": -1086.2795168708344,
+ "hMax": -945.8931930020183,
+ "encoding": "uint16 little-endian, row-major (rows = +z south); 0 = no data; h = hMin + (v - 1) / 65534 * (hMax - hMin)",
+ "heightRef": "metres relative to the 1737.4 km lunar sphere (DTM datum)",
+ "lmHeightDtm": -1061.8791707902105,
+ "lmElevationLroc": -1062,
+ "lmDeltaM": 0.12082920978946277,
+ "validFraction": 1.0,
+ "source": {
+  "product": "NAC_DTM_APOLLO14",
+  "productPage": "https://data.lroc.im-ldi.com/lroc/view_rdr_product/NAC_DTM_APOLLO14",
+  "file": "https://pds.mcp.nasa.gov/data/store/img/lunar_reconnaissance_orbiter/pds4/lroc/lro-l-lroc-5-rdr/LROLRC_2001/DATA/SDP/NAC_DTM/APOLLO14/NAC_DTM_APOLLO14.TIF",
+  "crs": "+proj=eqc +lat_ts=-3 +lat_0=0 +lon_0=180 +x_0=0 +y_0=0 +R=1737400 +units=m +no_defs=True",
+  "postSpacingM": 2.0000000000006,
+  "rowsRead": [
+   9947,
+   10751
+  ],
+  "bytesRead": 6933696,
+  "accuracy": "tied to LOLA (see the product README)"
+ }
+}

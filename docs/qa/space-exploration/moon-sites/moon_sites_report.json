@@ -1,0 +1,378 @@
+{
+ "checks": [
+  {
+   "check": "S0 the site picker offers all six Apollo landing sites",
+   "pass": true,
+   "detail": "6"
+  },
+  {
+   "check": "[tranquility-base] LROC NAC DTM terrain loaded (not the procedural fallback)",
+   "pass": true,
+   "detail": "NAC_DTM_APOLLO11"
+  },
+  {
+   "check": "[tranquility-base] a11-lm-descent: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a11-lm-descent",
+    "model": "lm-descent-stage"
+   }
+  },
+  {
+   "check": "[tranquility-base] a11-easep-pse: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a11-easep-pse",
+    "model": "easep-pse"
+   }
+  },
+  {
+   "check": "[tranquility-base] a11-lrrr: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a11-lrrr",
+    "model": "lrrr"
+   }
+  },
+  {
+   "check": "[tranquility-base] frame rate on the surface (headless, balanced)",
+   "pass": true,
+   "detail": "60.1"
+  },
+  {
+   "check": "[apollo-12] LROC NAC DTM terrain loaded (not the procedural fallback)",
+   "pass": true,
+   "detail": "NAC_DTM_APOLLO12"
+  },
+  {
+   "check": "[apollo-12] a12-lm-descent: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a12-lm-descent",
+    "model": "lm-descent-stage"
+   }
+  },
+  {
+   "check": "[apollo-12] a12-alsep: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a12-alsep",
+    "model": "alsep-central"
+   }
+  },
+  {
+   "check": "[apollo-12] frame rate on the surface (headless, balanced)",
+   "pass": true,
+   "detail": "60.0"
+  },
+  {
+   "check": "[apollo-14] LROC NAC DTM terrain loaded (not the procedural fallback)",
+   "pass": true,
+   "detail": "NAC_DTM_APOLLO14"
+  },
+  {
+   "check": "[apollo-14] a14-lm-descent: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a14-lm-descent",
+    "model": "lm-descent-stage"
+   }
+  },
+  {
+   "check": "[apollo-14] a14-alsep: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a14-alsep",
+    "model": "alsep-central"
+   }
+  },
+  {
+   "check": "[apollo-14] a14-lrrr: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a14-lrrr",
+    "model": "lrrr"
+   }
+  },
+  {
+   "check": "[apollo-14] frame rate on the surface (headless, balanced)",
+   "pass": true,
+   "detail": "60.3"
+  },
+  {
+   "check": "[apollo-15] LROC NAC DTM terrain loaded (not the procedural fallback)",
+   "pass": true,
+   "detail": "NAC_DTM_APOLLO15"
+  },
+  {
+   "check": "[apollo-15] a15-lm-descent: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a15-lm-descent",
+    "model": "lm-descent-stage"
+   }
+  },
+  {
+   "check": "[apollo-15] a15-alsep: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a15-alsep",
+    "model": "alsep-central"
+   }
+  },
+  {
+   "check": "[apollo-15] a15-lrrr: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a15-lrrr",
+    "model": "lrrr"
+   }
+  },
+  {
+   "check": "[apollo-15] a15-lrv: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a15-lrv",
+    "model": "lrv"
+   }
+  },
+  {
+   "check": "[apollo-15] frame rate on the surface (headless, balanced)",
+   "pass": true,
+   "detail": "60.0"
+  },
+  {
+   "check": "[apollo-16] LROC NAC DTM terrain loaded (not the procedural fallback)",
+   "pass": true,
+   "detail": "NAC_DTM_APOLLO16"
+  },
+  {
+   "check": "[apollo-16] a16-lm-descent: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a16-lm-descent",
+    "model": "lm-descent-stage"
+   }
+  },
+  {
+   "check": "[apollo-16] a16-alsep: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a16-alsep",
+    "model": "alsep-central"
+   }
+  },
+  {
+   "check": "[apollo-16] a16-lrv: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a16-lrv",
+    "model": "lrv"
+   }
+  },
+  {
+   "check": "[apollo-16] frame rate on the surface (headless, balanced)",
+   "pass": true,
+   "detail": "60.0"
+  },
+  {
+   "check": "[apollo-17] LROC NAC DTM terrain loaded (not the procedural fallback)",
+   "pass": true,
+   "detail": "NAC_DTM_APOLLO17"
+  },
+  {
+   "check": "[apollo-17] a17-lm-descent: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a17-lm-descent",
+    "model": "lm-descent-stage"
+   }
+  },
+  {
+   "check": "[apollo-17] a17-alsep: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a17-alsep",
+    "model": "alsep-central"
+   }
+  },
+  {
+   "check": "[apollo-17] a17-lrv: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a17-lrv",
+    "model": "lrv"
+   }
+  },
+  {
+   "check": "[apollo-17] a17-sep: discovered, E opens its record, story + specs",
+   "pass": true,
+   "detail": {
+    "near": "a17-sep",
+    "model": null
+   }
+  },
+  {
+   "check": "[apollo-17] frame rate on the surface (headless, balanced)",
+   "pass": true,
+   "detail": "60.0"
+  },
+  {
+   "check": "T1 touch device: on-screen joystick shown and drives the astronaut",
+   "pass": true,
+   "detail": {
+    "moved_m": 2.17
+   }
+  },
+  {
+   "check": "T2 phone layout: no horizontal overflow on the surface",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "T3 desktop (mouse) keeps the keyboard UI: no on-screen joystick",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "Z1 no console errors",
+   "pass": true,
+   "detail": []
+  }
+ ],
+ "errors": [],
+ "sites": {
+  "tranquility-base": {
+   "product": "NAC_DTM_APOLLO11",
+   "fps": 60.1,
+   "objects": [
+    {
+     "id": "a11-lm-descent",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a11-easep-pse",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a11-lrrr",
+     "discovered": true,
+     "story": true
+    }
+   ]
+  },
+  "apollo-12": {
+   "product": "NAC_DTM_APOLLO12",
+   "fps": 60.0,
+   "objects": [
+    {
+     "id": "a12-lm-descent",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a12-alsep",
+     "discovered": true,
+     "story": true
+    }
+   ]
+  },
+  "apollo-14": {
+   "product": "NAC_DTM_APOLLO14",
+   "fps": 60.3,
+   "objects": [
+    {
+     "id": "a14-lm-descent",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a14-alsep",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a14-lrrr",
+     "discovered": true,
+     "story": true
+    }
+   ]
+  },
+  "apollo-15": {
+   "product": "NAC_DTM_APOLLO15",
+   "fps": 60.0,
+   "objects": [
+    {
+     "id": "a15-lm-descent",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a15-alsep",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a15-lrrr",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a15-lrv",
+     "discovered": true,
+     "story": true
+    }
+   ]
+  },
+  "apollo-16": {
+   "product": "NAC_DTM_APOLLO16",
+   "fps": 60.0,
+   "objects": [
+    {
+     "id": "a16-lm-descent",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a16-alsep",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a16-lrv",
+     "discovered": true,
+     "story": true
+    }
+   ]
+  },
+  "apollo-17": {
+   "product": "NAC_DTM_APOLLO17",
+   "fps": 60.0,
+   "objects": [
+    {
+     "id": "a17-lm-descent",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a17-alsep",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a17-lrv",
+     "discovered": true,
+     "story": true
+    },
+    {
+     "id": "a17-sep",
+     "discovered": true,
+     "story": true
+    }
+   ]
+  }
+ },
+ "touchOnDesktop": false
+}

@@ -1,16 +1,17 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useStore } from '../store/store'
 import { OBJECT_BY_ID, MISSION_BY_ID, dateMs } from '../missions'
 import { SITE_BY_ID, SURFACE_BODIES } from './sites'
 import { useSurface } from './surfaceState'
-import { SurfaceScene } from './SurfaceScene'
+import { SurfaceScene, DtmData } from './SurfaceScene'
+import { loadDtm } from './terrain'
+import { TouchControls, useTouchDevice } from './TouchControls'
 import { MiniMap, SurfaceMap } from './SurfaceMap'
 import { DiscoveryPanel } from './DiscoveryPanel'
 import { sunDirectionAtLunarSite, elevationDeg, azimuthDeg } from './lighting'
 import { bearingDeg } from './geo'
 import { preloadNasaModel } from './models/NasaModel'
 
-const MOONWALK_MS = dateMs('1969-07-21T03:30:00Z')
 
 function Compass() {
   const site = SITE_BY_ID[useSurface((s) => s.siteId)!]
@@ -73,7 +74,7 @@ function Hud() {
       {sunEl <= 0 && (
         <div className="surf-night glass" role="status">
           <b>Lunar night at this date.</b> The Sun is {Math.abs(sunEl).toFixed(0)}° below the horizon; only earthshine lights the ground.
-          <button className="btn small" onClick={() => useStore.getState().setSim(MOONWALK_MS)}>☀ Go to the Apollo 11 moonwalk (21 Jul 1969)</button>
+          <button className="btn small" onClick={() => useStore.getState().setSim(site.daylight.ms)}>☀ Go to {site.daylight.label} ({new Date(site.daylight.ms).toUTCString().slice(5, 16)})</button>
         </div>
       )}
       {S.banner && (
@@ -144,17 +145,42 @@ function Help() {
 
 export default function SurfaceExperience() {
   const siteId = useStore((s) => s.surfaceSiteId)
+  const touch = useTouchDevice()
   const S = useSurface()
+  // measured terrain must be ready before the scene (and the character controller) start
+  const [dtm, setDtm] = useState<{ siteId: string; data: DtmData; error?: string } | null>(null)
   useEffect(() => {
     preloadNasaModel('apollo-lm')
     useSurface.getState().reset(siteId)
-    return () => useSurface.getState().reset(null)
+    const site = siteId ? SITE_BY_ID[siteId] : null
+    let live = true
+    if (site?.terrain.kind === 'dtm') {
+      setDtm(null)
+      loadDtm(site.terrain.file)
+        .then((d) => live && setDtm({ siteId: site.id, data: d }))
+        .catch((e) => live && setDtm({ siteId: site.id, data: null, error: String(e?.message ?? e) }))
+    } else if (site) setDtm({ siteId: site.id, data: null })
+    return () => {
+      live = false
+      useSurface.getState().reset(null)
+    }
   }, [siteId])
   const site = siteId ? SITE_BY_ID[siteId] : null
   if (!site || S.siteId !== siteId) return null
+  if (!dtm || dtm.siteId !== site.id)
+    return (
+      <div className="surface-root" data-testid="surface-root">
+        <div className="surf-intro" role="status">
+          <span className="eyebrow">PREPARING THE SURFACE</span>
+          <b>{site.name}</b>
+          <span className="muted">Loading the LROC terrain model…</span>
+        </div>
+      </div>
+    )
   return (
-    <div className="surface-root" data-testid="surface-root">
-      <SurfaceScene site={site} />
+    <div className="surface-root" data-testid="surface-root" data-touch={touch ? 'on' : undefined}>
+      <SurfaceScene site={site} dtm={dtm.data} />
+      {dtm.error && <p className="surf-terrain-error" role="status">Measured terrain could not be loaded ({dtm.error}); showing illustrative terrain instead.</p>}
       {S.intro ? (
         <div className="surf-intro" role="status">
           <span className="eyebrow">DESCENT</span>
@@ -165,6 +191,7 @@ export default function SurfaceExperience() {
       ) : (
         <Hud />
       )}
+      {touch && !S.intro && <TouchControls />}
       {S.mapOpen && <SurfaceMap site={site} />}
       {S.panel && <DiscoveryPanel />}
       {S.paused && !S.helpOpen && <PauseMenu />}

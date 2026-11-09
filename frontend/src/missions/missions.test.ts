@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { MISSIONS, OBJECTS, MISSION_BY_ID, OBJECT_BY_ID, SOURCES, validateCatalog, dateMs, timelineEvents, missionsActiveAt } from './index'
-import { STORIES } from './stories'
+import { STORIES, storyFor } from './stories'
 
 describe('mission catalogue', () => {
   it('passes validation (sources resolve, dates ordered, non-NASA labelled, facts consistent)', () => {
@@ -69,6 +69,19 @@ describe('mission catalogue', () => {
         p.sources.forEach((id) => expect(SOURCES[id], id).toBeTruthy())
       }
     }
+  })
+
+  it('every placeable object gets a story built only from cited catalogue facts', () => {
+    for (const o of OBJECTS) {
+      const st = storyFor(o.id)!
+      expect(st.concise.length).toBeGreaterThan(0)
+      for (const p of st.expanded) {
+        expect(p.sources.length, `${o.id} ${p.part}`).toBeGreaterThan(0)
+        p.sources.forEach((id) => expect(SOURCES[id], id).toBeTruthy())
+      }
+    }
+    expect(storyFor('a15-lrv')!.concise.join(' ')).toContain('27.8 km')
+    expect(storyFor('a17-alsep')!.expanded.find((p) => p.part === 'end')!.text).toContain('30 September 1977')
   })
 
   it('has a broad multi-destination catalogue', () => {

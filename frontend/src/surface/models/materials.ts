@@ -96,3 +96,22 @@ export const MAT = {
   visor: () => new THREE.MeshPhysicalMaterial({ color: '#d9a640', metalness: 1, roughness: 0.08, clearcoat: 1, clearcoatRoughness: 0.05 }),
   helmetShell: () => new THREE.MeshPhysicalMaterial({ color: '#ffffff', metalness: 0, roughness: 0.05, transmission: 0.0, transparent: true, opacity: 0.22, clearcoat: 1 }),
 }
+
+/** LRV tyre: woven zinc-coated steel mesh with titanium chevrons (NSSDCA), as a texture around the tread */
+export function lrvTyreMap(): THREE.Texture {
+  return canvasTex('lrv-tyre', 256, (g, s) => {
+    g.fillStyle = '#3c3e42'
+    g.fillRect(0, 0, s, s)
+    g.strokeStyle = '#a9adb3'
+    g.lineWidth = 1.2
+    for (let i = -s; i < 2 * s; i += 8) {
+      g.beginPath(); g.moveTo(i, 0); g.lineTo(i + s, s); g.stroke()
+      g.beginPath(); g.moveTo(i, s); g.lineTo(i + s, 0); g.stroke()
+    }
+    // chevrons covering about half the contact area
+    g.fillStyle = '#c9c6bd'
+    for (let y = 0; y < s; y += 32) {
+      g.beginPath(); g.moveTo(s * 0.15, y + 4); g.lineTo(s * 0.5, y + 16); g.lineTo(s * 0.85, y + 4); g.lineTo(s * 0.85, y + 12); g.lineTo(s * 0.5, y + 24); g.lineTo(s * 0.15, y + 12); g.closePath(); g.fill()
+    }
+  }, 1)
+}

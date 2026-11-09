@@ -1,6 +1,6 @@
 import { Component, ReactNode, Suspense, useMemo } from 'react'
 import * as THREE from 'three'
-import { MAT } from './materials'
+import { MAT, lrvTyreMap } from './materials'
 import { NasaModel } from './NasaModel'
 
 /**
@@ -22,6 +22,8 @@ export const COMPONENT_ANCHORS: Record<string, Record<string, [number, number, n
   'lm-descent-stage-nasa': { body: [0, 1.6, 0], legs: [0, 0.5, 2.8], ladder: [0, 1.2, 2.47], engine: [0, 0.7, 0] },
   'easep-pse': { seismometer: [0, 0.35, 0], 'solar-panels': [0.9, 0.45, 0], antenna: [0.15, 0.9, 0.2], 'dust-detector': [-0.2, 0.45, -0.25] },
   lrrr: { array: [0, 0.55, 0], support: [0, 0.2, 0.15] },
+  lrv: { wheels: [0.92, 0.41, 1.15], controls: [0, 0.95, -0.1], antenna: [0, 1.45, 1.25], chassis: [0, 0.5, 0] },
+  'alsep-central': { antenna: [0.1, 0.85, 0], station: [0, 0.35, 0] },
 }
 /** obstacle footprint for the controller: [x, z, radius, height] in model space */
 export const COLLIDERS: Record<string, [number, number, number, number][]> = {
@@ -41,6 +43,12 @@ export const COLLIDERS: Record<string, [number, number, number, number][]> = {
   ],
   'easep-pse': [[0, 0, 0.75, 0.9]],
   lrrr: [[0, 0, 0.45, 0.8]],
+  lrv: [
+    [0, -1.0, 1.0, 1.2],
+    [0, 0, 1.0, 1.2],
+    [0, 1.0, 1.0, 1.2],
+  ],
+  'alsep-central': [[0, 0, 0.6, 0.9]],
 }
 
 const glow = (mat: THREE.MeshStandardMaterial, on: boolean) => {
@@ -242,6 +250,133 @@ function FocusMarker({ at }: { at: [number, number, number] }) {
   )
 }
 
+/**
+ * Lunar Roving Vehicle — procedural reconstruction to NSSDCA numbers: 3.1 m frame, 2.3 m wheelbase, 1.14 m maximum
+ * height (taken to exclude the antenna mast), 81.8 cm x 23 cm wire-mesh wheels, 36 cm ground clearance, two seats,
+ * T-handle controller between them, mesh dish antenna on a mast at the front centre, communications relay unit.
+ * Track width (1.83 m here), seat/console shapes and colours are approximations. Model +z = front.
+ */
+export function LunarRovingVehicle({ highlight }: { highlight?: string | null }) {
+  const alu = useMemo(() => MAT.aluminium(), [])
+  const dark = useMemo(() => MAT.darkMetal(), [])
+  const mesh = useMemo(() => {
+    const t = lrvTyreMap().clone()
+    t.needsUpdate = true
+    t.repeat.set(1, 10)
+    return new THREE.MeshStandardMaterial({ color: '#ffffff', map: t, metalness: 0.6, roughness: 0.6 })
+  }, [])
+  const webbing = useMemo(() => new THREE.MeshStandardMaterial({ color: '#c8c3b4', roughness: 0.9 }), [])
+  const gold = useMemo(() => MAT.gold(), [])
+  const dish = useMemo(() => new THREE.MeshStandardMaterial({ color: '#d8d8d2', metalness: 0.4, roughness: 0.5, side: THREE.DoubleSide, wireframe: true }), [])
+  const wheelM = glow(mesh, highlight === 'wheels')
+  const chassisM = glow(alu, highlight === 'chassis')
+  const ctrlM = glow(dark, highlight === 'controls')
+  const antM = glow(alu, highlight === 'antenna')
+  const R = 0.409, WIDTH = 0.23, BASE = 2.3, TRACK = 1.83, CLEAR = 0.36
+  const wheels: [number, number][] = [[-TRACK / 2, -BASE / 2], [TRACK / 2, -BASE / 2], [-TRACK / 2, BASE / 2], [TRACK / 2, BASE / 2]]
+  return (
+    <group>
+      {/* three-part chassis: centre section + front and rear sections (3.1 m) */}
+      <mesh position={[0, CLEAR + 0.08, 0]} material={chassisM} castShadow receiveShadow>
+        <boxGeometry args={[1.1, 0.12, 3.1]} />
+      </mesh>
+      {[-1.2, 1.2].map((z) => (
+        <mesh key={z} position={[0, CLEAR + 0.2, z]} material={chassisM} castShadow>
+          <boxGeometry args={[1.2, 0.22, 0.5]} />
+        </mesh>
+      ))}
+      {/* wheels with fenders */}
+      {wheels.map(([x, z], i) => (
+        <group key={i} position={[x, R, z]}>
+          <mesh rotation={[0, 0, Math.PI / 2]} material={wheelM} castShadow receiveShadow>
+            <cylinderGeometry args={[R, R, WIDTH, 28, 1, false]} />
+          </mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]} material={gold} castShadow>
+            <cylinderGeometry args={[R * 0.32, R * 0.32, WIDTH + 0.02, 16]} />
+          </mesh>
+          <mesh position={[0, R * 0.55, 0]} rotation={[0, 0, Math.PI / 2]} material={chassisM} castShadow>
+            <cylinderGeometry args={[R + 0.06, R + 0.06, WIDTH + 0.08, 20, 1, true, -Math.PI / 2, Math.PI]} />
+          </mesh>
+          <Strut from={[0, 0, 0]} to={[-Math.sign(x) * (TRACK / 2 - 0.55), CLEAR + 0.05 - R, 0]} r={0.025} mat={chassisM} />
+        </group>
+      ))}
+      {/* two foldable seats (tubular frame + nylon webbing) */}
+      {[-0.32, 0.32].map((x) => (
+        <group key={x} position={[x, CLEAR + 0.16, -0.25]}>
+          <mesh position={[0, 0.06, 0]} material={webbing} castShadow>
+            <boxGeometry args={[0.46, 0.04, 0.5]} />
+          </mesh>
+          <mesh position={[0, 0.34, -0.26]} rotation={[-0.25, 0, 0]} material={webbing} castShadow>
+            <boxGeometry args={[0.46, 0.55, 0.04]} />
+          </mesh>
+        </group>
+      ))}
+      {/* T-shaped hand controller between the seats, display console in front */}
+      <Strut from={[0, CLEAR + 0.22, 0.05]} to={[0, CLEAR + 0.62, 0.05]} r={0.02} mat={ctrlM} />
+      <Strut from={[-0.07, CLEAR + 0.62, 0.05]} to={[0.07, CLEAR + 0.62, 0.05]} r={0.02} mat={ctrlM} />
+      <mesh position={[0, CLEAR + 0.62, 0.42]} rotation={[-0.5, 0, 0]} material={ctrlM} castShadow>
+        <boxGeometry args={[0.5, 0.36, 0.08]} />
+      </mesh>
+      {/* communications relay unit + high-gain mesh dish on a mast at the front centre */}
+      <mesh position={[0, CLEAR + 0.42, 1.25]} material={webbing} castShadow>
+        <boxGeometry args={[0.42, 0.3, 0.3]} />
+      </mesh>
+      <Strut from={[0, CLEAR + 0.4, 1.25]} to={[0, 1.4, 1.25]} r={0.018} mat={antM} />
+      {/* shallow mesh dish attached at the mast top (opening toward Earth, approximate pointing) */}
+      <group position={[0, 1.42, 1.25]} rotation={[-0.9, 0, 0]}>
+        <mesh position={[0, 0.06, 0]} material={dish} castShadow>
+          <cylinderGeometry args={[0.48, 0.06, 0.12, 20, 1, true]} />
+        </mesh>
+      </group>
+    </group>
+  )
+}
+
+/**
+ * ALSEP central station — procedural: a 25 kg box (NSSDCA) under a raised thermal sunshield, with the 58 cm,
+ * 3.8 cm diameter axial-helical antenna. Box and sunshield sizes are approximate.
+ */
+export function AlsepCentralStation({ highlight }: { highlight?: string | null }) {
+  const silver = useMemo(() => MAT.silverFoil(), [])
+  const alu = useMemo(() => MAT.aluminium(), [])
+  const dark = useMemo(() => MAT.darkMetal(), [])
+  const box = glow(silver, highlight === 'station')
+  const ant = glow(dark, highlight === 'antenna')
+  return (
+    <group>
+      <mesh position={[0, 0.2, 0]} material={box} castShadow receiveShadow>
+        <boxGeometry args={[0.6, 0.32, 0.42]} />
+      </mesh>
+      {[[-0.28, -0.2], [0.28, -0.2], [-0.28, 0.2], [0.28, 0.2]].map(([x, z], i) => (
+        <Strut key={i} from={[x, 0.36, z]} to={[x, 0.62, z]} r={0.012} mat={alu} />
+      ))}
+      <mesh position={[0, 0.64, 0]} material={silver} castShadow>
+        <boxGeometry args={[0.75, 0.02, 0.6]} />
+      </mesh>
+      <Strut from={[0.1, 0.66, 0]} to={[0.1, 0.76, 0]} r={0.02} mat={alu} />
+      <mesh position={[0.1, 0.93, -0.1]} rotation={[0.6, 0, 0]} material={ant} castShadow>
+        <cylinderGeometry args={[0.019, 0.019, 0.58, 10]} />
+      </mesh>
+    </group>
+  )
+}
+
+/** a catalogued object without a sourced model: a plain position beacon, never an invented shape */
+export function PositionMarker() {
+  return (
+    <group>
+      <mesh position={[0, 0.02, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.35, 0.5, 36]} />
+        <meshBasicMaterial color="#ffcf5a" transparent opacity={0.85} toneMapped={false} />
+      </mesh>
+      <mesh position={[0, 1, 0]}>
+        <cylinderGeometry args={[0.03, 0.03, 2, 8]} />
+        <meshBasicMaterial color="#ffcf5a" transparent opacity={0.6} toneMapped={false} />
+      </mesh>
+    </group>
+  )
+}
+
 export function HardwareModel({ modelId, highlight, tilt, variant = 'nasa' }: { modelId: string; highlight?: string | null; tilt?: number; variant?: 'nasa' | 'reconstruction' }) {
   if (modelId === 'lm-descent-stage') {
     const recon = <LunarModuleDescentStage highlight={highlight} />
@@ -258,5 +393,7 @@ export function HardwareModel({ modelId, highlight, tilt, variant = 'nasa' }: { 
   }
   if (modelId === 'easep-pse') return <EasepStation highlight={highlight} />
   if (modelId === 'lrrr') return <Retroreflector highlight={highlight} tiltRad={tilt ?? 0.4} />
+  if (modelId === 'lrv') return <LunarRovingVehicle highlight={highlight} />
+  if (modelId === 'alsep-central') return <AlsepCentralStation highlight={highlight} />
   return null
 }

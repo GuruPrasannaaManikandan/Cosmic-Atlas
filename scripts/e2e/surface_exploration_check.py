@@ -223,7 +223,7 @@ async def main(base: str, out: Path) -> int:
         await page.wait_for_timeout(700)
         mp = page.locator(".surf-map")
         mtxt = await mp.inner_text()
-        check("M1 M opens the surface map listing the hardware with distances", "EASEP" in mtxt and " m ·" in mtxt and "procedural" in mtxt.lower(), mtxt[:160])
+        check("M1 M opens the surface map listing the hardware with distances and the terrain source", "EASEP" in mtxt and " m ·" in mtxt and "LROC NAC" in mtxt, mtxt[:160])
         await page.locator(".surf-map-list button", has_text="EASEP").click()
         wp = await page.evaluate(f"() => {SU}.waypointId")
         await page.get_by_role("button", name="Zoom in").click()
@@ -273,6 +273,8 @@ async def main(base: str, out: Path) -> int:
         await page.wait_for_timeout(400)
         check("R2 Escape pauses with a menu", await page.locator(".surf-pause").count() == 1)
         await shot("s17_pause")
+        # the night shortcut used the site's sourced daylight moment; go back to the descent time so absolute positions compare
+        await page.evaluate(f"() => {ST}.setSim({MOONWALK})")
         await page.get_by_role("button", name="Return to orbit").last.click()
         await page.wait_for_timeout(1500)
         after = await page.evaluate("() => ({ pos: [...window.__nav.pos], follow: window.__nav.followId, sel: window.__store.getState().selectedId, surf: window.__store.getState().surfaceSiteId })")

@@ -292,8 +292,7 @@ export function SurfaceMap({ site }: { site: SurfaceSite }) {
               })}
             </ul>
             <p className="surf-map-note">
-              Click a marker or a row to set a waypoint. Positions: LRO measurements (NSSDCA / LROC, ±0.3–0.4 m). <b>Terrain shading is procedural and illustrative</b> — not LOLA or LROC NAC
-              elevation data.
+              Click a marker or a row to set a waypoint. {site.terrainProvenance}
             </p>
           </aside>
         </div>

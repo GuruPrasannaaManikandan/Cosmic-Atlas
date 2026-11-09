@@ -90,3 +90,31 @@ export const STORIES: Record<string, Story> = {
     ],
   },
 }
+
+/**
+ * A story for any catalogued object: the handcrafted one when it exists, otherwise one assembled ONLY from the
+ * object's and its mission's catalogue facts (design, mission summary, landing, sourced status), citing the same
+ * sources. It never adds anything that is not in the catalogue.
+ */
+import { OBJECT_BY_ID, MISSION_BY_ID } from './index'
+
+export function storyFor(objectId: string): Story | null {
+  if (STORIES[objectId]) return STORIES[objectId]
+  const o = OBJECT_BY_ID[objectId]
+  if (!o) return null
+  const m = MISSION_BY_ID[o.missionId]
+  const landing = m.landing?.value ? new Date(m.landing.value.length > 10 ? m.landing.value : m.landing.value + 'T00:00:00Z').toUTCString().slice(5, 16) : null
+  const status = o.currentStatus.value
+  const parts: StoryPart[] = [
+    { part: 'introduction', heading: 'What you are looking at', text: `This is the ${o.name}, left here by ${m.name}.`, sources: o.sources },
+    { part: 'design', heading: 'How it worked', text: o.design, sources: [...new Set([...o.sources, ...(o.massKg.sources ?? []), ...(o.dimensions.sources ?? [])])] },
+    ...(landing ? [{ part: 'journey' as const, heading: 'The mission', text: `${m.name} landed on ${landing}. ${m.summary}`, sources: [...(m.landing?.sources ?? []), ...m.launch.sources] }] : []),
+    ...(status ? [{ part: 'end' as const, heading: 'Where it is now', text: `Status: ${status}.`, sources: o.currentStatus.sources.length ? o.currentStatus.sources : o.sources }] : []),
+  ]
+  return {
+    objectId,
+    narrator: 'Astronaut guide',
+    concise: [parts[0].text, o.design, ...(status ? [`Today it is ${status.replace(/^on the lunar surface/, 'still on the lunar surface')}.`] : [])],
+    expanded: parts.filter((p) => p.sources.length),
+  }
+}

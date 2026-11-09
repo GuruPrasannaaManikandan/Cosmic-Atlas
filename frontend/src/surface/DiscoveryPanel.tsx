@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { OBJECT_BY_ID, MISSION_BY_ID, SOURCES, Fact, dateMs } from '../missions'
-import { STORIES } from '../missions/stories'
+import { storyFor } from '../missions/stories'
 import { useStore } from '../store/store'
 import { useSurface, PanelTab } from './surfaceState'
 import { VALID_FROM, VALID_TO } from '../astro/ephemeris'
@@ -98,7 +98,7 @@ export function DiscoveryPanel() {
   const [expanded, setExpanded] = useState(false)
   const obj = OBJECT_BY_ID[panel.objectId]
   const mission = MISSION_BY_ID[obj.missionId]
-  const story = STORIES[obj.id]
+  const story = useMemo(() => storyFor(obj.id), [obj.id])
   const lines = useMemo(() => (story ? (expanded ? story.expanded.map((p) => `${p.heading}. ${p.text}`) : story.concise) : []), [story, expanded])
   const tab = panel.tab
   const loc = obj.location.value

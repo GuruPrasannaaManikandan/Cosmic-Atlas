@@ -1,4 +1,4 @@
-import { MISSION_BY_ID, OBJECT_BY_ID, Fact } from '../missions'
+import { MISSION_BY_ID, OBJECT_BY_ID, Fact, dateMs } from '../missions'
 import { v } from '../missions/catalog/facts'
 import { GeoOrigin, toLocal } from './geo'
 
@@ -30,6 +30,11 @@ export interface PlacedObject {
   interactM: number
 }
 
+export type SiteTerrainSpec =
+  | { kind: 'procedural'; seed: number }
+  /** LROC NAC DTM heightmap extracted by scripts/terrain/extract_lroc_dtm.py (falls back to procedural if it fails to load) */
+  | { kind: 'dtm'; file: string; seed: number; product: string; postSpacingM: number }
+
 export interface SurfaceSite {
   id: string
   bodyId: string
@@ -38,9 +43,11 @@ export interface SurfaceSite {
   origin: GeoOrigin & { elevationM: number }
   /** half-size of the walkable square (m) */
   halfExtentM: number
-  terrainSeed: number
+  terrain: SiteTerrainSpec
   terrainProvenance: string
   objects: PlacedObject[]
+  /** a sourced daylight moment for the "lunar night" shortcut, and its label */
+  daylight: { ms: number; label: string }
   /** environment implemented and explorable now */
   available: boolean
 }
@@ -55,29 +62,60 @@ function place(site: Omit<SurfaceSite, 'objects'>, specs: { id: string; heading:
   return { ...site, objects }
 }
 
-const a11lm = OBJECT_BY_ID['a11-lm-descent'].location.value!
+const DTM_NOTE = (product: string, post: number) =>
+  `Terrain: LROC NAC digital terrain model ${product} (${post} m posts, tied to LOLA; NASA PDS). Rocks smaller than the post spacing are illustrative. Hardware at LRO-measured positions (LROC 2016 / NSSDCA 2017).`
 
-export const SURFACE_SITES: SurfaceSite[] = [
-  place(
+/** standard Apollo site: origin at the LM, LROC DTM terrain, LM + every catalogued object with a sourced position */
+function apolloSite(n: number, id: string, name: string, halfExtentM: number, post: number, extra: { id: string; notice: number; interact: number; heading?: number }[]): SurfaceSite {
+  const lmId = `a${n}-lm-descent`
+  const lm = OBJECT_BY_ID[lmId].location.value!
+  const mission = MISSION_BY_ID[`apollo-${n}`]
+  const landing = mission.landing!.value!
+  // the day after the (date-only) landing: still early lunar morning, sunlit
+  const ms = landing.length > 10 ? dateMs(landing) + 7 * 3600e3 : dateMs(landing) + 36 * 3600e3
+  const product = `NAC_DTM_APOLLO${n}`
+  return place(
     {
-      id: 'tranquility-base',
+      id,
       bodyId: 'moon',
-      name: 'Tranquility Base — Apollo 11',
-      missionIds: ['apollo-11'],
-      origin: { latDeg: a11lm.latDeg, lonEastDeg: a11lm.lonEastDeg, radiusM: SURFACE_BODIES.moon.radiusM, elevationM: a11lm.elevationM ?? 0 },
-      halfExtentM: 300,
-      terrainSeed: 1969,
-      terrainProvenance:
-        'Terrain is PROCEDURAL (seeded noise and craters shaped like mare regolith), not a LOLA or LROC NAC elevation model. Hardware positions are the LRO-measured coordinates (NSSDCA 2017 / LROC 2016, ±0.3–0.4 m).',
+      name,
+      missionIds: [`apollo-${n}`],
+      origin: { latDeg: lm.latDeg, lonEastDeg: lm.lonEastDeg, radiusM: SURFACE_BODIES.moon.radiusM, elevationM: lm.elevationM ?? 0 },
+      halfExtentM,
+      terrain: { kind: 'dtm', file: `/assets/terrain/${id}.json`, seed: 1960 + n, product, postSpacingM: post },
+      terrainProvenance: DTM_NOTE(product, post),
+      daylight: { ms, label: landing.length > 10 ? `the ${mission.name} moonwalk` : `the day after the ${mission.name} landing` },
       available: true,
     },
-    [
-      // LM heading is NOT sourced: approximate, with the ladder (model +z) facing west as in the crew photographs
-      { id: 'a11-lm-descent', heading: 90, notice: 40, interact: 7 },
-      { id: 'a11-easep-pse', heading: 0, notice: 18, interact: 3.5 },
-      { id: 'a11-lrrr', heading: 90, notice: 18, interact: 3 },
-    ],
-  ),
+    // LM heading is NOT sourced: approximate (ladder side facing west, as at Apollo 11)
+    [{ id: lmId, heading: 90, notice: 40, interact: 7 }, ...extra.map((e) => ({ id: e.id, heading: e.heading ?? 0, notice: e.notice, interact: e.interact }))],
+  )
+}
+
+export const SURFACE_SITES: SurfaceSite[] = [
+  apolloSite(11, 'tranquility-base', 'Tranquility Base — Apollo 11', 780, 2, [
+    { id: 'a11-easep-pse', notice: 18, interact: 3.5 },
+    { id: 'a11-lrrr', notice: 18, interact: 3, heading: 90 },
+  ]),
+  apolloSite(12, 'apollo-12', 'Oceanus Procellarum — Apollo 12', 780, 2, [{ id: 'a12-alsep', notice: 22, interact: 3.5 }]),
+  apolloSite(14, 'apollo-14', 'Fra Mauro — Apollo 14', 780, 2, [
+    { id: 'a14-alsep', notice: 22, interact: 3.5 },
+    { id: 'a14-lrrr', notice: 18, interact: 3 },
+  ]),
+  apolloSite(15, 'apollo-15', 'Hadley–Apennine — Apollo 15', 780, 2, [
+    { id: 'a15-alsep', notice: 22, interact: 3.5 },
+    { id: 'a15-lrrr', notice: 18, interact: 3 },
+    { id: 'a15-lrv', notice: 28, interact: 4.5 },
+  ]),
+  apolloSite(16, 'apollo-16', 'Descartes Highlands — Apollo 16', 380, 2, [
+    { id: 'a16-alsep', notice: 22, interact: 3.5 },
+    { id: 'a16-lrv', notice: 28, interact: 4.5 },
+  ]),
+  apolloSite(17, 'apollo-17', 'Taurus–Littrow — Apollo 17', 980, 5, [
+    { id: 'a17-alsep', notice: 22, interact: 3.5 },
+    { id: 'a17-lrv', notice: 28, interact: 4.5 },
+    { id: 'a17-sep', notice: 18, interact: 3 },
+  ]),
 ]
 
 /** other catalogued landing sites, listed (not yet explorable) so the picker shows the full map of what exists */

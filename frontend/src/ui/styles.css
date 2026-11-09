@@ -4334,3 +4334,14 @@ option { background: #070d1e; color: #fff; }
 .archive-info .fidelity.high b { color: var(--ok); }
 .archive-info .fidelity.medium b { color: var(--warm); }
 .archive-info .fidelity.low b { color: var(--err); }
+
+/* touch controls (phones / tablets) */
+.touch-controls { position: absolute; inset: auto 0 0 0; height: 0; pointer-events: none; }
+.touch-stick { position: absolute; left: 22px; bottom: 34px; width: 128px; height: 128px; border-radius: 50%; background: rgba(8, 14, 30, 0.45); border: 2px solid var(--line-hi); pointer-events: auto; touch-action: none; }
+.touch-knob { position: absolute; left: 39px; top: 39px; width: 50px; height: 50px; border-radius: 50%; background: rgba(103, 232, 249, 0.55); border: 2px solid #fff; }
+.touch-buttons { position: absolute; right: 18px; bottom: 40px; display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
+.touch-btn { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--line-hi); background: rgba(8, 14, 30, 0.6); color: var(--txt); font-weight: 700; touch-action: manipulation; }
+.touch-btn.on { background: rgba(103, 232, 249, 0.3); }
+.surface-root[data-touch='on'] .surf-minimap { left: auto; right: 16px; top: 214px; bottom: auto; width: 110px; height: 110px; }
+.surface-root[data-touch='on'] .surf-keys { display: none; }
+.surf-terrain-error { position: absolute; left: 50%; top: 96px; transform: translateX(-50%); margin: 0; padding: 6px 12px; border-radius: 8px; background: rgba(60, 20, 10, 0.85); color: #fdd; font-size: 12px; }
