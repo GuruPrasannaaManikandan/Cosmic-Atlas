@@ -4168,3 +4168,131 @@ option { background: #070d1e; color: #fff; }
   .panel, .datapanel { bottom: calc(var(--dock-h, 112px) + var(--gutter, 12px) + 8px); }
   .app[data-timebar] .panel, .app[data-timebar] .datapanel { bottom: calc(var(--dock-h, 112px) + var(--timebar-h, 96px) + var(--gutter, 12px) + 16px); }
 }
+
+/* mission milestone picker in the time bar */
+.timebar .mission-events { max-width: 230px; text-overflow: ellipsis; }
+@media (max-width: 760px) { .timebar .mission-events { max-width: 150px; } }
+
+/* ===================================================================== planetary surface exploration */
+.app[data-surface='on'] > *:not(.surface-root) { visibility: hidden !important; pointer-events: none !important; }
+.surface-root { position: fixed; inset: 0; z-index: 120; background: #000; visibility: visible !important; pointer-events: auto !important; }
+.surface-root canvas { display: block; }
+.surface-root .small, .site-picker .small, .discovery .small { font-size: 12px; }
+.surface-root kbd { display: inline-block; min-width: 20px; padding: 1px 6px; border: 1px solid var(--line-hi); border-radius: 5px; background: rgba(10, 20, 40, 0.8); font: 600 11px var(--font-mono); color: var(--txt); text-align: center; }
+
+.surf-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; flex-wrap: wrap; }
+.surf-top > div:first-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.surf-top b { font-size: 16px; }
+.surf-top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.surf-compass { position: absolute; top: 86px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 32px)); height: 30px; border-radius: 999px; background: rgba(4, 8, 18, 0.62); border: 1px solid var(--line); overflow: hidden; pointer-events: none; }
+.surf-compass span { position: absolute; top: 7px; transform: translateX(-50%); font: 600 11px var(--font-mono); color: var(--mut); }
+.surf-compass span.major { color: var(--txt); font-size: 12px; }
+.surf-compass i.obj { position: absolute; bottom: 3px; width: 7px; height: 7px; border-radius: 50%; background: var(--warm); transform: translateX(-50%); }
+.surf-compass i.obj.wp { background: #58b6ff; box-shadow: 0 0 8px #58b6ff; width: 9px; height: 9px; }
+.surf-compass .needle { position: absolute; left: 50%; top: -1px; transform: translateX(-50%); font: 700 9px var(--font-mono); color: var(--cy); border-top: 3px solid var(--cy); padding-top: 1px; }
+
+.surf-banner { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; animation: surfBanner 5s ease forwards; }
+.surf-banner span { display: block; font: 800 13px var(--font); letter-spacing: 0.4em; color: var(--warm); text-shadow: 0 0 18px var(--warm-glow); }
+.surf-banner b { display: block; font-size: clamp(20px, 3.4vw, 34px); letter-spacing: 0.06em; text-transform: uppercase; text-shadow: 0 2px 18px #000; }
+@keyframes surfBanner { 0% { opacity: 0; transform: translate(-50%, 8px); } 10%, 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .surf-banner { animation: none; } }
+
+.surf-prompt { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(4, 8, 18, 0.78); border: 1px solid var(--line-hi); white-space: nowrap; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
+.surf-waypoint { position: absolute; top: 126px; left: 50%; transform: translateX(-50%); padding: 6px 12px; font-size: 13px; white-space: nowrap; }
+.surf-night { position: absolute; top: 126px; left: 50%; transform: translateX(-50%); padding: 10px 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; max-width: calc(100vw - 32px); }
+.surf-keys { position: absolute; right: 16px; bottom: 14px; text-align: right; max-width: 56vw; line-height: 1.9; }
+.surf-provenance { position: absolute; left: 16px; right: 16px; bottom: 2px; margin: 0; text-align: center; opacity: 0.6; pointer-events: none; font-size: 10px !important; }
+
+.surf-minimap { position: absolute; left: 16px; bottom: 24px; width: 200px; height: 200px; padding: 0; border-radius: 50%; overflow: hidden; border: 2px solid var(--line-hi); background: #05070b; cursor: pointer; box-shadow: var(--shadow); }
+.surf-minimap canvas { width: 100%; height: 100%; display: block; }
+.surf-minimap-n { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font: 800 11px var(--font); color: var(--warm); }
+
+.surf-intro { position: absolute; left: 50%; bottom: 18%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; text-shadow: 0 2px 14px #000; }
+.surf-intro b { font-size: clamp(22px, 4vw, 40px); letter-spacing: 0.04em; }
+
+.surf-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.55); z-index: 5; }
+.surf-pause { display: flex; flex-direction: column; gap: 10px; padding: 22px; min-width: 280px; max-width: calc(100vw - 32px); }
+.surf-pause h2 { margin: 0 0 6px; }
+.surf-help { max-width: 560px; }
+.surf-help ul { padding-left: 18px; line-height: 1.9; margin: 0; }
+
+.surf-map-overlay { position: absolute; inset: 0; z-index: 6; display: grid; place-items: center; background: rgba(0, 0, 0, 0.5); padding: 16px; }
+.surf-map { width: min(1180px, 100%); height: min(780px, 100%); display: flex; flex-direction: column; overflow: hidden; }
+.surf-map header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 12px 16px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.surf-map h2 { margin: 2px 0; font-size: 18px; }
+.surf-map-coords { margin: 0; font: 12px var(--font-mono); color: var(--mut); }
+.surf-map-tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.surf-map-body { flex: 1; display: flex; min-height: 0; }
+.surf-map-canvas { flex: 1; min-width: 0; height: 100%; cursor: grab; touch-action: none; }
+.surf-map-canvas:active { cursor: grabbing; }
+.surf-map-list { width: 290px; border-left: 1px solid var(--line); padding: 12px; overflow: auto; }
+.surf-map-list h3 { margin: 0 0 8px; font-size: 13px; color: var(--mut); text-transform: uppercase; letter-spacing: 0.1em; }
+.surf-map-list ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.surf-map-list li button { width: 100%; text-align: left; display: flex; flex-direction: column; gap: 2px; padding: 8px 10px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--glass-card); color: var(--txt); cursor: pointer; }
+.surf-map-list li button.on { border-color: #58b6ff; box-shadow: 0 0 0 1px #58b6ff inset; }
+.surf-map-list li span { font-size: 12px; color: var(--mut); }
+.surf-map-note { font-size: 12px; color: var(--mut); line-height: 1.5; }
+@media (max-width: 760px) {
+  .surf-map-body { flex-direction: column; }
+  .surf-map-list { width: auto; border-left: 0; border-top: 1px solid var(--line); max-height: 38%; }
+  .surf-minimap { width: 130px; height: 130px; }
+  .surf-keys { display: none; }
+}
+
+.discovery { position: absolute; top: 12px; right: 12px; bottom: 12px; width: min(460px, calc(100vw - 24px)); display: flex; flex-direction: column; overflow: hidden; z-index: 4; }
+.discovery header { position: relative; padding: 14px 44px 10px 16px; border-bottom: 1px solid var(--line); }
+.discovery h2 { margin: 4px 0 2px; font-size: 20px; }
+.discovery-close { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--txt); cursor: pointer; }
+.discovery-tabs { display: flex; gap: 4px; padding: 8px 10px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+.discovery-tabs button, .comp-list button, .story-len button { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--txt-dim); cursor: pointer; white-space: nowrap; font-size: 12px; }
+.discovery-tabs button.on, .comp-list button.on, .story-len button.on { background: rgba(103, 232, 249, 0.14); border-color: var(--line-hi); color: var(--txt); }
+.discovery-body { flex: 1; overflow: auto; padding: 12px 16px; line-height: 1.55; font-size: 14px; }
+.discovery footer { padding: 10px 16px; border-top: 1px solid var(--line); }
+.comp-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.story-len { display: inline-flex; gap: 4px; margin-bottom: 8px; }
+.provenance { font-size: 12px; color: var(--mut); border-left: 2px solid var(--warm); padding-left: 8px; }
+.narration-controls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.subtitle { position: fixed; left: 50%; bottom: 70px; transform: translateX(-50%); width: min(760px, calc(100vw - 40px)); padding: 10px 16px; border-radius: 10px; background: rgba(0, 0, 0, 0.78); color: #fff; font-size: 16px; text-align: center; z-index: 7; }
+.transcript p { margin: 0 0 10px; }
+.transcript p.speaking { color: var(--cy); }
+.specs dt { margin-top: 10px; font-weight: 700; display: flex; gap: 6px; align-items: center; }
+.specs dd { margin: 2px 0 0; color: var(--txt-dim); }
+.vbadge { font: 700 9px var(--font); letter-spacing: 0.1em; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; }
+.vbadge.ok { background: rgba(52, 211, 153, 0.18); color: var(--ok); }
+.vbadge.warn { background: rgba(251, 191, 36, 0.18); color: var(--warm); }
+.vbadge.bad { background: rgba(248, 113, 113, 0.16); color: var(--err); }
+.cite a { margin-left: 3px; font-size: 11px; color: var(--cy); text-decoration: none; }
+.m-timeline { list-style: none; padding: 0; margin: 0; }
+.m-timeline li { border-left: 2px solid var(--line-hi); padding: 0 0 12px 12px; position: relative; }
+.m-timeline li::before { content: ""; position: absolute; left: -6px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--cy); }
+.m-timeline time { display: block; font: 12px var(--font-mono); color: var(--mut); }
+.m-timeline p { margin: 2px 0 6px; }
+.btn.small { padding: 4px 10px; font-size: 12px; height: auto; }
+
+.explore-surface-btn { position: fixed; left: 50%; bottom: calc(var(--dock-h, 70px) + var(--timebar-h, 0px) + 74px); transform: translateX(-50%); z-index: 40; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 10px 26px; border-radius: 999px; border: 1px solid var(--warm); background: linear-gradient(180deg, rgba(60, 40, 8, 0.85), rgba(20, 12, 2, 0.9)); color: #fff; cursor: pointer; box-shadow: 0 0 28px var(--warm-glow); }
+.explore-surface-btn b { font-size: 17px; letter-spacing: 0.16em; }
+.explore-surface-btn .eyebrow { color: var(--warm); }
+.explore-surface-btn:hover { box-shadow: 0 0 40px var(--warm-glow); }
+.site-picker-backdrop { position: fixed; inset: 0; z-index: 90; display: grid; place-items: center; background: rgba(0, 0, 0, 0.6); padding: 16px; }
+.site-picker { position: relative; width: min(720px, 100%); max-height: 100%; overflow: auto; padding: 18px; }
+.site-picker header { position: relative; padding-right: 36px; }
+.site-picker h2 { margin: 4px 0 10px; }
+.site-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.site-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--glass-card); }
+.site-list li.available { border-color: var(--warm); }
+.site-list li > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.site-list .non-nasa { color: var(--warm); font-style: normal; }
+@media (max-width: 600px) { .site-list li { flex-direction: column; align-items: stretch; } }
+
+/* surface HUD on narrow screens: stack the compass and guidance under the (taller) top bar, keep the prompt above the minimap */
+@media (max-width: 760px) {
+  .surf-top { gap: 6px; padding: 8px 10px; }
+  .surf-top-actions .btn { padding: 4px 8px; font-size: 12px; }
+  .surf-compass { top: 176px; }
+  .surf-prompt kbd { display: none; }
+  .surf-waypoint, .surf-night { top: 214px; font-size: 12px; white-space: normal; text-align: center; }
+  .surf-prompt { bottom: 176px; }
+  .surf-minimap { left: 12px; bottom: 30px; }
+  .surf-provenance { display: none; }
+}

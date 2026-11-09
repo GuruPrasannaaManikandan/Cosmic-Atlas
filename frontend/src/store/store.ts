@@ -37,6 +37,10 @@ interface State {
   message: string | null
   datasetPoints: { id: string; name: string; pos: [number, number, number] }[]
   objectsVersion: number
+  /** planetary surface exploration: the active site id (src/surface/sites.ts), null in orbit */
+  surfaceSiteId: string | null
+  enterSurface(siteId: string): void
+  exitSurface(): void
   setPhase(p: Phase): void
   select(id: string | null): void
   travel(id: string, instant?: boolean, viewDistanceLy?: number): void
@@ -55,6 +59,23 @@ interface State {
 }
 
 let dwellTimer: ReturnType<typeof setTimeout> | null = null
+
+/**
+ * Orbital view saved when descending to a surface. The camera is stored RELATIVE to the body it was following, so
+ * if the simulation clock is moved while on the surface (e.g. to the Apollo 11 date) the view returns next to the
+ * same body instead of to an empty point in space.
+ */
+let surfaceReturn: {
+  phase: Phase
+  bodyId: string | null
+  offset: [number, number, number]
+  pos: [number, number, number]
+  quat: [number, number, number, number]
+  followId: string | null
+  selectedId: string | null
+  playing: boolean
+} | null = null
+export const getSurfaceReturn = () => surfaceReturn
 const clearDwell = () => {
   if (dwellTimer) {
     clearTimeout(dwellTimer)
@@ -126,6 +147,7 @@ export const useStore = create<State>((set, get) => {
     message: null,
     datasetPoints: [],
     objectsVersion: 0,
+    surfaceSiteId: null,
     setPhase: (p) => set({ phase: p }),
     // selecting shows a compact selection chip; the Inspector opens on demand (chip 'Details' or the I key)
     select: (id) => set({ selectedId: id, rightOpen: id ? get().rightOpen : false }),
@@ -197,6 +219,41 @@ export const useStore = create<State>((set, get) => {
       nav.followId = ship.refBodyId && BY_ID[ship.refBodyId] ? ship.refBodyId : null
       nav.lastFollowPos = nav.followId ? positionOf(BY_ID[nav.followId], get().simMs) : null
       set({ phase: 'explore', navMapOpen: false })
+    },
+    enterSurface: (siteId) => {
+      if (get().surfaceSiteId) return
+      if (get().phase === 'travel') get().exitTravelMode()
+      cancelTravel()
+      interrupt()
+      const s = get()
+      const bodyId = nav.followId ?? s.selectedId
+      const bp = bodyId && BY_ID[bodyId] ? positionOf(BY_ID[bodyId], s.simMs) : null
+      surfaceReturn = {
+        phase: s.phase === 'travel' ? 'travel' : s.phase,
+        bodyId: bp ? bodyId : null,
+        offset: bp ? (sub(nav.pos, bp) as [number, number, number]) : [0, 0, 0],
+        pos: [...nav.pos] as [number, number, number],
+        quat: [nav.quat.x, nav.quat.y, nav.quat.z, nav.quat.w],
+        followId: nav.followId,
+        selectedId: s.selectedId,
+        playing: s.playing,
+      }
+      set({ surfaceSiteId: siteId, playing: false, navMapOpen: false })
+    },
+    exitSurface: () => {
+      const r = surfaceReturn
+      surfaceReturn = null
+      if (!r) return set({ surfaceSiteId: null })
+      const ms = get().simMs
+      if (r.bodyId && BY_ID[r.bodyId]) {
+        const bp = positionOf(BY_ID[r.bodyId], ms)
+        nav.pos = [bp[0] + r.offset[0], bp[1] + r.offset[1], bp[2] + r.offset[2]]
+      } else nav.pos = [...r.pos]
+      nav.quat.set(r.quat[0], r.quat[1], r.quat[2], r.quat[3])
+      nav.followId = r.followId
+      nav.lastFollowPos = r.followId && BY_ID[r.followId] ? positionOf(BY_ID[r.followId], ms) : null
+      set({ surfaceSiteId: null, selectedId: r.selectedId, playing: r.playing })
+      if (r.phase === 'travel') get().enterTravelMode()
     },
     set: (p) => set(p as never),
   }

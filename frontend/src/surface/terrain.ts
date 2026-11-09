@@ -1,0 +1,139 @@
+/**
+ * Procedural site terrain (deterministic from a seed). This is an artistic stand-in for real topography and is
+ * labelled as such everywhere it is shown: it is NOT LOLA / LROC NAC DTM data (that is the Phase 3b upgrade path —
+ * see docs/space-exploration/surface-exploration). What IS real: where the hardware stands and its elevation
+ * differences (LRO-measured), which the terrain is flattened to match.
+ */
+export interface Crater {
+  x: number
+  z: number
+  r: number
+}
+export interface Rock {
+  x: number
+  z: number
+  /** radius (m) */
+  r: number
+  rotY: number
+  squash: number
+  seed: number
+}
+export interface Collider {
+  x: number
+  z: number
+  r: number
+  /** collider top (m above local ground); the astronaut can step onto anything lower than STEP_HEIGHT */
+  h: number
+  id?: string
+}
+
+export function mulberry32(seed: number) {
+  let a = seed >>> 0
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0
+    let t = a
+    t = Math.imul(t ^ (t >>> 15), t | 1)
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+function hash2(ix: number, iz: number, seed: number) {
+  let h = (ix * 374761393 + iz * 668265263 + seed * 2246822519) | 0
+  h = Math.imul(h ^ (h >>> 13), 1274126177)
+  return ((h ^ (h >>> 16)) >>> 0) / 4294967296
+}
+
+function valueNoise(x: number, z: number, seed: number) {
+  const ix = Math.floor(x), iz = Math.floor(z)
+  const fx = x - ix, fz = z - iz
+  const sx = fx * fx * (3 - 2 * fx), sz = fz * fz * (3 - 2 * fz)
+  const a = hash2(ix, iz, seed), b = hash2(ix + 1, iz, seed), c = hash2(ix, iz + 1, seed), d = hash2(ix + 1, iz + 1, seed)
+  return (a + (b - a) * sx + (c - a) * sz + (a - b - c + d) * sx * sz) * 2 - 1
+}
+
+export interface TerrainSpec {
+  seed: number
+  halfExtentM: number
+  /** points that must sit at a given local elevation (hardware), with a flat radius */
+  anchors: { x: number; z: number; dy: number; flatR: number }[]
+}
+
+export class Terrain {
+  readonly craters: Crater[] = []
+  readonly rocks: Rock[] = []
+  readonly spec: TerrainSpec
+  /** craters bucketed by CELL so heightAt only tests nearby ones */
+  private grid = new Map<string, Crater[]>()
+  private static CELL = 24
+
+  constructor(spec: TerrainSpec) {
+    this.spec = spec
+    const rnd = mulberry32(spec.seed)
+    const H = spec.halfExtentM * 1.6
+    const clear = (x: number, z: number, pad: number) => spec.anchors.every((a) => Math.hypot(x - a.x, z - a.z) > a.flatR + pad)
+    // crater size distribution: many small, few large (power law)
+    for (let i = 0; i < 2400 && this.craters.length < 900; i++) {
+      const r = 0.7 * Math.pow(1 - rnd(), -0.62)
+      if (r > 34) continue
+      const x = (rnd() * 2 - 1) * H, z = (rnd() * 2 - 1) * H
+      if (clear(x, z, r * 1.7 + 4)) this.craters.push({ x, z, r })
+    }
+    const C = Terrain.CELL
+    for (const c of this.craters) {
+      const R = c.r * 1.8
+      for (let gx = Math.floor((c.x - R) / C); gx <= Math.floor((c.x + R) / C); gx++)
+        for (let gz = Math.floor((c.z - R) / C); gz <= Math.floor((c.z + R) / C); gz++) {
+          const k = gx + ',' + gz
+          const list = this.grid.get(k)
+          if (list) list.push(c)
+          else this.grid.set(k, [c])
+        }
+    }
+    for (let i = 0; i < 2600 && this.rocks.length < 650; i++) {
+      const r = 0.06 + 0.9 * Math.pow(rnd(), 3.2)
+      const x = (rnd() * 2 - 1) * spec.halfExtentM * 1.2, z = (rnd() * 2 - 1) * spec.halfExtentM * 1.2
+      // rocks gather near crater rims (ejecta)
+      const nearRim = this.craters.some((c) => Math.abs(Math.hypot(x - c.x, z - c.z) - c.r * 1.1) < c.r * 0.35)
+      if (!nearRim && rnd() < 0.55) continue
+      if (clear(x, z, 2.5)) this.rocks.push({ x, z, r, rotY: rnd() * Math.PI * 2, squash: 0.45 + rnd() * 0.4, seed: Math.floor(rnd() * 1e9) })
+    }
+  }
+
+  /** ground height (m) relative to the site origin */
+  heightAt(x: number, z: number): number {
+    const s = this.spec.seed
+    let h = 1.6 * valueNoise(x / 90, z / 90, s) + 0.55 * valueNoise(x / 31, z / 31, s + 1) + 0.12 * valueNoise(x / 7, z / 7, s + 2) + 0.035 * valueNoise(x / 1.7, z / 1.7, s + 3)
+    for (const c of this.grid.get(Math.floor(x / Terrain.CELL) + ',' + Math.floor(z / Terrain.CELL)) ?? []) {
+      const dx = x - c.x, dz = z - c.z
+      const d2 = dx * dx + dz * dz
+      const R = c.r * 1.8
+      if (d2 > R * R) continue
+      const q = Math.sqrt(d2) / c.r
+      // bowl (depth ~0.2 r), raised rim (~0.045 r), ejecta falloff
+      h += q < 1 ? c.r * (0.2 * (q * q - 1) + 0.045) : c.r * 0.045 * Math.pow(Math.max(0, (1.8 - q) / 0.8), 2)
+    }
+    // hardware anchors: blend to the measured relative elevation inside the flat radius
+    for (const a of this.spec.anchors) {
+      const d = Math.hypot(x - a.x, z - a.z)
+      if (d < a.flatR * 2.2) {
+        const t = Math.min(1, Math.max(0, (a.flatR * 2.2 - d) / (a.flatR * 1.2)))
+        const k = t * t * (3 - 2 * t)
+        h = h * (1 - k) + a.dy * k
+      }
+    }
+    return h
+  }
+
+  normalAt(x: number, z: number, e = 0.25): [number, number, number] {
+    const hx = this.heightAt(x + e, z) - this.heightAt(x - e, z)
+    const hz = this.heightAt(x, z + e) - this.heightAt(x, z - e)
+    const n: [number, number, number] = [-hx, 2 * e, -hz]
+    const l = Math.hypot(...n)
+    return [n[0] / l, n[1] / l, n[2] / l]
+  }
+
+  rockColliders(minR = 0.28): Collider[] {
+    return this.rocks.filter((r) => r.r >= minR).map((r) => ({ x: r.x, z: r.z, r: r.r * 0.9, h: r.r * r.squash * 1.6 }))
+  }
+}

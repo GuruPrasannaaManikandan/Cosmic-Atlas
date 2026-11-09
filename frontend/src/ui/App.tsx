@@ -1,5 +1,6 @@
 import { Component, ReactNode, Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { CosmicCanvas } from '../scene/Scene'
+import { ExploreSurfaceButton } from '../surface/ExploreSurface'
 import { Labels } from './Labels'
 import { useStore } from '../store/store'
 import { CosmicObject, searchObjects, registerObject } from '../data/catalog'
@@ -35,6 +36,7 @@ const TutorialOverlay = lazy(() => import('../tutorial/TutorialOverlay').then((m
 const AcademyCompleteModal = lazy(() => import('../tutorial/AcademyCompleteModal').then((m) => ({ default: m.AcademyCompleteModal })))
 const HelpModal = lazy(() => import('./HelpModal').then((m) => ({ default: m.HelpModal })))
 const AboutModal = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutModal })))
+const SurfaceExperience = lazy(() => import('../surface/SurfaceExperience'))
 
 class Boundary extends Component<{ children: ReactNode }, { err: Error | null }> {
   state = { err: null as Error | null }
@@ -291,6 +293,7 @@ export function App() {
     set,
   } = useStore()
   const tourIdx = useStore((s) => s.tourIndex)
+  const surfaceSiteId = useStore((s) => s.surfaceSiteId)
   // warp flight in progress: large panels step aside so the flight is the focus (restored on arrival)
   const [inFlight, setInFlight] = useState(false)
   useEffect(() => subscribeTravelEngine(() => setInFlight(travelEngineState.phase === 'traveling')), [])
@@ -326,7 +329,7 @@ export function App() {
       if (!t || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return
       if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return
       const s = useStore.getState()
-      if (s.phase === 'intro' || s.phase === 'travel') return
+      if (s.phase === 'intro' || s.phase === 'travel' || s.surfaceSiteId) return
       if (e.code === 'KeyI' && s.selectedId) s.set({ rightOpen: !s.rightOpen })
       else if (e.code === 'KeyL') s.set({ leftOpen: !s.leftOpen })
       else if (e.code === 'KeyT') s.set({ timeOpen: !s.timeOpen })
@@ -403,10 +406,19 @@ export function App() {
       data-left={showBrowser ? 'open' : undefined}
       data-right={showInfo ? 'open' : undefined}
       data-inflight={inFlight ? 'on' : undefined}
+      data-surface={surfaceSiteId ? 'on' : undefined}
     >
       <Boundary>
         <CosmicCanvas />
       </Boundary>
+      {surfaceSiteId && (
+        <Boundary>
+          <Suspense fallback={<ModuleLoader label="Preparing the surface…" />}>
+            <SurfaceExperience />
+          </Suspense>
+        </Boundary>
+      )}
+      {!surfaceSiteId && phase !== 'intro' && <ExploreSurfaceButton hidden={inFlight || !!activeEventId || hasActiveModal} />}
       {phase !== 'intro' && phase !== 'travel' && !activeEventId && <Labels />}
       <Loader />
 

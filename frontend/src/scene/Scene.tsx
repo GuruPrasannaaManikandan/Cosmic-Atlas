@@ -1630,6 +1630,8 @@ function ActiveControls() {
 
 export function CosmicCanvas() {
   const quality = useStore((s) => s.quality)
+  // while on a planetary surface the orbital scene is hidden and paused (state kept, no GPU work)
+  const onSurface = useStore((s) => !!s.surfaceSiteId)
 
   return (
     <Canvas
@@ -1644,6 +1646,7 @@ export function CosmicCanvas() {
       dpr={quality === 'performance' ? 1 : quality === 'balanced' ? [1, 1.5] : [1, 2]}
       camera={{ fov: 55, near: 0.001, far: 1e13, position: [0, 0, 0] }}
       onPointerMissed={() => {}}
+      frameloop={onSurface ? 'never' : 'always'}
     >
       <color attach="background" args={['#000004']} />
       <GLWatch />
