@@ -61,6 +61,16 @@ Full SHA-256 values are in `frontend/src/surface/models/nasaModels.ts`.
 - **Script:** `scripts/terrain/extract_lroc_dtm.py`. It records the file URL, CRS, rows read and the LM height check in every `*.json` sidecar.
 - **Data notes:** heights are relative to the 1737.4 km sphere and stored relative to the LM. Rocks smaller than the post spacing are procedural and labelled.
 
+### Distant horizon (LOLA)
+
+| Item | Detail |
+|---|---|
+| Product | LOLA LDEM_64 (NASA PDS Geosciences Node), `ldem_64.img` + `.lbl` |
+| Read | One row range per site, 4.9–5.0 MB each, **29.6 MB total** |
+| Committed | 250 m grid, ±24 km, 74 KB per site (`*.horizon.bin` + `.json`) |
+| Script | `scripts/terrain/extract_lola_horizon.py` |
+| Agreement with the LROC DTM at the LMs | Within 5.4 m |
+
 ## Not yet available as NASA glTF
 
 - **Curiosity:** `.blend` only (10 MB). It needs a Blender → glTF conversion; Blender is not installed here.

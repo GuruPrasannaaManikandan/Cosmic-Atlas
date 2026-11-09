@@ -1,0 +1,25 @@
+{
+ "site": "apollo-14",
+ "width": 193,
+ "height": 193,
+ "cellM": 250.0,
+ "x0": -24000.0,
+ "z0": -24000.0,
+ "hMin": -374.55941251297395,
+ "hMax": 382.36912045805866,
+ "encoding": "uint16 LE, row-major (rows = +z south); h = hMin + v / 65535 * (hMax - hMin), metres relative to the LM",
+ "lmHeightLola": -1062.166664384004,
+ "lmHeightDtm": -1061.8791707902105,
+ "lolaMinusDtmAtLmM": -0.2874935937934424,
+ "reliefM": 756.9285329710326,
+ "source": {
+  "product": "LOLA LDEM_64 (64 px/deg, ~474 m/px)",
+  "file": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_64.img",
+  "label": "https://pds-geosciences.wustl.edu/lro/lro-l-lola-3-rdr-v1/lrolol_1xxx/data/lola_gdr/cylindrical/img/ldem_64.lbl",
+  "rowsRead": [
+   5940,
+   6047
+  ],
+  "bytesRead": 4930560
+ }
+}

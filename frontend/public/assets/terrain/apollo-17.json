@@ -26,5 +26,7 @@
   ],
   "bytesRead": 16215640,
   "accuracy": "tied to LOLA (see the product README)"
- }
+ },
+ "lmLat": 20.1911,
+ "lmLon": 30.7723
 }

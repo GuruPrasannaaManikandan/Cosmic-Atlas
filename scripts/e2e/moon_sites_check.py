@@ -64,8 +64,25 @@ async def main(base: str, out: Path) -> int:
             await page.wait_for_timeout(1500)
             t = await page.evaluate(f"() => {DBG}.terrain()")
             check(f"[{sid}] LROC NAC DTM terrain loaded (not the procedural fallback)", t["kind"] == "dtm" and t["product"], t["product"])
+            check(f"[{sid}] LOLA distant horizon loaded", t.get("horizonReliefM") is not None, {"reliefM": t.get("horizonReliefM")})
             objs = t["objects"]
             await page.screenshot(path=str(out / f"{sid}_01_arrival.jpg"), type="jpeg", quality=82)
+            if sid in ("apollo-15", "apollo-17"):
+                # look around the compass from beside the LM (mountains on the horizon)
+                await page.evaluate(f"() => {DBG}.teleport(-12, 10)")
+                canvas = await page.locator("[data-testid=surface-root] canvas").first.bounding_box()
+                cx, cy = canvas["x"] + 400, canvas["y"] + 400
+                for name, bearing in (("N", 0), ("E", 90), ("S", 180), ("W", 270)):
+                    cur = (await page.evaluate(f"() => {DBG}.character()"))["camYaw"]
+                    target = -math.radians(bearing)
+                    d = math.atan2(math.sin(cur - target), math.cos(cur - target))
+                    await page.mouse.move(cx, cy)
+                    await page.mouse.down()
+                    await page.mouse.move(cx + d / 0.0024, cy + 25, steps=12)
+                    await page.mouse.up()
+                    await page.wait_for_timeout(700)
+                    hd = round((-math.degrees((await page.evaluate(f"() => {DBG}.character()"))["camYaw"])) % 360)
+                    await page.screenshot(path=str(out / f"{sid}_horizon_{name}_heading{hd:03d}.jpg"), type="jpeg", quality=82)
             fps = await page.evaluate("() => new Promise(r => { let n = 0; const t0 = performance.now(); const f = () => { n++; if (performance.now() - t0 < 2500) requestAnimationFrame(f); else r(n / ((performance.now() - t0) / 1000)) }; requestAnimationFrame(f) })")
             site_rep = {"product": t["product"], "fps": round(fps, 1), "objects": []}
             for o in objs:

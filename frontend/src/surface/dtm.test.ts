@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { decodeDtm, DtmTerrain, DtmMeta } from './terrain'
+import { decodeDtm, DtmTerrain, DtmMeta, HorizonGrid, HorizonMeta } from './terrain'
 import { SURFACE_SITES } from './sites'
 import { OBJECT_BY_ID } from '../missions'
 
@@ -50,5 +50,37 @@ describe('LROC DTM terrain', () => {
       // the walkable area lies inside the extracted window
       expect(s.halfExtentM, s.id).toBeLessThanOrEqual(Math.min(-m.x0, -m.z0))
     }
+  })
+
+  it('LOLA horizon: decodes, agrees with the LROC DTM at every LM, and carries the real mountain relief', async () => {
+    const fs: { readFileSync(p: URL, enc?: string): any } = await import(/* @vite-ignore */ 'node:' + 'fs')
+    const pub = (f: string) => new URL('../../public/' + f, import.meta.url)
+    const relief: Record<string, number> = {}
+    for (const s of SURFACE_SITES) {
+      if (s.terrain.kind !== 'dtm') continue
+      const f = s.terrain.file.slice(1).replace('.json', '.horizon.json')
+      const m = JSON.parse(fs.readFileSync(pub(f), 'utf8')) as HorizonMeta
+      const buf: Uint8Array = fs.readFileSync(pub(f.replace('.json', '.bin')))
+      const g = new HorizonGrid(m, buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer)
+      // two independent datasets on the same 1737.4 km sphere agree at the LM within 10 m
+      expect(Math.abs(m.lolaMinusDtmAtLmM), s.id).toBeLessThan(10)
+      expect(Math.abs(g.sample(0, 0) - m.lolaMinusDtmAtLmM), s.id).toBeLessThan(1)
+      expect(g.halfExtent, s.id).toBeGreaterThanOrEqual(20000)
+      relief[s.id] = m.reliefM
+    }
+    // the Apennine front at Hadley and the Taurus-Littrow massifs are kilometres high
+    expect(relief['apollo-15']).toBeGreaterThan(3000)
+    expect(relief['apollo-17']).toBeGreaterThan(2000)
+  })
+
+  it('far terrain blends from the DTM to LOLA without a step at the DTM edge', () => {
+    const m = meta(5, 5)
+    const q = new Uint16Array(25).fill(enc(0, m))
+    const t = new DtmTerrain(m, decodeDtm(m, q.buffer), { seed: 1, halfExtentM: 4, anchors: [] })
+    const hm = { site: 't', width: 3, height: 3, cellM: 1000, x0: -1000, z0: -1000, hMin: 0, hMax: 500 } as unknown as HorizonMeta
+    t.horizon = new HorizonGrid(hm, new Uint16Array(9).fill(65535).buffer)
+    expect(t.farHeightAt(500, 0)).toBeCloseTo(500, 0) // outside the DTM: LOLA
+    expect(t.farHeightAt(4, 0)).toBeCloseTo(500, 0) // at the DTM edge: still LOLA (blend starts there)
+    expect(t.farHeightAt(0, 0)).toBeLessThan(500) // inside: moving toward the DTM value
   })
 })

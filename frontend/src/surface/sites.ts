@@ -63,7 +63,7 @@ function place(site: Omit<SurfaceSite, 'objects'>, specs: { id: string; heading:
 }
 
 const DTM_NOTE = (product: string, post: number) =>
-  `Terrain: LROC NAC digital terrain model ${product} (${post} m posts, tied to LOLA; NASA PDS). Rocks smaller than the post spacing are illustrative. Hardware at LRO-measured positions (LROC 2016 / NSSDCA 2017).`
+  `Terrain: LROC NAC digital terrain model ${product} (${post} m posts, tied to LOLA; NASA PDS); distant horizon to 24 km from LOLA LDEM_64 (~474 m/px). Rocks smaller than the post spacing are illustrative. Hardware at LRO-measured positions (LROC 2016 / NSSDCA 2017).`
 
 /** standard Apollo site: origin at the LM, LROC DTM terrain, LM + every catalogued object with a sourced position */
 function apolloSite(n: number, id: string, name: string, halfExtentM: number, post: number, extra: { id: string; notice: number; interact: number; heading?: number }[]): SurfaceSite {

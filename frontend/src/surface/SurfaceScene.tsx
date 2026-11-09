@@ -4,7 +4,7 @@ import * as THREE from 'three'
 import { useStore } from '../store/store'
 import { OBJECT_BY_ID } from '../missions'
 import { SurfaceSite, SURFACE_BODIES } from './sites'
-import { Terrain, DtmTerrain, SiteTerrain, Collider, mulberry32, DtmMeta } from './terrain'
+import { Terrain, DtmTerrain, SiteTerrain, Collider, mulberry32, DtmMeta, HorizonGrid } from './terrain'
 import { stepCharacter, newCharacter, paramsForGravity, gaitPose, CharacterState, forwardOf } from './controller'
 import { sunDirectionAtLunarSite, meanEarthDirectionAtLunarSite, elevationDeg, azimuthDeg } from './lighting'
 import { useSurface, surfaceDebug } from './surfaceState'
@@ -18,7 +18,10 @@ const D2R = Math.PI / 180
 export const terrainGrid: { size: number; extent: number; heights: Float32Array | null; terrain: SiteTerrain | null } = { size: 0, extent: 0, heights: null, terrain: null }
 
 /** measured terrain handed in by SurfaceExperience (null = procedural) */
-export type DtmData = { meta: DtmMeta; heights: Float32Array } | null
+export type DtmData = { meta: DtmMeta; heights: Float32Array; horizon?: HorizonGrid | null } | null
+
+/** distance (m) at which the sky (stars, Earth, Sun) is drawn: beyond the farthest horizon terrain */
+const SKY_R = 52000
 
 /** keyboard state, owned by the scene */
 const keys = new Set<string>()
@@ -41,7 +44,11 @@ export const modelKey = (modelId: string | null, lmModel: 'nasa' | 'reconstructi
 function useEnv(site: SurfaceSite, simMs: number, lmModel: 'nasa' | 'reconstruction', dtm: DtmData): SceneEnv {
   const terrain = useMemo<SiteTerrain>(() => {
     const anchors = site.objects.map((o) => ({ x: o.x, z: o.z, dy: o.dy, flatR: o.objectId.includes('lm') ? 6 : o.objectId.includes('lrv') ? 3.5 : 2.5 }))
-    if (dtm) return new DtmTerrain(dtm.meta, dtm.heights, { seed: site.terrain.seed, halfExtentM: site.halfExtentM, anchors })
+    if (dtm) {
+      const t = new DtmTerrain(dtm.meta, dtm.heights, { seed: site.terrain.seed, halfExtentM: site.halfExtentM, anchors })
+      t.horizon = dtm.horizon ?? null
+      return t
+    }
     return new Terrain({ seed: site.terrain.seed, halfExtentM: Math.min(site.halfExtentM, 400), anchors })
   }, [site, dtm])
   const earthDir = useMemo(() => new THREE.Vector3(...meanEarthDirectionAtLunarSite(site.origin.latDeg, site.origin.lonEastDeg)), [site])
@@ -91,7 +98,9 @@ function TerrainMesh({ env, segments }: { env: SceneEnv; segments: number }) {
     Object.assign(terrainGrid, { size: n, extent: ext, heights, terrain: env.terrain })
     // horizon ring: low-detail terrain that drops with the Moon's curvature (h = −d²/2R): the horizon is ~2.4 km away
     const R = SURFACE_BODIES[env.site.bodyId].radiusM
-    const fg = new THREE.PlaneGeometry(9000, 9000, 180, 180)
+    const hz = env.terrain.kind === 'dtm' ? (env.terrain as DtmTerrain).horizon : null
+    const farSize = hz ? 2 * hz.halfExtent : 9000
+    const fg = new THREE.PlaneGeometry(farSize, farSize, hz ? 288 : 180, hz ? 288 : 180)
     fg.rotateX(-Math.PI / 2)
     const fp = fg.attributes.position as THREE.BufferAttribute
     for (let i = 0; i < fp.count; i++) {
@@ -110,7 +119,8 @@ function TerrainMesh({ env, segments }: { env: SceneEnv; segments: number }) {
     withPatchCutout(m)
     return m
   }, [])
-  const farMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#8f8d88', roughness: 1, metalness: 0 }), [])
+  // matched to the near ground's effective albedo (base colour x average regolith texture) so there is no bright seam
+  const farMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#5c5a55', roughness: 1, metalness: 0 }), [])
   return (
     <>
       <mesh geometry={geo} material={mat} receiveShadow />
@@ -235,7 +245,7 @@ function Sky({ env }: { env: SceneEnv }) {
     for (let i = 0; i < n; i++) {
       const u = r() * 2 - 1, t = r() * Math.PI * 2
       const s = Math.sqrt(1 - u * u)
-      p.set([s * Math.cos(t) * 3500, u * 3500, s * Math.sin(t) * 3500], i * 3)
+      p.set([s * Math.cos(t) * SKY_R, u * SKY_R, s * Math.sin(t) * SKY_R], i * 3)
     }
     const g = new THREE.BufferGeometry()
     g.setAttribute('position', new THREE.BufferAttribute(p, 3))
@@ -246,10 +256,10 @@ function Sky({ env }: { env: SceneEnv }) {
     t.colorSpace = THREE.SRGBColorSpace
     return t
   }, [])
-  const ep = env.earthDir.clone().multiplyScalar(3000)
-  const sp = env.sunDir.clone().multiplyScalar(3200)
+  const ep = env.earthDir.clone().multiplyScalar(SKY_R * 0.96)
+  const sp = env.sunDir.clone().multiplyScalar(SKY_R * 0.98)
   // Earth's angular diameter from the Moon ≈ 2 × atan(6371 / 384400) ≈ 1.9°
-  const earthR = 3000 * Math.tan(((6371 / 384400) as number))
+  const earthR = SKY_R * 0.96 * Math.tan(((6371 / 384400) as number))
   return (
     <group>
       {/* daylight on the surface overwhelms faint stars (as in the Apollo photographs); they appear at night */}
@@ -262,7 +272,7 @@ function Sky({ env }: { env: SceneEnv }) {
       </mesh>
       {env.sunUp && (
         <mesh position={sp}>
-          <sphereGeometry args={[3200 * Math.tan(0.267 * D2R), 24, 16]} />
+          <sphereGeometry args={[SKY_R * 0.98 * Math.tan(0.267 * D2R), 24, 16]} />
           <meshBasicMaterial color="#fffaf0" toneMapped={false} />
         </mesh>
       )}
@@ -343,7 +353,7 @@ function Player({ env }: { env: SceneEnv }) {
     }
     surfaceDebug.character = () => ({ ...ch.current, camYaw: look.current.yaw, camPitch: look.current.pitch })
     surfaceDebug.camera = () => ({ pos: camera.position.toArray(), mode: useSurface.getState().camMode })
-    surfaceDebug.terrain = () => ({ daylightMs: env.site.daylight.ms, kind: ground.kind, product: ground.kind === 'dtm' ? (ground as DtmTerrain).meta.source.product : null, objects: env.placed.map((p) => ({ id: p.id, x: p.x, z: p.z, y: p.y, model: p.modelId })) })
+    surfaceDebug.terrain = () => ({ daylightMs: env.site.daylight.ms, kind: ground.kind, product: ground.kind === 'dtm' ? (ground as DtmTerrain).meta.source.product : null, horizonReliefM: ground.kind === 'dtm' ? (ground as DtmTerrain).horizon?.meta.reliefM ?? null : null, objects: env.placed.map((p) => ({ id: p.id, x: p.x, z: p.z, y: p.y, model: p.modelId })) })
     return () => {
       surfaceDebug.teleport = undefined
       surfaceDebug.character = undefined
@@ -653,9 +663,9 @@ export function SurfaceScene({ site, dtm }: { site: SurfaceSite; dtm: DtmData })
   return (
     <Canvas
       shadows="soft"
-      gl={{ antialias: quality !== 'performance', toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0, powerPreference: 'high-performance' }}
+      gl={{ antialias: quality !== 'performance', toneMapping: THREE.ACESFilmicToneMapping, toneMappingExposure: 1.0, powerPreference: 'high-performance', logarithmicDepthBuffer: true }}
       dpr={quality === 'performance' ? 1 : quality === 'balanced' ? [1, 1.5] : [1, 2]}
-      camera={{ fov: 62, near: 0.05, far: 12000, position: [0, 200, 200] }}
+      camera={{ fov: 62, near: 0.05, far: 60000, position: [0, 200, 200] }}
       data-testid="surface-canvas"
     >
       <color attach="background" args={['#000000']} />

@@ -220,6 +220,8 @@ export class DtmTerrain implements SiteTerrain {
   private h: Float32Array
   private anchors: { x: number; z: number; y: number; flatR: number }[]
   readonly mean: number
+  /** LOLA horizon beyond the DTM (optional) */
+  horizon: HorizonGrid | null = null
 
   constructor(meta: DtmMeta, heights: Float32Array, spec: { seed: number; halfExtentM: number; anchors: { x: number; z: number; flatR: number }[] }) {
     this.meta = meta
@@ -266,8 +268,15 @@ export class DtmTerrain implements SiteTerrain {
 
   farHeightAt(x: number, z: number): number {
     const m = this.meta
-    const inside = x >= m.x0 && z >= m.z0 && x <= m.x0 + (m.width - 1) * m.cellM && z <= m.z0 + (m.height - 1) * m.cellM
-    return inside ? this.raw(x, z) : this.mean
+    const x1 = m.x0 + (m.width - 1) * m.cellM, z1 = m.z0 + (m.height - 1) * m.cellM
+    // distance inside the DTM rectangle (negative = outside)
+    const inset = Math.min(x - m.x0, x1 - x, z - m.z0, z1 - z)
+    if (!this.horizon) return inset >= 0 ? this.raw(x, z) : this.mean
+    const far = this.horizon.sample(x, z)
+    if (inset <= 0) return far
+    // blend from the coarse LOLA surface to the DTM over 300 m inside the DTM edge (no step at the seam)
+    const t = Math.min(1, inset / 300)
+    return far * (1 - t) + this.raw(x, z) * t
   }
 
   normalAt(x: number, z: number, e = 0.5): [number, number, number] {
@@ -288,4 +297,57 @@ export async function loadDtm(url: string): Promise<{ meta: DtmMeta; heights: Fl
   const res = await fetch(url.replace(/\.json$/, '.bin'))
   if (!res.ok) throw new Error(`terrain ${meta.site}: HTTP ${res.status}`)
   return { meta, heights: decodeDtm(meta, await res.arrayBuffer()) }
+}
+
+// ------------------------------------------------------------------ LOLA horizon (LDEM_64)
+
+export interface HorizonMeta {
+  site: string
+  width: number
+  height: number
+  cellM: number
+  x0: number
+  z0: number
+  hMin: number
+  hMax: number
+  lmHeightLola: number
+  lmHeightDtm: number
+  lolaMinusDtmAtLmM: number
+  reliefM: number
+  source: { product: string; file: string; label: string; rowsRead: number[]; bytesRead: number }
+}
+
+/** coarse (250 m) LOLA terrain around a site, metres relative to the LM, for the distant horizon */
+export class HorizonGrid {
+  readonly meta: HorizonMeta
+  private h: Float32Array
+  constructor(meta: HorizonMeta, buf: ArrayBuffer) {
+    const q = new Uint16Array(buf)
+    if (q.length !== meta.width * meta.height) throw new Error(`horizon ${meta.site}: ${q.length} samples, expected ${meta.width * meta.height}`)
+    this.meta = meta
+    this.h = new Float32Array(q.length)
+    const span = meta.hMax - meta.hMin
+    for (let i = 0; i < q.length; i++) this.h[i] = meta.hMin + (q[i] / 65535) * span
+  }
+  sample(x: number, z: number): number {
+    const m = this.meta
+    const fx = Math.min(Math.max((x - m.x0) / m.cellM, 0), m.width - 1.001)
+    const fz = Math.min(Math.max((z - m.z0) / m.cellM, 0), m.height - 1.001)
+    const i = Math.floor(fx), j = Math.floor(fz)
+    const tx = fx - i, tz = fz - j
+    const W = m.width, h = this.h
+    const k = j * W + i
+    return h[k] * (1 - tx) * (1 - tz) + h[k + 1] * tx * (1 - tz) + h[k + W] * (1 - tx) * tz + h[k + W + 1] * tx * tz
+  }
+  /** horizontal half-size of the grid (m) */
+  get halfExtent() {
+    return Math.min(-this.meta.x0, -this.meta.z0)
+  }
+}
+
+export async function loadHorizon(url: string): Promise<HorizonGrid> {
+  const meta = (await (await fetch(url)).json()) as HorizonMeta
+  const res = await fetch(url.replace(/\.json$/, '.bin'))
+  if (!res.ok) throw new Error(`horizon ${meta.site}: HTTP ${res.status}`)
+  return new HorizonGrid(meta, await res.arrayBuffer())
 }

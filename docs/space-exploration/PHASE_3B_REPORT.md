@@ -85,12 +85,56 @@
 
 ## Known limitations
 
-1. **No distant mountains.** The DTM windows are narrow north–south, so features beyond them (the Taurus–Littrow massifs and Mount Hadley, several km away) are not on the horizon. The horizon beyond the data is a flat mean surface with curvature.
-   - The LROC pyramid files are not published at the expected path (HTTP 404).
-   - **Proposed fix:** a coarse LOLA-based horizon ring. This needs a separate approval for a new dataset download.
+1. **Distant mountains: resolved in a follow-up (see "Horizon update" below).**
 2. **Models:**
    - LRV and ALSEP are approximate reconstructions.
    - The J-mission LM descent stage is not modelled.
    - The Apollo 14/15 LRRR uses the Apollo 11 geometry (array sizes not sourced).
 3. **Unplaced hardware:** the ALSEP instruments, RTGs and flags are not placed because their coordinates are not sourced. LROC lists only the central stations, PSEs, LRVs and SEP.
 4. **Surveyor 3** at the Apollo 12 site has LROC coordinates but no mission record yet. Next step: an NSSDCA record and a model.
+
+## Horizon update — distant mountains from LOLA
+
+- **Source:** the LOLA global gridded DEM **LDEM_64** (NASA PDS Geosciences Node), fetched with your approval.
+  - 64 px/deg, about 474 m/px; LSB int16; height = DN × 0.5 m above the same 1737.4 km sphere as the LROC DTMs.
+- **Method:** one contiguous range request of rows per site (`scripts/terrain/extract_lola_horizon.py`), resampled to a 250 m grid out to ±24 km around each LM.
+- **Transfer: 29.6 MB, above my ~20 MB estimate.** I sized the window as ±0.55° of latitude, but ±24 km needs ±0.79°.
+- **Committed:** 450 KB (6 × 74 KB plus sidecars).
+- **Independent check — LOLA vs the LROC DTM at each LM:**
+
+  | Site | Difference |
+  |---|---|
+  | Apollo 11 | +1.8 m |
+  | Apollo 12 | −5.4 m |
+  | Apollo 14 | −0.3 m |
+  | Apollo 15 | −1.0 m |
+  | Apollo 16 | +0.9 m |
+  | Apollo 17 | +1.2 m |
+
+  This is a unit test.
+- **Relief within 24 km:**
+
+  | Site | Relief |
+  |---|---|
+  | Hadley–Apennine (Apollo 15) | **4,980 m** (Apennine front, Mount Hadley, Hadley Delta) |
+  | Taurus–Littrow (Apollo 17) | **2,729 m** (North and South Massifs) |
+  | Descartes (Apollo 16) | 1,109 m |
+  | Tranquility (Apollo 11) | 979 m |
+  | Fra Mauro (Apollo 14) | 757 m |
+  | Oceanus Procellarum (Apollo 12) | 400 m |
+
+**Rendering**
+- A 48 km horizon mesh carries LOLA heights and drops with the Moon's real curvature (about 166 m at 24 km).
+- Inside the DTM, the heights blend from LOLA to the DTM over 300 m, so there is no step at the seam.
+- The surface canvas now uses a logarithmic depth buffer, with the far plane at 60 km. The sky (stars, Earth, Sun) moved out to 52 km so the mountains are drawn in front of it.
+- The distant mesh is colour-matched to the near ground (no bright seam).
+
+**Tests**
+- Unit: 171/171. New: LOLA decode, LOLA/DTM agreement at every LM, relief at Hadley and Taurus–Littrow, and the DTM-to-LOLA blend.
+- `moon_sites_check`: 42/42. New: the horizon loads at all six sites; compass views at Apollo 15 and 17 are saved as `*_horizon_*_headingNNN.jpg`.
+- The file names record the measured camera heading; the drag-based turning doesn't land exactly on N/E/S/W.
+
+**Limitations**
+- At 474 m/px, the distant massifs are smooth: no gullies or boulder tracks.
+- Beyond 24 km the horizon is flat, with curvature.
+- The distant terrain has a uniform albedo, so the brighter highland material isn't shown.

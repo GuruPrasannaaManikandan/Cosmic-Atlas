@@ -11,6 +11,13 @@
    "detail": "NAC_DTM_APOLLO11"
   },
   {
+   "check": "[tranquility-base] LOLA distant horizon loaded",
+   "pass": true,
+   "detail": {
+    "reliefM": 979.2905823098276
+   }
+  },
+  {
    "check": "[tranquility-base] a11-lm-descent: discovered, E opens its record, story + specs",
    "pass": true,
    "detail": {
@@ -37,12 +44,19 @@
   {
    "check": "[tranquility-base] frame rate on the surface (headless, balanced)",
    "pass": true,
-   "detail": "60.1"
+   "detail": "60.0"
   },
   {
    "check": "[apollo-12] LROC NAC DTM terrain loaded (not the procedural fallback)",
    "pass": true,
    "detail": "NAC_DTM_APOLLO12"
+  },
+  {
+   "check": "[apollo-12] LOLA distant horizon loaded",
+   "pass": true,
+   "detail": {
+    "reliefM": 400.3527352899757
+   }
   },
   {
    "check": "[apollo-12] a12-lm-descent: discovered, E opens its record, story + specs",
@@ -69,6 +83,13 @@
    "check": "[apollo-14] LROC NAC DTM terrain loaded (not the procedural fallback)",
    "pass": true,
    "detail": "NAC_DTM_APOLLO14"
+  },
+  {
+   "check": "[apollo-14] LOLA distant horizon loaded",
+   "pass": true,
+   "detail": {
+    "reliefM": 756.9285329710326
+   }
   },
   {
    "check": "[apollo-14] a14-lm-descent: discovered, E opens its record, story + specs",
@@ -103,6 +124,13 @@
    "check": "[apollo-15] LROC NAC DTM terrain loaded (not the procedural fallback)",
    "pass": true,
    "detail": "NAC_DTM_APOLLO15"
+  },
+  {
+   "check": "[apollo-15] LOLA distant horizon loaded",
+   "pass": true,
+   "detail": {
+    "reliefM": 4979.926266562759
+   }
   },
   {
    "check": "[apollo-15] a15-lm-descent: discovered, E opens its record, story + specs",
@@ -147,6 +175,13 @@
    "detail": "NAC_DTM_APOLLO16"
   },
   {
+   "check": "[apollo-16] LOLA distant horizon loaded",
+   "pass": true,
+   "detail": {
+    "reliefM": 1108.8456438794751
+   }
+  },
+  {
    "check": "[apollo-16] a16-lm-descent: discovered, E opens its record, story + specs",
    "pass": true,
    "detail": {
@@ -173,12 +208,19 @@
   {
    "check": "[apollo-16] frame rate on the surface (headless, balanced)",
    "pass": true,
-   "detail": "60.0"
+   "detail": "60.1"
   },
   {
    "check": "[apollo-17] LROC NAC DTM terrain loaded (not the procedural fallback)",
    "pass": true,
    "detail": "NAC_DTM_APOLLO17"
+  },
+  {
+   "check": "[apollo-17] LOLA distant horizon loaded",
+   "pass": true,
+   "detail": {
+    "reliefM": 2728.5950800509163
+   }
   },
   {
    "check": "[apollo-17] a17-lm-descent: discovered, E opens its record, story + specs",
@@ -215,7 +257,7 @@
   {
    "check": "[apollo-17] frame rate on the surface (headless, balanced)",
    "pass": true,
-   "detail": "60.0"
+   "detail": "60.3"
   },
   {
    "check": "T1 touch device: on-screen joystick shown and drives the astronaut",
@@ -244,7 +286,7 @@
  "sites": {
   "tranquility-base": {
    "product": "NAC_DTM_APOLLO11",
-   "fps": 60.1,
+   "fps": 60.0,
    "objects": [
     {
      "id": "a11-lm-descent",
@@ -328,7 +370,7 @@
   },
   "apollo-16": {
    "product": "NAC_DTM_APOLLO16",
-   "fps": 60.0,
+   "fps": 60.1,
    "objects": [
     {
      "id": "a16-lm-descent",
@@ -349,7 +391,7 @@
   },
   "apollo-17": {
    "product": "NAC_DTM_APOLLO17",
-   "fps": 60.0,
+   "fps": 60.3,
    "objects": [
     {
      "id": "a17-lm-descent",

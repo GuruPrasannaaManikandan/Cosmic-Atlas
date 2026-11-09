@@ -117,6 +117,8 @@ def extract(n: int, cfg: dict, out: Path) -> dict:
         "hMax": hmax,
         "encoding": "uint16 little-endian, row-major (rows = +z south); 0 = no data; h = hMin + (v - 1) / 65534 * (hMax - hMin)",
         "heightRef": "metres relative to the 1737.4 km lunar sphere (DTM datum)",
+        "lmLat": cfg["lat"],
+        "lmLon": cfg["lon"],
         "lmHeightDtm": h_lm,
         "lmElevationLroc": cfg["elev"],
         "lmDeltaM": h_lm - cfg["elev"] if math.isfinite(h_lm) else None,

@@ -4,7 +4,7 @@ import { OBJECT_BY_ID, MISSION_BY_ID, dateMs } from '../missions'
 import { SITE_BY_ID, SURFACE_BODIES } from './sites'
 import { useSurface } from './surfaceState'
 import { SurfaceScene, DtmData } from './SurfaceScene'
-import { loadDtm } from './terrain'
+import { loadDtm, loadHorizon } from './terrain'
 import { TouchControls, useTouchDevice } from './TouchControls'
 import { MiniMap, SurfaceMap } from './SurfaceMap'
 import { DiscoveryPanel } from './DiscoveryPanel'
@@ -156,8 +156,9 @@ export default function SurfaceExperience() {
     let live = true
     if (site?.terrain.kind === 'dtm') {
       setDtm(null)
-      loadDtm(site.terrain.file)
-        .then((d) => live && setDtm({ siteId: site.id, data: d }))
+      const file = site.terrain.file
+      Promise.all([loadDtm(file), loadHorizon(file.replace(/\.json$/, '.horizon.json')).catch(() => null)])
+        .then(([d, horizon]) => live && setDtm({ siteId: site.id, data: { ...d, horizon } }))
         .catch((e) => live && setDtm({ siteId: site.id, data: null, error: String(e?.message ?? e) }))
     } else if (site) setDtm({ siteId: site.id, data: null })
     return () => {
