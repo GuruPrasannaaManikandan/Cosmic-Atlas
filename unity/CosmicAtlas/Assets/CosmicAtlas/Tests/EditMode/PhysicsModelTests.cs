@@ -122,54 +122,8 @@ namespace CosmicAtlas.Rendering.Tests
         }
     }
 
-    public class BlackHoleGeodesicTests
-    {
-        /// <summary>Same integrator as BlackHole.shader (r_s = 1): returns true if a ray with impact parameter b is captured.</summary>
-        static bool Captured(double b)
-        {
-            var p = new Vector3d(-60, b, 0);
-            var v = new Vector3d(1, 0, 0);
-            double h2 = Math.Pow(p.x * v.y - p.y * v.x, 2);
-            for (int k = 0; k < 20000; k++)
-            {
-                double r = p.Len;
-                if (r < 1) return true;
-                double dt = Math.Max(0.002, Math.Min(0.5, 0.01 * r));
-                var acc = p * (-1.5 * h2 / Math.Pow(r, 5));
-                var pn = p + v * dt + acc * (0.5 * dt * dt);
-                double rn = pn.Len;
-                var accn = pn * (-1.5 * h2 / Math.Pow(rn, 5));
-                v = v + (acc + accn) * (0.5 * dt);
-                p = pn;
-                if (rn > 70 && p.x * v.x + p.y * v.y > 0) return false;
-            }
-            return true;
-        }
-
-        [Test]
-        public void Shadow_edge_is_at_the_critical_impact_parameter()
-        {
-            double lo = 2.0, hi = 3.5;
-            for (int i = 0; i < 40; i++)
-            {
-                double mid = 0.5 * (lo + hi);
-                if (Captured(mid)) lo = mid; else hi = mid;
-            }
-            double bc = 0.5 * (lo + hi);
-            double expected = 1.5 * Math.Sqrt(3); // (3√3/2) r_s ≈ 2.598
-            TestContext.WriteLine($"critical impact parameter = {bc:F4} r_s (expected {expected:F4})");
-            Assert.AreEqual(expected, bc, 0.02);
-        }
-
-        struct Vector3d
-        {
-            public double x, y, z;
-            public Vector3d(double x, double y, double z) { this.x = x; this.y = y; this.z = z; }
-            public double Len => Math.Sqrt(x * x + y * y + z * z);
-            public static Vector3d operator +(Vector3d a, Vector3d b) => new Vector3d(a.x + b.x, a.y + b.y, a.z + b.z);
-            public static Vector3d operator *(Vector3d a, double k) => new Vector3d(a.x * k, a.y * k, a.z * k);
-        }
-    }
+    // Black-hole ray tracing is validated in BlackHoleValidationTests.cs (replica of the shader integrator vs the
+    // exact Schwarzschild deflection integral, shadow edge, photon rings, disk redshift).
 
     public class GalaxyAndSmallBodyTests
     {
