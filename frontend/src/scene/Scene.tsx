@@ -988,7 +988,8 @@ function Objects() {
             <ObjectVisual o={o} />
           )}
           <sprite ref={(el) => { ring.current[o.id] = el }} visible={false}>
-            <spriteMaterial map={T.selectRingTexture()} transparent depthTest={false} />
+            {/* depth-tested: a selected object behind another body must not have its marker drawn over that body */}
+            <spriteMaterial map={T.selectRingTexture()} transparent depthWrite={false} />
           </sprite>
         </group>
       ))}
@@ -1280,8 +1281,13 @@ function Backdrop() {
     if (ref.current) ref.current.position.set(0, 0, 0)
   })
   return (
-    <points ref={ref} geometry={geo} frustumCulled={false} renderOrder={-100} raycast={() => null}>
-      <pointsMaterial size={1.6} sizeAttenuation={false} vertexColors transparent opacity={0.9} depthWrite={false} depthTest={false} />
+    // Background starfield at infinity. It must be drawn FIRST: three.js renders every opaque object before every
+    // transparent one and renderOrder only sorts within each list, so a transparent, non-depth-tested backdrop was
+    // drawn AFTER the opaque planets and showed through their solid surfaces. As an opaque, first-drawn layer
+    // (no depth test / write - it is at infinity) every solid body, atmosphere and ring is drawn over it.
+    // The former 0.9 opacity is folded into the material colour.
+    <points ref={ref} geometry={geo} frustumCulled={false} renderOrder={-100} raycast={() => null} name="backdrop-stars">
+      <pointsMaterial size={1.6} sizeAttenuation={false} vertexColors color="#e6e6e6" transparent={false} depthWrite={false} depthTest={false} />
     </points>
   )
 }
@@ -1390,7 +1396,8 @@ function DatasetLayer() {
   if (!pts.length) return null
   return (
     <points ref={ref} geometry={geo} frustumCulled={false} raycast={() => null}>
-      <pointsMaterial size={6} sizeAttenuation={false} color="#ffe14d" depthTest={false} transparent opacity={0.95} />
+      {/* dataset objects are real 3-D positions: depth-tested so planets in front hide them */}
+      <pointsMaterial size={6} sizeAttenuation={false} color="#ffe14d" depthWrite={false} transparent opacity={0.95} />
     </points>
   )
 }

@@ -156,7 +156,7 @@ export function AsteroidBeltLayer() {
   if (!geometry) return null
 
   return (
-    <points ref={pointsRef} geometry={geometry} frustumCulled={false} raycast={() => null}>
+    <points ref={pointsRef} geometry={geometry} frustumCulled={false} raycast={() => null} name="asteroid-belt">
       <shaderMaterial
         ref={matRef}
         transparent
