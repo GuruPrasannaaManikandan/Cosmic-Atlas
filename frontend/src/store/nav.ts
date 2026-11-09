@@ -34,6 +34,13 @@ export const nav = {
 }
 
 if (typeof window !== 'undefined') (window as any).__nav = nav
+// Dev-only hook for deterministic browser checks (scripts/e2e/planet_audit.py); not present in production builds.
+if (typeof window !== 'undefined' && import.meta.env?.DEV)
+  (window as any).__navApi = {
+    setCameraAt: (pos: Vec3, look: Vec3) => { interrupt(); nav.followId = null; setCameraAt(pos, look) },
+    positionOf: (id: string, ms: number) => positionOf(BY_ID[id], ms),
+    radiusLy: (id: string) => radiusLyOf(BY_ID[id]),
+  }
 
 export function onInterrupt(fn: () => void) { nav.listeners.add(fn); return () => nav.listeners.delete(fn) }
 
@@ -53,7 +60,8 @@ function lookAtQuat(from: THREE.Vector3, to: THREE.Vector3): THREE.Quaternion {
 export function setCameraAt(pos: Vec3, lookAtPos: Vec3) {
   nav.pos = pos
   const rel = toThree(sub(lookAtPos, pos))
-  nav.quat.copy(lookAtQuat(new THREE.Vector3(0, 0, 0), new THREE.Vector3(...rel)))
+  // lookAtQuat(origin, X) faces -X (same convention as the flight code, which passes -dir): negate to face the target
+  nav.quat.copy(lookAtQuat(new THREE.Vector3(0, 0, 0), new THREE.Vector3(...rel).multiplyScalar(-1)))
 }
 
 export function distanceTo(id: string, ms: number): number {
