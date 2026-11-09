@@ -1,6 +1,8 @@
 # Render Deployment Report (2026-11-09)
 
-**Status: BLOCKED.** Render has not published `main` since the PR #4 commit. The live site serves `8504a14`'s build, not `main` (`b356968`). It needs action in the Render dashboard (see "What to do").
+**Status: RESOLVED (14:48:52 UTC).** Auto-deploy did not publish PR #9 (`b409f93`) or PR #10 (`b356968`). The owner ran a manual deploy of `main` from the Render dashboard. The live site now serves `main`'s exact build (`index-2v9BLBJf.js`) and passes 19/19 live checks (`DEPLOYMENT_VERIFICATION_REPORT.md`).
+
+The rest of this report is the investigation as it stood before the manual deploy. The section "Auto-deploy after the fix" at the end records whether the next commit to `main` deployed by itself.
 
 ## Configuration audited (`render.yaml`, no changes made)
 
@@ -50,3 +52,7 @@ The Render dashboard couldn't be inspected from this session: the in-app browser
 4. **Verify the deploy:**
    - `curl -s https://cosmic-atlas-jk2e.onrender.com/ | grep -o 'assets/index-[^"]*\.js'` must print `assets/index-2v9BLBJf.js`. Allow up to 5 minutes for the CDN.
    - Then run `python scripts/e2e/live_site_check.py --base https://cosmic-atlas-jk2e.onrender.com --out docs/qa/deployment`.
+
+## Auto-deploy after the fix
+
+The merge of this report's PR (#11, docs only) is the test. If auto-deploy works, `last-modified` on `/` moves past 14:48:52 UTC within a few minutes, while the bundle stays `index-2v9BLBJf.js` (no frontend change). The result is recorded in the PR #11 conversation and in the final hand-off.

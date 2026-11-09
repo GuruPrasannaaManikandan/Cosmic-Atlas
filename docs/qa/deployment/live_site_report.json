@@ -1,0 +1,146 @@
+{
+ "base": "https://cosmic-atlas-jk2e.onrender.com",
+ "checks": [
+  {
+   "check": "L1 initial load: app and 3-D canvas start",
+   "pass": true,
+   "detail": {
+    "bundle": [
+     "assets/index-2v9BLBJf.js",
+     "assets/index-DDEEF0IO.css",
+     "assets/vendor-three-DKcu54yN.js"
+    ],
+    "cacheControl": "public, max-age=0, s-maxage=300"
+   }
+  },
+  {
+   "check": "L2 contextual UI deployed: no panels open by default",
+   "pass": true,
+   "detail": {
+    "left": false,
+    "right": false,
+    "timeOpen": false
+   }
+  },
+  {
+   "check": "L3 compact warp-flight HUD deployed",
+   "pass": true,
+   "detail": "DEPARTING Laniakea Supercluster \u2192 Jupiter 10.8 s \u2715 999.54 Mly \u00b7 light 999.54 Myr"
+  },
+  {
+   "check": "L4 Solar System navigation: Jupiter and Galilean moons",
+   "pass": true,
+   "detail": [
+    "io",
+    "europa",
+    "ganymede",
+    "callisto"
+   ]
+  },
+  {
+   "check": "L5 selection chip and on-demand Inspector",
+   "pass": true,
+   "detail": {
+    "chip": 1,
+    "inspector": 1
+   }
+  },
+  {
+   "check": "L6 search: suggestion selects and flies to Saturn",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "L7 timeline opens on demand and plays",
+   "pass": true,
+   "detail": {
+    "advancedDays": 1.5501000000113028
+   }
+  },
+  {
+   "check": "L8 Travel Mode entry keeps the exact view at rest",
+   "pass": true,
+   "detail": {
+    "delta": 0.0,
+    "speed": 0
+   }
+  },
+  {
+   "check": "L9 destination request engages the spacecraft autopilot",
+   "pass": true,
+   "detail": {
+    "active": true,
+    "dest": "titan"
+   }
+  },
+  {
+   "check": "L10 nav map docked, minimizes and closes",
+   "pass": true,
+   "detail": {
+    "card": true,
+    "modal": false
+   }
+  },
+  {
+   "check": "L11 Escape returns to Explore",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "L12 Cosmic Event runs and exits",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "L13 Cosmic Academy opens",
+   "pass": true,
+   "detail": "1"
+  },
+  {
+   "check": "L14 flight speed / reduce-motion settings present",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "L15 1366x768: no horizontal overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "L15 768x1024: no horizontal overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "L15 390x844: no horizontal overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "L16 hard reload (cache disabled) serves the same bundle",
+   "pass": true,
+   "detail": [
+    "assets/index-2v9BLBJf.js",
+    "assets/index-DDEEF0IO.css",
+    "assets/vendor-three-DKcu54yN.js"
+   ]
+  },
+  {
+   "check": "L17 no console errors or failed / 4xx-5xx requests",
+   "pass": true,
+   "detail": {
+    "consoleErrors": [],
+    "network": []
+   }
+  }
+ ],
+ "console": [],
+ "network": [],
+ "browser": "chrome 156.0.8078.81",
+ "servedBundle": [
+  "assets/index-2v9BLBJf.js",
+  "assets/index-DDEEF0IO.css",
+  "assets/vendor-three-DKcu54yN.js"
+ ],
+ "cacheControl": "public, max-age=0, s-maxage=300"
+}
