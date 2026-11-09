@@ -1,0 +1,165 @@
+{
+ "browser": "chrome 156.0.8078.81",
+ "viewport": [
+  1920,
+  1080
+ ],
+ "quality": "balanced",
+ "vsync": true,
+ "seconds": 30,
+ "load": {
+  "ttfbMs": 5,
+  "domContentLoadedMs": 154,
+  "loadMs": 155,
+  "resources": 107,
+  "transferKB": 18001,
+  "decodedKB": 17969,
+  "firstCanvasFrameS": 2.33,
+  "timeToInteractiveS": 2.35,
+  "note": "dev server (unminified Vite modules); a production build loads less"
+ },
+ "scenarios": [
+  {
+   "scenario": "idle-solar-system",
+   "frames": 1799,
+   "meanMs": 16.67,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "p99Ms": 16.9,
+   "maxMs": 33.6,
+   "meanFps": 60.0,
+   "fpsDistributionPct": {
+    ">=58": 99.6,
+    "45-58": 0.0,
+    "30-45": 0.2,
+    "<30": 0.2
+   },
+   "longTasks": 0,
+   "longTaskTotalMs": 0,
+   "heapStartMB": 44.9,
+   "heapEndMB": 46.2
+  },
+  {
+   "scenario": "camera-orbit-drag",
+   "frames": 1804,
+   "meanMs": 16.67,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "p99Ms": 16.9,
+   "maxMs": 17.1,
+   "meanFps": 60.0,
+   "fpsDistributionPct": {
+    ">=58": 100.0,
+    "45-58": 0.0,
+    "30-45": 0.0,
+    "<30": 0.0
+   },
+   "longTasks": 0,
+   "longTaskTotalMs": 0,
+   "heapStartMB": 61.5,
+   "heapEndMB": 42.4
+  },
+  {
+   "scenario": "fast-navigation",
+   "frames": 1803,
+   "meanMs": 16.67,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "p99Ms": 16.9,
+   "maxMs": 33.4,
+   "meanFps": 60.0,
+   "fpsDistributionPct": {
+    ">=58": 99.4,
+    "45-58": 0.1,
+    "30-45": 0.3,
+    "<30": 0.2
+   },
+   "longTasks": 0,
+   "longTaskTotalMs": 0,
+   "heapStartMB": 56.1,
+   "heapEndMB": 44.6
+  },
+  {
+   "scenario": "dense-starfield-milkyway",
+   "frames": 1800,
+   "meanMs": 16.67,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "p99Ms": 25.2,
+   "maxMs": 33.7,
+   "meanFps": 60.0,
+   "fpsDistributionPct": {
+    ">=58": 98.6,
+    "45-58": 0.0,
+    "30-45": 0.7,
+    "<30": 0.7
+   },
+   "longTasks": 0,
+   "longTaskTotalMs": 0,
+   "heapStartMB": 57.1,
+   "heapEndMB": 48.4
+  },
+  {
+   "scenario": "black-hole-event",
+   "frames": 1802,
+   "meanMs": 16.65,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "p99Ms": 25.1,
+   "maxMs": 33.6,
+   "meanFps": 60.1,
+   "fpsDistributionPct": {
+    ">=58": 98.8,
+    "45-58": 0.0,
+    "30-45": 0.5,
+    "<30": 0.7
+   },
+   "longTasks": 0,
+   "longTaskTotalMs": 0,
+   "heapStartMB": 59.6,
+   "heapEndMB": 46.6
+  },
+  {
+   "scenario": "planet-closeup-saturn",
+   "frames": 1800,
+   "meanMs": 16.67,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "p99Ms": 33.4,
+   "maxMs": 33.6,
+   "meanFps": 60.0,
+   "fpsDistributionPct": {
+    ">=58": 97.8,
+    "45-58": 0.0,
+    "30-45": 1.1,
+    "<30": 1.1
+   },
+   "longTasks": 0,
+   "longTaskTotalMs": 0,
+   "heapStartMB": 48.7,
+   "heapEndMB": 54.3
+  },
+  {
+   "scenario": "travel-navmap-open",
+   "frames": 1793,
+   "meanMs": 16.73,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "p99Ms": 25,
+   "maxMs": 33.4,
+   "meanFps": 59.8,
+   "fpsDistributionPct": {
+    ">=58": 98.9,
+    "45-58": 0.1,
+    "30-45": 0.7,
+    "<30": 0.3
+   },
+   "longTasks": 0,
+   "longTaskTotalMs": 0,
+   "heapStartMB": 64.8,
+   "heapEndMB": 63.9
+  }
+ ],
+ "soak": [],
+ "pageErrors": []
+}

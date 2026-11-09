@@ -18,6 +18,8 @@ import {
 } from '../tutorial/tutorialState'
 import { ScaleBreadcrumbs } from './ScaleBreadcrumbs'
 import { TravelProgressHUD } from '../travel/TravelProgressHUD'
+import { subscribeTravelEngine, travelEngineState, travelSettings } from '../travel/travelEngine'
+import { BY_ID } from '../data/catalog'
 import { ModuleBoundary, ModuleLoader } from './ModuleBoundary'
 import { TopNav } from './TopNav'
 
@@ -285,9 +287,53 @@ export function App() {
     navMapOpen,
     error,
     selectedId,
+    timeOpen,
     set,
   } = useStore()
   const tourIdx = useStore((s) => s.tourIndex)
+  // warp flight in progress: large panels step aside so the flight is the focus (restored on arrival)
+  const [inFlight, setInFlight] = useState(false)
+  useEffect(() => subscribeTravelEngine(() => setInFlight(travelEngineState.phase === 'traveling')), [])
+  // The bottom stack (dock, time bar) wraps to more rows on narrow screens; panels and the time bar are positioned
+  // from its MEASURED height (CSS vars --dock-h / --timebar-h) instead of fixed per-breakpoint guesses.
+  useEffect(() => {
+    const root = document.documentElement
+    const ro = new ResizeObserver(() => {
+      const dock = document.querySelector('.dock') as HTMLElement | null
+      const tb = document.querySelector('.timebar') as HTMLElement | null
+      root.style.setProperty('--dock-h', `${dock ? Math.ceil(dock.getBoundingClientRect().height) : 0}px`)
+      root.style.setProperty('--timebar-h', `${tb ? Math.ceil(tb.getBoundingClientRect().height) : 0}px`)
+    })
+    let watched: Element[] = []
+    const watch = () => {
+      const now = Array.from(document.querySelectorAll('.dock, .timebar'))
+      if (now.length === watched.length && now.every((el, i) => el === watched[i])) return // nothing (un)mounted
+      watched = now
+      ro.disconnect()
+      now.forEach((el) => ro.observe(el))
+      if (!now.some((el) => el.classList.contains('timebar'))) root.style.setProperty('--timebar-h', '0px')
+    }
+    watch()
+    // re-attach only when the dock / time bar mount or unmount (cheap identity check per DOM mutation)
+    const mo = new MutationObserver(watch)
+    mo.observe(document.body, { childList: true, subtree: true })
+    return () => { ro.disconnect(); mo.disconnect() }
+  }, [])
+  // panel shortcuts (never while typing): I = Inspector, L = Catalogue list, T = Timeline
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null
+      if (!t || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return
+      if (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName)) return
+      const s = useStore.getState()
+      if (s.phase === 'intro' || s.phase === 'travel') return
+      if (e.code === 'KeyI' && s.selectedId) s.set({ rightOpen: !s.rightOpen })
+      else if (e.code === 'KeyL') s.set({ leftOpen: !s.leftOpen })
+      else if (e.code === 'KeyT') s.set({ timeOpen: !s.timeOpen })
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
   const [about, setAbout] = useState(false)
   const [help, setHelp] = useState(false)
   const [eventsModalOpen, setEventsModalOpen] = useState(false)
@@ -297,6 +343,8 @@ export function App() {
   const [completeOpen, setCompleteOpen] = useState(tutorialState.isCompleteOpen)
   const [gl, setGl] = useState<boolean | null>(null)
   const [speed, setSpeed] = useState(nav.speedMult)
+  const [flightSpeed, setFlightSpeed] = useState(travelSettings.speed)
+  const [reduceMotion, setReduceMotion] = useState(travelSettings.reduceMotion)
   const [, force] = useState(0)
 
   useEffect(() => setGl(webglOk()), [])
@@ -330,7 +378,7 @@ export function App() {
   const inSolar = len(sub(nav.pos, SUN_POS)) < 0.02
   const isTour = phase === 'tour'
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 860
-  const showInfo = rightOpen && !!selectedId && !dataOpen && (!isTour || !isMobile) && phase !== 'travel'
+  const showInfo = rightOpen && !!selectedId && !dataOpen && (!isTour || !isMobile) && phase !== 'travel' && !inFlight
   const st = useStore.getState()
 
   if (gl === false) {
@@ -342,8 +390,11 @@ export function App() {
     )
   }
 
-  const showTimebar = phase !== 'intro' && phase !== 'travel' && !activeEventId && (inSolar || (phase === 'tour' && tourIdx >= 16))
-  const showBrowser = phase !== 'intro' && phase !== 'travel' && !activeEventId && leftOpen && phase !== 'tour'
+  const timeRelevant = phase !== 'intro' && phase !== 'travel' && !activeEventId && (inSolar || (phase === 'tour' && tourIdx >= 16))
+  const showTimebar = timeRelevant && timeOpen && !inFlight
+  const showBrowser = phase !== 'intro' && phase !== 'travel' && !activeEventId && leftOpen && phase !== 'tour' && !inFlight
+  const sel = selectedId ? BY_ID[selectedId] : null
+  const showChip = !!sel && !showInfo && !inFlight && (phase === 'explore' || phase === 'tour') && !activeEventId
 
   return (
     <div
@@ -351,6 +402,7 @@ export function App() {
       data-timebar={showTimebar ? 'on' : undefined}
       data-left={showBrowser ? 'open' : undefined}
       data-right={showInfo ? 'open' : undefined}
+      data-inflight={inFlight ? 'on' : undefined}
     >
       <Boundary>
         <CosmicCanvas />
@@ -476,8 +528,8 @@ export function App() {
       {/* Main Exploration Mode UI (Hidden in Event Mode) */}
       {phase !== 'intro' && phase !== 'travel' && !activeEventId && (
         <>
-          {leftOpen && phase !== 'tour' && <Browser />}
-          {!leftOpen && phase !== 'tour' && (
+          {showBrowser && <Browser />}
+          {!leftOpen && phase !== 'tour' && !inFlight && (
             <button
               className="btn reopen glass"
               onClick={() => set({ leftOpen: true })}
@@ -490,13 +542,34 @@ export function App() {
 
           {phase === 'tour' && <TourCard />}
           {showInfo && <Info />}
+          {showChip && sel && (
+            <div className="sel-chip glass" role="group" aria-label={`Selected: ${sel.name}`}>
+              <span className="sel-chip-name">{sel.name}</span>
+              <span className="sel-chip-cat">{sel.category.replace('-', ' ')}</span>
+              <button className="sel-chip-btn" onClick={() => set({ rightOpen: true })} title="Open the Inspector (I)">Details</button>
+              <button className="sel-chip-btn" onClick={() => st.travel(sel.id)} title="Fly here">Fly here</button>
+              <button className="sel-chip-x" onClick={() => st.select(null)} aria-label="Clear selection" title="Clear selection">✕</button>
+            </div>
+          )}
 
           {showTimebar && <TimeBar />}
+
 
           <StatusBar />
 
           {/* Bottom Dock Controls */}
           <div className="dock glass" role="toolbar" aria-label="Observatory controls">
+            {timeRelevant && (
+              <button
+                className={'tog time-toggle' + (timeOpen ? ' on' : '')}
+                onClick={() => set({ timeOpen: !timeOpen })}
+                aria-pressed={timeOpen}
+                aria-label={timeOpen ? 'Hide timeline (T)' : 'Show timeline (T)'}
+                title={timeOpen ? 'Hide timeline (T)' : 'Show timeline (T)'}
+              >
+                <span aria-hidden>◷</span> {new Date(useStore.getState().simMs).toISOString().slice(0, 10)}
+              </button>
+            )}
             <button
               className="btn ghost"
               onClick={() => {
@@ -556,6 +629,34 @@ export function App() {
                 ))}
               </select>
             </label>
+
+            <label title="Warp flight time compression (flights are shortened; the HUD shows the real light time)">
+              Flight
+              <select
+                value={flightSpeed}
+                onChange={(e) => {
+                  const v = parseFloat(e.target.value)
+                  travelSettings.speed = v
+                  setFlightSpeed(v)
+                }}
+                aria-label="Warp flight speed"
+              >
+                <option value={0.5}>Cinematic</option>
+                <option value={1}>Normal</option>
+                <option value={2}>Fast</option>
+              </select>
+            </label>
+            <button
+              className={'tog' + (reduceMotion ? ' on' : '')}
+              aria-pressed={reduceMotion}
+              onClick={() => {
+                travelSettings.reduceMotion = !reduceMotion
+                setReduceMotion(!reduceMotion)
+              }}
+              title="Reduce motion: no warp streaks during flights"
+            >
+              Reduce motion
+            </button>
 
             <label title="Rendering resolution and particle density">
               Quality

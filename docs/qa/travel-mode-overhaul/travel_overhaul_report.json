@@ -1,0 +1,485 @@
+{
+ "checks": [
+  {
+   "check": "P1 default view: no Catalogue, Inspector or Timeline open",
+   "pass": true,
+   "detail": {
+    "left": false,
+    "right": false,
+    "time": false,
+    "panels": 0,
+    "timebar": 0
+   }
+  },
+  {
+   "check": "P2 selecting Earth shows a compact chip, not the Inspector",
+   "pass": true,
+   "detail": {
+    "chip": 1
+   }
+  },
+  {
+   "check": "W1 earth -> moon: departs from previous arrival, arrives, panels hidden in flight",
+   "pass": true,
+   "detail": "first-frame move 0.010% of route, arrival 3.5 R, distance monotonic=True"
+  },
+  {
+   "check": "W2 moon -> mars: departs from previous arrival, arrives, panels hidden in flight",
+   "pass": true,
+   "detail": "first-frame move 0.002% of route, arrival 3.5 R, distance monotonic=True"
+  },
+  {
+   "check": "W3 mars -> phobos: departs from previous arrival, arrives, panels hidden in flight",
+   "pass": true,
+   "detail": "first-frame move 0.004% of route, arrival 4.2 R, distance monotonic=True"
+  },
+  {
+   "check": "W4 phobos -> jupiter: departs from previous arrival, arrives, panels hidden in flight",
+   "pass": true,
+   "detail": "first-frame move 0.007% of route, arrival 3.5 R, distance monotonic=True"
+  },
+  {
+   "check": "W5 jupiter -> europa: departs from previous arrival, arrives, panels hidden in flight",
+   "pass": true,
+   "detail": "first-frame move 0.012% of route, arrival 3.5 R, distance monotonic=True"
+  },
+  {
+   "check": "W6 europa -> saturn: departs from previous arrival, arrives, panels hidden in flight",
+   "pass": true,
+   "detail": "first-frame move 0.002% of route, arrival 6.0 R, distance monotonic=True"
+  },
+  {
+   "check": "W7 saturn -> titan: departs from previous arrival, arrives, panels hidden in flight",
+   "pass": true,
+   "detail": "first-frame move 0.004% of route, arrival 3.5 R, distance monotonic=True"
+  },
+  {
+   "check": "W8 titan -> neptune: departs from previous arrival, arrives, panels hidden in flight",
+   "pass": true,
+   "detail": "first-frame move 0.002% of route, arrival 3.5 R, distance monotonic=True"
+  },
+  {
+   "check": "W HUD is compact (< 3 % of the viewport) and never covers the centre",
+   "pass": true,
+   "detail": {
+    "maxAreaFraction": 0.0186,
+    "coversCentre": false
+   }
+  },
+  {
+   "check": "C1 Cancel stops the flight and holds the actual position",
+   "pass": true,
+   "detail": {
+    "drift": 0.0
+   }
+  },
+  {
+   "check": "C2 the next flight departs from the cancellation point",
+   "pass": true,
+   "detail": {
+    "firstFrameFraction": 6.609587009130219e-05
+   }
+  },
+  {
+   "check": "T1 entering Travel Mode keeps the exact view (position, orientation) at rest",
+   "pass": true,
+   "detail": {
+    "posDelta": 0.0,
+    "quatDot": 1.0,
+    "speed": 0,
+    "ref": "earth"
+   }
+  },
+  {
+   "check": "T2 every visible Travel-Mode control has a meaningful accessible name",
+   "pass": true,
+   "detail": {
+    "controls": 11,
+    "unnamed": []
+   }
+  },
+  {
+   "check": "T3 destination request engages the autopilot from the current ship position",
+   "pass": true,
+   "detail": {
+    "teleport": 8.470329472543003e-22
+   }
+  },
+  {
+   "check": "T4 autopilot accelerates, decelerates and arrives at the Moon",
+   "pass": true,
+   "detail": {
+    "samples": 59,
+    "peakSpeedLyS": 6.337617562805418e-09,
+    "peakIndex": 12,
+    "finalSpeedLyS": 0,
+    "phases": [
+     "accelerate",
+     "align",
+     "arrive",
+     "cruise",
+     "decelerate"
+    ],
+    "arrival": {
+     "arrived": "moon",
+     "active": false,
+     "d": 2.735084055008588
+    }
+   }
+  },
+  {
+   "check": "T5 manual input (W) overrides the autopilot",
+   "pass": true,
+   "detail": {
+    "active": false
+   }
+  },
+  {
+   "check": "T6 braking (B) reduces the actual velocity",
+   "pass": true,
+   "detail": {
+    "before": 1.3847149107211962e-06,
+    "after": 1.9868537406093845e-07
+   }
+  },
+  {
+   "check": "T7 V cycles cockpit / chase / external",
+   "pass": true,
+   "detail": [
+    "chase",
+    "external",
+    "cockpit"
+   ]
+  },
+  {
+   "check": "T8 nav map opens docked (no dimming backdrop) and leaves the centre visible",
+   "pass": true,
+   "detail": {
+    "w": 560,
+    "h": 808,
+    "x": 866,
+    "modalBackdrop": false
+   }
+  },
+  {
+   "check": "T9 nav map minimizes, expands and closes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "T10 Escape exits Travel Mode to Explore",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "P3 Catalogue (L), Inspector (Details), Timeline (T) open on demand",
+   "pass": true,
+   "detail": {
+    "catalogue": 1,
+    "inspector": true,
+    "timeline": 1
+   }
+  },
+  {
+   "check": "P4 panels step aside during warp and return after arrival",
+   "pass": true,
+   "detail": {
+    "inFlight": {
+     "panels": 0,
+     "timebar": 0
+    },
+    "restored": {
+     "panels": 2,
+     "timebar": 1
+    }
+   }
+  },
+  {
+   "check": "P5 panel shortcuts do not fire while typing",
+   "pass": true,
+   "detail": {
+    "left": false,
+    "right": false,
+    "time": false
+   }
+  },
+  {
+   "check": "R 1366x768: selection chip fully on screen",
+   "pass": true,
+   "detail": [
+    556.265625,
+    118,
+    809.734375,
+    156
+   ]
+  },
+  {
+   "check": "R 768x1024: selection chip fully on screen",
+   "pass": true,
+   "detail": [
+    257.265625,
+    118,
+    510.734375,
+    156
+   ]
+  },
+  {
+   "check": "R 390x844: selection chip fully on screen",
+   "pass": true,
+   "detail": [
+    91.3359375,
+    118,
+    298.6640625,
+    156
+   ]
+  },
+  {
+   "check": "No console errors or uncaught exceptions",
+   "pass": true,
+   "detail": []
+  }
+ ],
+ "legs": [
+  {
+   "leg": "earth -> moon",
+   "departureDistanceLy": 4.01714531322076e-08,
+   "firstFrameDisplacementLy": 3.858406344315732e-12,
+   "firstFrameDisplacementFraction": 9.604846336072025e-05,
+   "samples": 24,
+   "distanceMonotonic": true,
+   "arrivalDistanceR": 3.5062627774096184,
+   "followId": "moon",
+   "panelsVisibleInFlight": 0,
+   "hudText": "WARP Earth \u2192 Moon 1.8 s \u2715 35,313 km \u00b7 light 0.1 s"
+  },
+  {
+   "leg": "moon -> mars",
+   "departureDistanceLy": 2.1531154261570048e-05,
+   "firstFrameDisplacementLy": 4.887672685955594e-10,
+   "firstFrameDisplacementFraction": 2.2700467548455463e-05,
+   "samples": 42,
+   "distanceMonotonic": true,
+   "arrivalDistanceR": 3.4970576082087046,
+   "followId": "mars",
+   "panelsVisibleInFlight": 0,
+   "hudText": "WARP Moon \u2192 Mars 2.8 s \u2715 571,306 km \u00b7 light 1.9 s"
+  },
+  {
+   "leg": "mars -> phobos",
+   "departureDistanceLy": 1.160297806990874e-09,
+   "firstFrameDisplacementLy": 4.158307539172857e-14,
+   "firstFrameDisplacementFraction": 3.583827801896003e-05,
+   "samples": 32,
+   "distanceMonotonic": true,
+   "arrivalDistanceR": 4.160895168696565,
+   "followId": "phobos",
+   "panelsVisibleInFlight": 0,
+   "hudText": "WARP Mars \u2192 Phobos 2.0 s \u2715 511 km \u00b7 light 0.0 s"
+  },
+  {
+   "leg": "phobos -> jupiter",
+   "departureDistanceLy": 6.335541577769513e-05,
+   "firstFrameDisplacementLy": 4.172212609372045e-09,
+   "firstFrameDisplacementFraction": 6.585407984712353e-05,
+   "samples": 39,
+   "distanceMonotonic": true,
+   "arrivalDistanceR": 3.4999968977695173,
+   "followId": "jupiter",
+   "panelsVisibleInFlight": 0,
+   "hudText": "WARP Phobos \u2192 Jupiter 2.7 s \u2715 14,622,454 km \u00b7 light 48.8 s"
+  },
+  {
+   "leg": "jupiter -> europa",
+   "departureDistanceLy": 6.083172300453515e-08,
+   "firstFrameDisplacementLy": 7.517193958006523e-12,
+   "firstFrameDisplacementFraction": 0.00012357358277433796,
+   "samples": 29,
+   "distanceMonotonic": true,
+   "arrivalDistanceR": 3.50103352804252,
+   "followId": "europa",
+   "panelsVisibleInFlight": 0,
+   "hudText": "WARP Jupiter \u2192 Europa 2.0 s \u2715 58,207 km \u00b7 light 0.2 s"
+  },
+  {
+   "leg": "europa -> saturn",
+   "departureDistanceLy": 0.00020631242390742668,
+   "firstFrameDisplacementLy": 5.039745557639922e-09,
+   "firstFrameDisplacementFraction": 2.4427736644213336e-05,
+   "samples": 41,
+   "distanceMonotonic": true,
+   "arrivalDistanceR": 6.0102919962291645,
+   "followId": "saturn",
+   "panelsVisibleInFlight": 0,
+   "hudText": "WARP Europa \u2192 Saturn 2.8 s \u2715 25,742,965 km \u00b7 light 1.4 min"
+  },
+  {
+   "leg": "saturn -> titan",
+   "departureDistanceLy": 1.1164813602248761e-07,
+   "firstFrameDisplacementLy": 4.40537909429664e-12,
+   "firstFrameDisplacementFraction": 3.94577039191172e-05,
+   "samples": 30,
+   "distanceMonotonic": true,
+   "arrivalDistanceR": 3.4951838744235504,
+   "followId": "titan",
+   "panelsVisibleInFlight": 0,
+   "hudText": "WARP Saturn \u2192 Titan 1.9 s \u2715 77,245 km \u00b7 light 0.3 s"
+  },
+  {
+   "leg": "titan -> neptune",
+   "departureDistanceLy": 0.00032646221616817106,
+   "firstFrameDisplacementLy": 6.865839670870662e-09,
+   "firstFrameDisplacementFraction": 2.1031039216292796e-05,
+   "samples": 48,
+   "distanceMonotonic": true,
+   "arrivalDistanceR": 3.5003937820058693,
+   "followId": "neptune",
+   "panelsVisibleInFlight": 0,
+   "hudText": "WARP Titan \u2192 Neptune 3.1 s \u2715 11,586,328 km \u00b7 light 38.6 s"
+  }
+ ],
+ "travel": {
+  "autopilotMoon": {
+   "samples": 59,
+   "peakSpeedLyS": 6.337617562805418e-09,
+   "peakIndex": 12,
+   "finalSpeedLyS": 0,
+   "phases": [
+    "accelerate",
+    "align",
+    "arrive",
+    "cruise",
+    "decelerate"
+   ],
+   "arrival": {
+    "arrived": "moon",
+    "active": false,
+    "d": 2.735084055008588
+   }
+  }
+ },
+ "inventory": [
+  {
+   "name": "\u26a1 Assisted Flight",
+   "role": "button",
+   "box": [
+    603,
+    22,
+    132,
+    34
+   ],
+   "enabled": true
+  },
+  {
+   "name": "\u25ce Damping ON",
+   "role": "button",
+   "box": [
+    743,
+    22,
+    118,
+    34
+   ],
+   "enabled": true
+  },
+  {
+   "name": "G1",
+   "role": "button",
+   "box": [
+    872,
+    30,
+    28,
+    19
+   ],
+   "enabled": true
+  },
+  {
+   "name": "G2",
+   "role": "button",
+   "box": [
+    903,
+    30,
+    28,
+    19
+   ],
+   "enabled": true
+  },
+  {
+   "name": "G3",
+   "role": "button",
+   "box": [
+    934,
+    30,
+    28,
+    19
+   ],
+   "enabled": true
+  },
+  {
+   "name": "G4",
+   "role": "button",
+   "box": [
+    965,
+    30,
+    28,
+    19
+   ],
+   "enabled": true
+  },
+  {
+   "name": "\ud83c\udfa5 CHASE",
+   "role": "button",
+   "box": [
+    1004,
+    22,
+    89,
+    34
+   ],
+   "enabled": true
+  },
+  {
+   "name": "\ud83d\uddfa Nav Map (M)",
+   "role": "button",
+   "box": [
+    1101,
+    22,
+    124,
+    34
+   ],
+   "enabled": true
+  },
+  {
+   "name": "Flight controls help",
+   "role": "button",
+   "box": [
+    1233,
+    25,
+    28,
+    28
+   ],
+   "enabled": true
+  },
+  {
+   "name": "\u21a9 Exit to Explore",
+   "role": "button",
+   "box": [
+    1282,
+    22,
+    128,
+    34
+   ],
+   "enabled": true
+  },
+  {
+   "name": "Open Nav Map",
+   "role": "button",
+   "box": [
+    1133,
+    837,
+    276,
+    28
+   ],
+   "enabled": true
+  }
+ ],
+ "errors": [],
+ "browser": "chrome 156.0.8078.81"
+}

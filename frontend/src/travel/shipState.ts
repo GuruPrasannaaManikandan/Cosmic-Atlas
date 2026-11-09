@@ -177,6 +177,36 @@ export function initShipNear(targetId: string, simMs: number) {
   cancelAutopilot()
 }
 
+/**
+ * Continuity entry: put the spacecraft EXACTLY where the observer camera is (position and orientation), at rest
+ * in the co-moving frame of the nearest compact body - instead of re-spawning at a fixed offset next to a target
+ * (which teleported the view and started the ship with an arbitrary 30 km/s sideways velocity).
+ */
+export function initShipAt(pos: Vec3, quat: THREE.Quaternion, simMs: number, preferRefId?: string | null) {
+  ship.refBodyId = null
+  ship.localKm = null
+  ship.pos = [pos[0], pos[1], pos[2]]
+  ship.quat.copy(quat)
+  ship.vel = [0, 0, 0]
+  ship.acc = [0, 0, 0]
+  ship.angVel.set(0, 0, 0)
+  ship.thrust = 0
+  ship.boost = false
+  ship.reverse = false
+  ship.gear = 1
+  ship.arrivedId = null
+  ship.event = null
+  const n = nearestCompactBody(ship.pos, simMs)
+  // co-move with the body being viewed (e.g. Saturn, not its nearer moon Tethys); fall back to the nearest body
+  const pref = preferRefId && BY_ID[preferRefId] && COMPACT.has(BY_ID[preferRefId].category) ? preferRefId : null
+  const refId = pref ?? n.id
+  ship.targetId = refId
+  setReferenceBody(refId, simMs) // exact km offset from that body; the ship then co-moves with it
+  ship.nearestId = n.id
+  ship.nearestSurfaceLy = n.surfaceLy
+  cancelAutopilot()
+}
+
 /** Engage automated navigation toward a destination */
 export function engageAutopilot(targetId: string, simMs: number, useWarp: boolean = false) {
   const o = BY_ID[targetId]

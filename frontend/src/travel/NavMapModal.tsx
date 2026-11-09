@@ -43,6 +43,7 @@ const SOLAR_SYSTEM_OBJECTS = OBJECTS.filter(
 )
 
 export function NavMapModal({ onClose }: { onClose: () => void }) {
+  const [minimized, setMinimized] = useState(false)
   const ms = useStore((s) => s.simMs)
   const [selected, setSelected] = useState<string>(ship.targetId ?? 'earth')
   const [catFilter, setCatFilter] = useState<NavCategoryFilter>('all')
@@ -182,17 +183,35 @@ export function NavMapModal({ onClose }: { onClose: () => void }) {
     }
   }, [allDestinations])
 
+  if (minimized) {
+    const tgt = ship.autopilot.destinationName ?? (ship.targetId && BY_ID[ship.targetId] ? BY_ID[ship.targetId].name : null)
+    return (
+      <div className="navmap-mini" role="region" aria-label="Navigation map (minimized)">
+        <span className="navmap-mini-label">Nav</span>
+        <span className="navmap-mini-target">{tgt ? `→ ${tgt}` : 'no destination'}</span>
+        <button className="navmap-mini-btn" onClick={() => setMinimized(false)} aria-label="Expand navigation map" title="Expand">▢</button>
+        <button className="navmap-mini-btn" onClick={onClose} aria-label="Close Navigation Map" title="Close (M)">✕</button>
+      </div>
+    )
+  }
+
   return (
-    <div className="modal" onClick={onClose} role="dialog" aria-modal="true" aria-label="Solar System Navigation Map">
+    // Docked, non-modal overlay: the scene stays visible and flyable; nothing is dimmed or blocked behind it.
+    <div className="navmap-overlay" role="dialog" aria-modal="false" aria-label="Solar System Navigation Map">
       <div className="card glass navmap-card" onClick={(e) => e.stopPropagation()}>
         <div className="panel-head">
           <div>
-            <div className="eyebrow violet">TACTICAL ASTROGATION SYSTEM</div>
-            <h2>Solar System Navigation Map</h2>
+            <div className="eyebrow violet">NAVIGATION</div>
+            <h2>Solar System map</h2>
           </div>
-          <button className="icon-btn" onClick={onClose} aria-label="Close Navigation Map">
-            ✕
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="icon-btn" onClick={() => setMinimized(true)} aria-label="Minimize navigation map" title="Minimize">
+              ▁
+            </button>
+            <button className="icon-btn" onClick={onClose} aria-label="Close Navigation Map" title="Close (M)">
+              ✕
+            </button>
+          </div>
         </div>
 
         <p className="hint">

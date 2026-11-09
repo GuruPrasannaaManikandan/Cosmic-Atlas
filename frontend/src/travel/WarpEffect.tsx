@@ -1,10 +1,18 @@
 import { useMemo, useRef } from 'react'
-import { useFrame } from '@react-three/fiber'
+import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { ship } from './shipState'
+import { travelEngineState, travelSettings } from './travelEngine'
 
+/**
+ * Warp streaks. They live in CAMERA space (the group copies the camera orientation every frame) so they always
+ * stream along the line of flight; previously they were fixed to world axes and crossed the view sideways when
+ * the camera looked anywhere but world -Z. Shown for Travel-Mode warp and, softly, during the middle of Explore
+ * warp flights; never with reduced motion.
+ */
 export function WarpEffect() {
   const pointsRef = useRef<THREE.Points>(null)
+  const { camera } = useThree()
 
   const count = 600
   const [geo, initialZ] = useMemo(() => {
@@ -41,9 +49,14 @@ export function WarpEffect() {
     const pts = pointsRef.current
     if (!pts) return
 
-    const isWarping = ship.autopilot.warpActive || (ship.gear === 4 && ship.thrust > 0)
+    const shipWarp = ship.autopilot.warpActive || (ship.gear === 4 && ship.thrust > 0)
+    const p = travelEngineState.progress
+    const camWarp = travelEngineState.phase === 'traveling' && p > 0.12 && p < 0.88
+    const isWarping = !travelSettings.reduceMotion && (shipWarp || camWarp)
     pts.visible = isWarping
     if (!isWarping) return
+    pts.quaternion.copy(camera.quaternion)
+    ;(pts.material as THREE.PointsMaterial).opacity = shipWarp ? 0.85 : 0.55 * Math.sin(Math.PI * (p - 0.12) / 0.76)
 
     const posAttr = pts.geometry.attributes.position as THREE.BufferAttribute
     const arr = posAttr.array as Float32Array
