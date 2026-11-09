@@ -1,0 +1,1092 @@
+{
+ "tag": "sweep",
+ "results": [
+  {
+   "body": "mars",
+   "angle": 0,
+   "distR": 1.3,
+   "diskRadiusPx": 919,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 30,
+   "distR": 1.3,
+   "diskRadiusPx": 931,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 60,
+   "distR": 1.3,
+   "diskRadiusPx": 926,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 90,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 120,
+   "distR": 1.3,
+   "diskRadiusPx": 926,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 150,
+   "distR": 1.3,
+   "diskRadiusPx": 928,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 180,
+   "distR": 1.3,
+   "diskRadiusPx": 918,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 210,
+   "distR": 1.3,
+   "diskRadiusPx": 933,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 240,
+   "distR": 1.3,
+   "diskRadiusPx": 928,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 270,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 300,
+   "distR": 1.3,
+   "diskRadiusPx": 927,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 330,
+   "distR": 1.3,
+   "diskRadiusPx": 919,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 0,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26120,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 30,
+   "distR": 4.0,
+   "diskRadiusPx": 199,
+   "samples": 26204,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 60,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26132,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 261,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 90,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26172,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 120,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26172,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 150,
+   "distR": 4.0,
+   "diskRadiusPx": 199,
+   "samples": 26196,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 180,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26120,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 210,
+   "distR": 4.0,
+   "diskRadiusPx": 199,
+   "samples": 26196,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 240,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26172,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 270,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26172,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 300,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 330,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26128,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 261,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 0,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 30,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 60,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 90,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 120,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 150,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 180,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 210,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 973,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 240,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 270,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 300,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 330,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "mars",
+   "angle": 0,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 30,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 60,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 90,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 120,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 150,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 180,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 210,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 240,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 270,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 300,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 330,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 0,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 30,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 60,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 90,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 120,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 150,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 180,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 210,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 240,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 270,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 300,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "mars",
+   "angle": 330,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 0,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 261,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 30,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 261,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 60,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 261,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 90,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 120,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 261,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 150,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 180,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 210,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 240,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 261,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 270,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 261,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 300,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 330,
+   "distR": 1.3,
+   "diskRadiusPx": 925,
+   "samples": 256000,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 264,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 0,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 251,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 30,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 251,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 60,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 258,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 90,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 255,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 120,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26156,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 255,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 150,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 255,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 180,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 252,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 210,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 252,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 240,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 252,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 270,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 252,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 300,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26164,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 251,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 330,
+   "distR": 4.0,
+   "diskRadiusPx": 198,
+   "samples": 26156,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 251,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 0,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 246,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 30,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 246,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 60,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 243,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 90,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 252,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 120,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 249,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 150,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 249,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 180,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 237,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 210,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 246,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 240,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 243,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 270,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 239,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 300,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 237,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 330,
+   "distR": 20.0,
+   "diskRadiusPx": 38,
+   "samples": 981,
+   "leakingPixels": 0,
+   "maxDiff": 0,
+   "hiddenLayers": 240,
+   "pass": true
+  },
+  {
+   "body": "saturn",
+   "angle": 0,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 30,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 60,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 90,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 120,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 150,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 180,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 210,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 240,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 270,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 300,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 330,
+   "distR": 150.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 0,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 30,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 60,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 90,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 120,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 150,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 180,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 210,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 240,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 270,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 300,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  },
+  {
+   "body": "saturn",
+   "angle": 330,
+   "distR": 2000.0,
+   "skipped": "not on screen"
+  }
+ ],
+ "browser": "chrome 156.0.8078.81",
+ "consoleErrors": [],
+ "summary": {
+  "checked": 72,
+  "passed": 72,
+  "skipped": 48
+ }
+}

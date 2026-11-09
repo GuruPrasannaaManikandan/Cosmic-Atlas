@@ -1,0 +1,122 @@
+{
+ "tag": "control_simulated_defect",
+ "results": [
+  {
+   "body": "mars",
+   "angle": 50,
+   "distR": 3.0,
+   "diskRadiusPx": 272,
+   "samples": 49192,
+   "leakingPixels": 457,
+   "maxDiff": 213,
+   "hiddenLayers": 261,
+   "pass": false
+  },
+  {
+   "body": "mars",
+   "angle": 100,
+   "distR": 3.0,
+   "diskRadiusPx": 272,
+   "samples": 49049,
+   "leakingPixels": 273,
+   "maxDiff": 214,
+   "hiddenLayers": 264,
+   "pass": false
+  },
+  {
+   "body": "mars",
+   "angle": 160,
+   "distR": 3.0,
+   "diskRadiusPx": 271,
+   "samples": 48905,
+   "leakingPixels": 183,
+   "maxDiff": 211,
+   "hiddenLayers": 264,
+   "pass": false
+  },
+  {
+   "body": "mars",
+   "angle": 160,
+   "distR": 12.0,
+   "diskRadiusPx": 64,
+   "samples": 2749,
+   "leakingPixels": 4,
+   "maxDiff": 211,
+   "hiddenLayers": 264,
+   "pass": false
+  },
+  {
+   "body": "mars",
+   "angle": 70,
+   "distR": 1.6,
+   "diskRadiusPx": 615,
+   "samples": 205684,
+   "leakingPixels": 962,
+   "maxDiff": 212,
+   "hiddenLayers": 264,
+   "pass": false
+  },
+  {
+   "body": "jupiter",
+   "angle": 50,
+   "distR": 3.0,
+   "diskRadiusPx": 272,
+   "samples": 49049,
+   "leakingPixels": 228,
+   "maxDiff": 203,
+   "hiddenLayers": 262,
+   "pass": false
+  },
+  {
+   "body": "jupiter",
+   "angle": 100,
+   "distR": 3.0,
+   "diskRadiusPx": 272,
+   "samples": 49049,
+   "leakingPixels": 233,
+   "maxDiff": 211,
+   "hiddenLayers": 265,
+   "pass": false
+  },
+  {
+   "body": "jupiter",
+   "angle": 160,
+   "distR": 3.0,
+   "diskRadiusPx": 272,
+   "samples": 49049,
+   "leakingPixels": 116,
+   "maxDiff": 213,
+   "hiddenLayers": 259,
+   "pass": false
+  },
+  {
+   "body": "jupiter",
+   "angle": 160,
+   "distR": 12.0,
+   "diskRadiusPx": 64,
+   "samples": 2749,
+   "leakingPixels": 16,
+   "maxDiff": 118,
+   "hiddenLayers": 256,
+   "pass": false
+  },
+  {
+   "body": "jupiter",
+   "angle": 70,
+   "distR": 1.6,
+   "diskRadiusPx": 615,
+   "samples": 205772,
+   "leakingPixels": 864,
+   "maxDiff": 216,
+   "hiddenLayers": 265,
+   "pass": false
+  }
+ ],
+ "browser": "chrome 156.0.8078.81",
+ "consoleErrors": [],
+ "summary": {
+  "checked": 10,
+  "passed": 0,
+  "skipped": 0
+ }
+}

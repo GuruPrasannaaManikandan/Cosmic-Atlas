@@ -1,0 +1,33 @@
+{
+ "stages": [
+  {
+   "target": "laniakea",
+   "midflightScale": 14761761.989975596,
+   "scale": 14250000.000000004,
+   "nearest": "laniakea",
+   "flying": false
+  },
+  {
+   "target": "milky-way",
+   "midflightScale": 3303403.2083669193,
+   "scale": 3839.375,
+   "nearest": "milky-way",
+   "flying": false
+  },
+  {
+   "target": "sun",
+   "midflightScale": 1734.9024409871174,
+   "scale": 1.4232848644039735e-05,
+   "nearest": "himalia",
+   "flying": false
+  },
+  {
+   "target": "mars",
+   "midflightScale": 5.142296299518137e-06,
+   "scale": 2.2361369201617955e-11,
+   "nearest": "mars",
+   "flying": false
+  }
+ ],
+ "consoleErrors": []
+}
