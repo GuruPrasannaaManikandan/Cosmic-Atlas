@@ -474,8 +474,9 @@ option { background: #070d1e; color: #fff; }
 /* Category tabs in browser */
 .cat-tabs {
   display: flex;
+  flex-wrap: wrap; /* the 5th tab ("Solar") was clipped by the 280 px panel with no visible scroll affordance */
   gap: 4px;
-  overflow-x: auto;
+  overflow-x: visible;
   padding-bottom: 6px;
   margin-bottom: 6px;
   border-bottom: 1px solid var(--line-subtle);
@@ -3895,6 +3896,7 @@ option { background: #070d1e; color: #fff; }
 }
 .brand { min-width: 0; }
 .search { flex: 1 1 220px; min-width: 150px; max-width: 420px; }
+.search input { min-width: 0; width: 100%; } /* the input's intrinsic width stopped the search from shrinking (< 345 px) */
 .topnav {
   display: flex;
   align-items: center;
@@ -3966,9 +3968,13 @@ option { background: #070d1e; color: #fff; }
   /* icon-only secondary primary actions (name kept as accessible label + tooltip) */
   .nav-primary .events-btn .nav-label, .nav-primary .academy-btn .nav-label { display: none; }
 }
-@media (max-width: 860px) {
+/* primary actions need ~1000 CSS px beside the brand and search (e.g. 1366 px at 150 % browser zoom = 911 px
+   overflowed and pushed "More" off-screen), so they collapse into "More" below 1000 px */
+@media (max-width: 1000px) {
   .nav-primary { display: none !important; }
   .menu-primary { display: flex; }
+}
+@media (max-width: 860px) {
   .brand > div { display: none; }
   .top { gap: 8px; padding: 0 8px 0 10px; }
   .search { min-width: 0; }
@@ -3976,6 +3982,9 @@ option { background: #070d1e; color: #fff; }
 @media (max-width: 480px) {
   .nav-more-btn .nav-label { display: none; }
   .search-kbd { display: none; }
+  /* the nav (audio + More) must never be squeezed below its content; the search absorbs the remaining width */
+  .topnav { flex: none; }
+  .search { flex: 1 1 0; min-width: 0; }
 }
 
 /* ---- Breadcrumbs sit BELOW the header (they used to overlap its bottom edge) ------------------------ */
@@ -4010,14 +4019,14 @@ option { background: #070d1e; color: #fff; }
 
 /* phones / portrait tablets: the bottom stack wraps and grows, so reserve more space for it */
 @media (max-width: 768px) {
-  :root { --stack-base: 132px; --stack-time: 236px; }
-  .timebar { bottom: 120px; max-width: calc(100vw - 2 * var(--gutter)); }
+  :root { --stack-base: 132px; --stack-time: 246px; }
+  .timebar { bottom: 132px; max-width: calc(100vw - 2 * var(--gutter)); } /* clears a wrapped dock (was 10 px overlap) */
   .dock { max-width: calc(100vw - 2 * var(--gutter)); }
 }
 
 /* ---- Phones: compact two-row dock, compact clock, breadcrumbs without the telemetry chips ----------- */
 @media (max-width: 560px) {
-  :root { --stack-base: 104px; --stack-time: 196px; }
+  :root { --stack-base: 104px; --stack-time: 226px; } /* the time bar wraps on phones: keep panels above it */
   .dock {
     display: grid;
     grid-template-columns: repeat(4, auto);
