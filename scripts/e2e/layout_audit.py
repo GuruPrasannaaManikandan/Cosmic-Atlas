@@ -22,7 +22,7 @@ from pathlib import Path
 
 from playwright.async_api import async_playwright
 
-VIEWPORTS = [(1920, 1080), (1600, 900), (1366, 768), (1280, 720), (1024, 768), (768, 1024), (390, 844)]
+VIEWPORTS = [(1920, 1080), (1600, 900), (1366, 768), (1280, 720), (1024, 768), (768, 1024), (430, 932), (390, 844)]
 
 REQUIRED_NAV = ["Find Home", "Travel Mode", "Cosmic Events", "Academy", "Earth", "Milky Way", "Solar System",
                 "Data Intelligence", "Help", "Notes"]
@@ -39,7 +39,10 @@ REACH_JS = r"""
   }
   const names = (sel) => Array.from(document.querySelectorAll(sel)).filter(ok).map((b) =>
     (b.getAttribute('aria-label') || b.textContent || '').replace(/[^A-Za-z ]/g, ' ').replace(/\s+/g, ' ').trim())
-  return { inline: names('.topnav > .nav-group button'), menu: names('#nav-more-menu button') }
+  // the menu scrolls when the window is short: bring each item into view first (as a user would by scrolling)
+  const menu = Array.from(document.querySelectorAll('#nav-more-menu button')).filter((b) => { b.scrollIntoView({ block: 'nearest' }); return ok(b) })
+    .map((b) => (b.getAttribute('aria-label') || b.textContent || '').replace(/[^A-Za-z ]/g, ' ').replace(/\s+/g, ' ').trim())
+  return { inline: names('.topnav > .nav-group button'), menu }
 }
 """
 
@@ -123,13 +126,15 @@ MEASURE_JS = r"""
 """
 
 
-async def audit(base: str, out: Path, states: list[str]) -> dict:
+async def audit(base: str, out: Path, states: list[str], zoom: float = 1.0, channel: str | None = None, viewports=None) -> dict:
     out.mkdir(parents=True, exist_ok=True)
-    report: dict = {"base": base, "results": []}
+    report: dict = {"base": base, "zoom": zoom, "channel": channel or "chromium", "results": []}
     async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True, args=["--use-gl=angle", "--enable-webgl", "--ignore-gpu-blocklist"])
-        for (w, h) in VIEWPORTS:
-            ctx = await browser.new_context(viewport={"width": w, "height": h}, device_scale_factor=1)
+        browser = await p.chromium.launch(channel=channel, headless=True, args=["--use-gl=angle", "--enable-webgl", "--ignore-gpu-blocklist"])
+        for (W, H) in (viewports or VIEWPORTS):
+            # browser zoom z on a W x H window = a CSS viewport of W/z x H/z at device pixel ratio z
+            w, h = round(W / zoom), round(H / zoom)
+            ctx = await browser.new_context(viewport={"width": w, "height": h}, device_scale_factor=zoom)
             # suppress the first-visit Academy modal so the layout under test is the normal explorer
             await ctx.add_init_script("try{localStorage.setItem('cosmic_academy_dismissed','1')}catch(e){}")
             page = await ctx.new_page()
@@ -197,8 +202,12 @@ def main() -> int:
     ap.add_argument("--out", default="docs/ui-audit/latest")
     ap.add_argument("--states", default="explore,inspector")
     ap.add_argument("--no-fail", action="store_true")
+    ap.add_argument("--zoom", type=float, default=1.0, help="emulate browser zoom (0.8, 1.25, 1.5 ...)")
+    ap.add_argument("--channel", default=None, help="chrome | msedge (default: bundled Chromium)")
+    ap.add_argument("--viewports", default=None, help="e.g. 1920x1080,1366x768")
     a = ap.parse_args()
-    rep = asyncio.run(audit(a.base, Path(a.out), a.states.split(",")))
+    vps = [tuple(int(v) for v in s.split("x")) for s in a.viewports.split(",")] if a.viewports else None
+    rep = asyncio.run(audit(a.base, Path(a.out), a.states.split(","), a.zoom, a.channel, vps))
     failed = any(r["pageOverflowX"] or any(c["issues"] for c in r["controls"]) or r["overlaps"] or r.get("navUnreachable")
                  or r.get("menuClosesOnEscape") is False or r.get("searchResultsVisible") is False for r in rep["results"])
     print("RESULT:", "FAIL" if failed else "PASS")

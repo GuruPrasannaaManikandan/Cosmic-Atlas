@@ -5,7 +5,7 @@ Cases: page opened as file:// ; first HTTP visit ; reload through Unity's Indexe
 index.html served WITHOUT its Build/ folder. Each must either reach window.__atlas.ready or show a specific
 error naming the cause (window.__atlasError). Needs serve_unity_webgl.py running on :8091.
 
-Usage: python scripts/e2e/unity_webgl_load_paths.py
+Usage: python scripts/e2e/unity_webgl_load_paths.py [--channel chrome|msedge]
 """
 import asyncio
 import pathlib
@@ -19,8 +19,11 @@ from playwright.async_api import async_playwright
 BUILD = pathlib.Path(__file__).resolve().parents[2] / "unity" / "CosmicAtlas" / "Builds" / "WebGL"
 
 
-async def attempt(ctx, url, label, expect_ready, expect_text=None):
+async def attempt(ctx, url, label, expect_ready, expect_text=None, hard=False):
     page = await ctx.new_page()
+    if hard:  # hard refresh: bypass the HTTP cache for every request
+        cdp = await ctx.new_cdp_session(page)
+        await cdp.send("Network.setCacheDisabled", {"cacheDisabled": True})
     logs, failed, resp = [], [], {}
     page.on("console", lambda m: logs.append(f"{m.type}: {m.text[:220]}") if m.type == "error" else None)
     page.on("pageerror", lambda e: logs.append("PAGEERROR " + str(e)[:220]))
@@ -40,16 +43,21 @@ async def attempt(ctx, url, label, expect_ready, expect_text=None):
     return ok
 
 
-async def main():
+async def main(channel=None):
     page_only = pathlib.Path(tempfile.mkdtemp(prefix="atlas_pageonly_"))
     shutil.copy(BUILD / "index.html", page_only / "index.html")
     results = []
     async with async_playwright() as p:
-        b = await p.chromium.launch(headless=True, args=["--use-angle=d3d11", "--enable-gpu", "--ignore-gpu-blocklist"])
+        b = await p.chromium.launch(channel=channel, headless=True, args=["--use-angle=d3d11", "--enable-gpu", "--ignore-gpu-blocklist"])
+        print("browser:", channel or "chromium", b.version)
         ctx = await b.new_context()
         results.append(await attempt(ctx, (BUILD / "index.html").as_uri(), "file:// page", False, "over HTTP"))
         results.append(await attempt(ctx, "http://127.0.0.1:8091/", "HTTP first visit", True))
         results.append(await attempt(ctx, "http://127.0.0.1:8091/", "HTTP reload (UnityCache 304)", True))
+        results.append(await attempt(ctx, "http://127.0.0.1:8091/", "HTTP hard refresh (HTTP cache disabled)", True, hard=True))
+        incog = await b.new_context()  # fresh profile = clean cache, like an incognito window
+        results.append(await attempt(incog, "http://127.0.0.1:8091/", "clean profile (incognito-equivalent)", True))
+        await incog.close()
         srv = subprocess.Popen([sys.executable, "-m", "http.server", "8092", "--bind", "127.0.0.1", "--directory", str(page_only)],
                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         await asyncio.sleep(1.5)
@@ -63,4 +71,5 @@ async def main():
 
 
 if __name__ == "__main__":
-    sys.exit(asyncio.run(main()))
+    ch = sys.argv[sys.argv.index("--channel") + 1] if "--channel" in sys.argv else None
+    sys.exit(asyncio.run(main(ch)))

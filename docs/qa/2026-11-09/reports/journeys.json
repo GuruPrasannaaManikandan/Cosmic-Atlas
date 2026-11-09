@@ -1,0 +1,260 @@
+[
+ {
+  "journey": "A",
+  "step": "page loads, canvas present",
+  "pass": true,
+  "detail": "2.4 s to canvas"
+ },
+ {
+  "journey": "A",
+  "step": "first-visit Academy prompt shown (expected for a new visitor)",
+  "pass": true,
+  "detail": "2 academy elements"
+ },
+ {
+  "journey": "A",
+  "step": "universe visible in Explore",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "A",
+  "step": "select Earth -> inspector shows Earth",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "A",
+  "step": "close inspector",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "A",
+  "step": "no console errors",
+  "pass": true,
+  "detail": "[]"
+ },
+ {
+  "journey": "B",
+  "step": "select Jupiter -> planet and Galilean moons render",
+  "pass": true,
+  "detail": "labelled: ['io', 'europa', 'ganymede', 'callisto']"
+ },
+ {
+  "journey": "B",
+  "step": "time controls advance the system",
+  "pass": true,
+  "detail": "2.03 days in 2 s at 1 d/s"
+ },
+ {
+  "journey": "B",
+  "step": "breadcrumb returns to a larger scale",
+  "pass": true,
+  "detail": "scale 1.42e-05 -> 1.28e+03"
+ },
+ {
+  "journey": "C",
+  "step": "typing shows suggestions",
+  "pass": true,
+  "detail": "9"
+ },
+ {
+  "journey": "C",
+  "step": "selecting a result moves the camera",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "C",
+  "step": "inspector shows Jupiter",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "C",
+  "step": "no-match query shows an empty-state / live-lookup option",
+  "pass": true,
+  "detail": "BUNDLED CATALOGUE\nNo match in bundled catalogue \u2014 query the CDS SIMBAD database "
+ },
+ {
+  "journey": "C",
+  "step": "clear search empties the field",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "D",
+  "step": "enter Travel Mode",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "D",
+  "step": "W thrust moves the ship",
+  "pass": true,
+  "detail": "[-6.048439970863041, 11149.249999999998, 11149.249999999998] -> [-6.145434257746333, 11018.6954904904, 11018.6954904904]"
+ },
+ {
+  "journey": "D",
+  "step": "nav map opens with M",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "D",
+  "step": "window resize + blur keep Travel Mode alive",
+  "pass": true,
+  "detail": "[]"
+ },
+ {
+  "journey": "D",
+  "step": "Escape exits Travel Mode",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "E",
+  "step": "Time Engine visible at Solar System scale",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "E",
+  "step": "set date via the date picker",
+  "pass": true,
+  "detail": "sim year 2030"
+ },
+ {
+  "journey": "E",
+  "step": "Reverse + Play runs time backwards",
+  "pass": true,
+  "detail": "{'r': -1, 'p': True, 'dt': -1.5168}"
+ },
+ {
+  "journey": "E",
+  "step": "Pause stops time",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "E",
+  "step": "celestial state changes consistently with time",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "E",
+  "step": "Now returns to the present",
+  "pass": true,
+  "detail": "|sim - now| = 1 s"
+ },
+ {
+  "journey": "F",
+  "step": "event scene loads with narrative/labels",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "F",
+  "step": "exit restores the previous scene (phase, selection, camera)",
+  "pass": true,
+  "detail": "saturn/explore -> saturn/explore, camera kept=True"
+ },
+ {
+  "journey": "G",
+  "step": "Surface Explore (Moon/Mars/Titan)",
+  "pass": false,
+  "detail": "NOT IMPLEMENTED: no surface/explore mode exists in the frontend or Unity project"
+ },
+ {
+  "journey": "H",
+  "step": "Artifact details (rover/instrument inspection)",
+  "pass": false,
+  "detail": "NOT IMPLEMENTED: no artifact/rover models or inspection UI exist"
+ },
+ {
+  "journey": "I",
+  "step": "API 500: live lookup shows an actionable error, no endless spinner",
+  "pass": true,
+  "detail": "BUNDLED CATALOGUE\nNo match in bundled catalogue \u2014 query the CDS SIMBAD database below.\n\ud83c\udf10 Query CDS SIMBAD live for \u201cQqzx"
+ },
+ {
+  "journey": "I",
+  "step": "API 500: Horizons check reports the failure in the inspector",
+  "pass": true,
+  "detail": "injected failure"
+ },
+ {
+  "journey": "I",
+  "step": "API 500 + missing asteroid data: app stays usable (navigation works)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "I",
+  "step": "API abort: live lookup shows an actionable error, no endless spinner",
+  "pass": true,
+  "detail": "BUNDLED CATALOGUE\nNo match in bundled catalogue \u2014 query the CDS SIMBAD database below.\n\ud83c\udf10 Query CDS SIMBAD live for \u201cQqzx"
+ },
+ {
+  "journey": "I",
+  "step": "API abort: Horizons check reports the failure in the inspector",
+  "pass": true,
+  "detail": "Backend unreachable (Failed to fetch). Start it with: uvicorn app.main:app --port 8000"
+ },
+ {
+  "journey": "I",
+  "step": "API abort + missing asteroid data: app stays usable (navigation works)",
+  "pass": true,
+  "detail": ""
+ },
+ {
+  "journey": "J",
+  "step": "1366x768: inspector opens with an on-screen close control",
+  "pass": true,
+  "detail": "{'x': 1307, 'y': 133, 'width': 28, 'height': 28}"
+ },
+ {
+  "journey": "J",
+  "step": "1366x768: Travel Mode reachable and exits with Escape",
+  "pass": true,
+  "detail": "travel"
+ },
+ {
+  "journey": "J",
+  "step": "768x1024: inspector opens with an on-screen close control",
+  "pass": true,
+  "detail": "{'x': 709, 'y': 133, 'width': 28, 'height': 28}"
+ },
+ {
+  "journey": "J",
+  "step": "768x1024: Travel Mode reachable and exits with Escape",
+  "pass": true,
+  "detail": "travel"
+ },
+ {
+  "journey": "J",
+  "step": "430x932: inspector opens with an on-screen close control",
+  "pass": true,
+  "detail": "{'x': 371, 'y': 133, 'width': 28, 'height': 28}"
+ },
+ {
+  "journey": "J",
+  "step": "430x932: Travel Mode reachable and exits with Escape",
+  "pass": true,
+  "detail": "travel"
+ },
+ {
+  "journey": "J",
+  "step": "390x844: inspector opens with an on-screen close control",
+  "pass": true,
+  "detail": "{'x': 331, 'y': 133, 'width': 28, 'height': 28}"
+ },
+ {
+  "journey": "J",
+  "step": "390x844: Travel Mode reachable and exits with Escape",
+  "pass": true,
+  "detail": "travel"
+ }
+]
