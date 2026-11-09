@@ -1,0 +1,1679 @@
+{
+ "base": "http://localhost:5174",
+ "zoom": 1.5,
+ "channel": "chrome",
+ "results": [
+  {
+   "viewport": {
+    "W": 1280,
+    "H": 720
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 233.0625,
+      "y": 19,
+      "w": 373.8125,
+      "h": 36,
+      "r": 606.875,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Guided journey from ~1 billion light-yea",
+     "rect": {
+      "x": 618.875,
+      "y": 20,
+      "w": 119.21875,
+      "h": 34,
+      "r": 738.09375,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Pilot a spacecraft through the Solar Sys",
+     "rect": {
+      "x": 744.09375,
+      "y": 20,
+      "w": 124.46875,
+      "h": 34,
+      "r": 868.5625,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Simulations of supernovae, pulsars, blac",
+     "rect": {
+      "x": 874.5625,
+      "y": 20,
+      "w": 135.921875,
+      "h": 34,
+      "r": 1010.484375,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Academy: interactive training mis",
+     "rect": {
+      "x": 1016.484375,
+      "y": 17,
+      "w": 122.359375,
+      "h": 40,
+      "r": 1138.84375,
+      "b": 57
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 1144.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 1180.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 1186.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 1253,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 1252,
+     "h": 54,
+     "r": 1266,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 1252,
+     "h": 38,
+     "r": 1266,
+     "b": 108
+    },
+    "browser": {
+     "x": 12.445691108703613,
+     "y": 116,
+     "w": 280,
+     "h": 496,
+     "r": 292.4456911087036,
+     "b": 612
+    },
+    "dock": {
+     "x": 299.59375,
+     "y": 662,
+     "w": 680.8125,
+     "h": 44,
+     "r": 980.40625,
+     "b": 706
+    },
+    "status": {
+     "x": 426.3125,
+     "y": 624,
+     "w": 427.375,
+     "h": 30,
+     "r": 853.6875,
+     "b": 654
+    }
+   },
+   "overlaps": [],
+   "state": "explore",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "1280x720_explore.png"
+  },
+  {
+   "viewport": {
+    "W": 1280,
+    "H": 720
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 233.0625,
+      "y": 19,
+      "w": 373.8125,
+      "h": 36,
+      "r": 606.875,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Guided journey from ~1 billion light-yea",
+     "rect": {
+      "x": 618.875,
+      "y": 20,
+      "w": 119.21875,
+      "h": 34,
+      "r": 738.09375,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Pilot a spacecraft through the Solar Sys",
+     "rect": {
+      "x": 744.09375,
+      "y": 20,
+      "w": 124.46875,
+      "h": 34,
+      "r": 868.5625,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Simulations of supernovae, pulsars, blac",
+     "rect": {
+      "x": 874.5625,
+      "y": 20,
+      "w": 135.921875,
+      "h": 34,
+      "r": 1010.484375,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Academy: interactive training mis",
+     "rect": {
+      "x": 1016.484375,
+      "y": 17,
+      "w": 122.359375,
+      "h": 40,
+      "r": 1138.84375,
+      "b": 57
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 1144.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 1180.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 1186.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 1253,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 1252,
+     "h": 54,
+     "r": 1266,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 1252,
+     "h": 38,
+     "r": 1266,
+     "b": 108
+    },
+    "browser": {
+     "x": 14,
+     "y": 116,
+     "w": 280,
+     "h": 436,
+     "r": 294,
+     "b": 552
+    },
+    "inspector": {
+     "x": 906,
+     "y": 116,
+     "w": 360,
+     "h": 436,
+     "r": 1266,
+     "b": 552
+    },
+    "timebar": {
+     "x": 262.546875,
+     "y": 560,
+     "w": 754.90625,
+     "h": 52,
+     "r": 1017.453125,
+     "b": 612
+    },
+    "dock": {
+     "x": 299.59375,
+     "y": 662,
+     "w": 680.8125,
+     "h": 44,
+     "r": 980.40625,
+     "b": 706
+    },
+    "status": {
+     "x": 379.984375,
+     "y": 624,
+     "w": 520.03125,
+     "h": 30,
+     "r": 900.015625,
+     "b": 654
+    }
+   },
+   "overlaps": [],
+   "state": "inspector",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "1280x720_inspector.png"
+  },
+  {
+   "viewport": {
+    "W": 1067,
+    "H": 600
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 229.0625,
+      "y": 19,
+      "w": 319.375,
+      "h": 36,
+      "r": 548.4375,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Guided journey from ~1 billion light-yea",
+     "rect": {
+      "x": 560.4375,
+      "y": 20,
+      "w": 119.21875,
+      "h": 34,
+      "r": 679.65625,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Pilot a spacecraft through the Solar Sys",
+     "rect": {
+      "x": 685.65625,
+      "y": 20,
+      "w": 124.46875,
+      "h": 34,
+      "r": 810.125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Simulations of supernovae, pulsars, blac",
+     "rect": {
+      "x": 816.125,
+      "y": 20,
+      "w": 45.859375,
+      "h": 34,
+      "r": 861.984375,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Academy: interactive training mis",
+     "rect": {
+      "x": 867.984375,
+      "y": 17,
+      "w": 59.859375,
+      "h": 40,
+      "r": 927.84375,
+      "b": 57
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 933.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 969.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 975.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 1042,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 1039,
+     "h": 54,
+     "r": 1053,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 1039,
+     "h": 38,
+     "r": 1053,
+     "b": 108
+    },
+    "browser": {
+     "x": 14,
+     "y": 116,
+     "w": 280,
+     "h": 376,
+     "r": 294,
+     "b": 492
+    },
+    "dock": {
+     "x": 193.09375,
+     "y": 542,
+     "w": 680.8125,
+     "h": 44,
+     "r": 873.90625,
+     "b": 586
+    }
+   },
+   "overlaps": [],
+   "state": "explore",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "1067x600_explore.png"
+  },
+  {
+   "viewport": {
+    "W": 1067,
+    "H": 600
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 229.0625,
+      "y": 19,
+      "w": 319.375,
+      "h": 36,
+      "r": 548.4375,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Guided journey from ~1 billion light-yea",
+     "rect": {
+      "x": 560.4375,
+      "y": 20,
+      "w": 119.21875,
+      "h": 34,
+      "r": 679.65625,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Pilot a spacecraft through the Solar Sys",
+     "rect": {
+      "x": 685.65625,
+      "y": 20,
+      "w": 124.46875,
+      "h": 34,
+      "r": 810.125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Simulations of supernovae, pulsars, blac",
+     "rect": {
+      "x": 816.125,
+      "y": 20,
+      "w": 45.859375,
+      "h": 34,
+      "r": 861.984375,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Academy: interactive training mis",
+     "rect": {
+      "x": 867.984375,
+      "y": 17,
+      "w": 59.859375,
+      "h": 40,
+      "r": 927.84375,
+      "b": 57
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 933.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 969.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 975.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 1042,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 1039,
+     "h": 54,
+     "r": 1053,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 1039,
+     "h": 38,
+     "r": 1053,
+     "b": 108
+    },
+    "inspector": {
+     "x": 693,
+     "y": 116,
+     "w": 360,
+     "h": 316,
+     "r": 1053,
+     "b": 432
+    },
+    "timebar": {
+     "x": 156.046875,
+     "y": 440,
+     "w": 754.90625,
+     "h": 52,
+     "r": 910.953125,
+     "b": 492
+    },
+    "dock": {
+     "x": 193.09375,
+     "y": 542,
+     "w": 680.8125,
+     "h": 44,
+     "r": 873.90625,
+     "b": 586
+    }
+   },
+   "overlaps": [],
+   "state": "inspector",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "1067x600_inspector.png"
+  },
+  {
+   "viewport": {
+    "W": 911,
+    "H": 512
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 229.0625,
+      "y": 19,
+      "w": 420,
+      "h": 36,
+      "r": 649.0625,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 777.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 813.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 819.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 886,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 883,
+     "h": 54,
+     "r": 897,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 883,
+     "h": 38,
+     "r": 897,
+     "b": 108
+    },
+    "browser": {
+     "x": 13.995198249816895,
+     "y": 116,
+     "w": 280,
+     "h": 288,
+     "r": 293.9951982498169,
+     "b": 404
+    },
+    "dock": {
+     "x": 115.09375,
+     "y": 454,
+     "w": 680.8125,
+     "h": 44,
+     "r": 795.90625,
+     "b": 498
+    }
+   },
+   "overlaps": [],
+   "state": "explore",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "911x512_explore.png"
+  },
+  {
+   "viewport": {
+    "W": 911,
+    "H": 512
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 229.0625,
+      "y": 19,
+      "w": 420,
+      "h": 36,
+      "r": 649.0625,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 777.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 813.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 819.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 886,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 883,
+     "h": 54,
+     "r": 897,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 883,
+     "h": 38,
+     "r": 897,
+     "b": 108
+    },
+    "inspector": {
+     "x": 537,
+     "y": 116,
+     "w": 360,
+     "h": 228,
+     "r": 897,
+     "b": 344
+    },
+    "timebar": {
+     "x": 78.046875,
+     "y": 352,
+     "w": 754.90625,
+     "h": 52,
+     "r": 832.953125,
+     "b": 404
+    },
+    "dock": {
+     "x": 115.09375,
+     "y": 454,
+     "w": 680.8125,
+     "h": 44,
+     "r": 795.90625,
+     "b": 498
+    }
+   },
+   "overlaps": [],
+   "state": "inspector",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "911x512_inspector.png"
+  },
+  {
+   "viewport": {
+    "W": 853,
+    "H": 480
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 420,
+      "h": 36,
+      "r": 487,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 719.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 755.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 761.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 828,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 825,
+     "h": 54,
+     "r": 839,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 825,
+     "h": 38,
+     "r": 839,
+     "b": 108
+    },
+    "browser": {
+     "x": 14,
+     "y": 116,
+     "w": 280,
+     "h": 256,
+     "r": 294,
+     "b": 372
+    },
+    "dock": {
+     "x": 86.09375,
+     "y": 422,
+     "w": 680.8125,
+     "h": 44,
+     "r": 766.90625,
+     "b": 466
+    }
+   },
+   "overlaps": [],
+   "state": "explore",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "853x480_explore.png"
+  },
+  {
+   "viewport": {
+    "W": 853,
+    "H": 480
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 420,
+      "h": 36,
+      "r": 487,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 719.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 755.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 761.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 828,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 825,
+     "h": 54,
+     "r": 839,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 825,
+     "h": 38,
+     "r": 839,
+     "b": 108
+    },
+    "inspector": {
+     "x": 479,
+     "y": 116,
+     "w": 360,
+     "h": 196,
+     "r": 839,
+     "b": 312
+    },
+    "timebar": {
+     "x": 49.046875,
+     "y": 320,
+     "w": 754.90625,
+     "h": 52,
+     "r": 803.953125,
+     "b": 372
+    },
+    "dock": {
+     "x": 86.09375,
+     "y": 422,
+     "w": 680.8125,
+     "h": 44,
+     "r": 766.90625,
+     "b": 466
+    }
+   },
+   "overlaps": [],
+   "state": "inspector",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "853x480_inspector.png"
+  },
+  {
+   "viewport": {
+    "W": 683,
+    "H": 512
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 420,
+      "h": 36,
+      "r": 487,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 549.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 585.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 591.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 658,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 655,
+     "h": 54,
+     "r": 669,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 655,
+     "h": 38,
+     "r": 669,
+     "b": 108
+    },
+    "browser": {
+     "x": 13.999445915222168,
+     "y": 116,
+     "w": 655,
+     "h": 264,
+     "r": 668.9994459152222,
+     "b": 380
+    },
+    "dock": {
+     "x": 170.75,
+     "y": 382,
+     "w": 341.5,
+     "h": 116,
+     "r": 512.25,
+     "b": 498
+    }
+   },
+   "overlaps": [],
+   "state": "explore",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "683x512_explore.png"
+  },
+  {
+   "viewport": {
+    "W": 683,
+    "H": 512
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 420,
+      "h": 36,
+      "r": 487,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 549.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 585.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 591.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 658,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 655,
+     "h": 54,
+     "r": 669,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 655,
+     "h": 38,
+     "r": 669,
+     "b": 108
+    },
+    "inspector": {
+     "x": 14,
+     "y": 116,
+     "w": 655,
+     "h": 150,
+     "r": 669,
+     "b": 266
+    },
+    "timebar": {
+     "x": 14,
+     "y": 296,
+     "w": 655,
+     "h": 84,
+     "r": 669,
+     "b": 380
+    },
+    "dock": {
+     "x": 170.75,
+     "y": 382,
+     "w": 341.5,
+     "h": 116,
+     "r": 512.25,
+     "b": 498
+    }
+   },
+   "overlaps": [],
+   "state": "inspector",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "683x512_inspector.png"
+  },
+  {
+   "viewport": {
+    "W": 512,
+    "H": 683
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 303.84375,
+      "h": 36,
+      "r": 370.84375,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 378.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 414.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 420.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 487,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 484,
+     "h": 54,
+     "r": 498,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 484,
+     "h": 38,
+     "r": 498,
+     "b": 108
+    },
+    "browser": {
+     "x": 13.953829765319824,
+     "y": 116,
+     "w": 484,
+     "h": 463,
+     "r": 497.9538297653198,
+     "b": 579
+    },
+    "dock": {
+     "x": 73.3359375,
+     "y": 591,
+     "w": 365.328125,
+     "h": 78,
+     "r": 438.6640625,
+     "b": 669
+    }
+   },
+   "overlaps": [],
+   "state": "explore",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "512x683_explore.png"
+  },
+  {
+   "viewport": {
+    "W": 512,
+    "H": 683
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 303.84375,
+      "h": 36,
+      "r": 370.84375,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 378.84375,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 414.703125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 420.703125,
+      "y": 20,
+      "w": 66.296875,
+      "h": 34,
+      "r": 487,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 484,
+     "h": 54,
+     "r": 498,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 484,
+     "h": 38,
+     "r": 498,
+     "b": 108
+    },
+    "inspector": {
+     "x": 14,
+     "y": 116,
+     "w": 484,
+     "h": 341,
+     "r": 498,
+     "b": 457
+    },
+    "timebar": {
+     "x": 14,
+     "y": 495,
+     "w": 484,
+     "h": 88,
+     "r": 498,
+     "b": 583
+    },
+    "dock": {
+     "x": 73.3359375,
+     "y": 591,
+     "w": 365.328125,
+     "h": 78,
+     "r": 438.6640625,
+     "b": 669
+    }
+   },
+   "overlaps": [],
+   "state": "inspector",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "512x683_inspector.png"
+  },
+  {
+   "viewport": {
+    "W": 287,
+    "H": 621
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 115.453125,
+      "h": 36,
+      "r": 182.453125,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 190.453125,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 226.3125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 232.3125,
+      "y": 20,
+      "w": 29.6875,
+      "h": 34,
+      "r": 262,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 259,
+     "h": 54,
+     "r": 273,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 259,
+     "h": 38,
+     "r": 273,
+     "b": 108
+    },
+    "browser": {
+     "x": 13.98220443725586,
+     "y": 116,
+     "w": 259,
+     "h": 401,
+     "r": 272.98220443725586,
+     "b": 517
+    },
+    "dock": {
+     "x": 14,
+     "y": 529,
+     "w": 259,
+     "h": 78,
+     "r": 273,
+     "b": 607
+    }
+   },
+   "overlaps": [],
+   "state": "explore",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "287x621_explore.png"
+  },
+  {
+   "viewport": {
+    "W": 287,
+    "H": 621
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 115.453125,
+      "h": 36,
+      "r": 182.453125,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 190.453125,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 226.3125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 232.3125,
+      "y": 20,
+      "w": 29.6875,
+      "h": 34,
+      "r": 262,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 259,
+     "h": 54,
+     "r": 273,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 259,
+     "h": 38,
+     "r": 273,
+     "b": 108
+    },
+    "inspector": {
+     "x": 14,
+     "y": 116,
+     "w": 259,
+     "h": 279,
+     "r": 273,
+     "b": 395
+    },
+    "timebar": {
+     "x": 14,
+     "y": 397,
+     "w": 259,
+     "h": 124,
+     "r": 273,
+     "b": 521
+    },
+    "dock": {
+     "x": 14,
+     "y": 529,
+     "w": 259,
+     "h": 78,
+     "r": 273,
+     "b": 607
+    }
+   },
+   "overlaps": [],
+   "state": "inspector",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "287x621_inspector.png"
+  },
+  {
+   "viewport": {
+    "W": 260,
+    "H": 563
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 88.453125,
+      "h": 36,
+      "r": 155.453125,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 163.453125,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 199.3125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 205.3125,
+      "y": 20,
+      "w": 29.6875,
+      "h": 34,
+      "r": 235,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 232,
+     "h": 54,
+     "r": 246,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 232,
+     "h": 38,
+     "r": 246,
+     "b": 108
+    },
+    "browser": {
+     "x": 13.995251655578613,
+     "y": 116,
+     "w": 232,
+     "h": 343,
+     "r": 245.9952516555786,
+     "b": 459
+    },
+    "dock": {
+     "x": 14,
+     "y": 471,
+     "w": 232,
+     "h": 78,
+     "r": 246,
+     "b": 549
+    }
+   },
+   "overlaps": [],
+   "state": "explore",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "260x563_explore.png"
+  },
+  {
+   "viewport": {
+    "W": 260,
+    "H": 563
+   },
+   "pageOverflowX": false,
+   "headerOverflowX": false,
+   "controls": [
+    {
+     "label": "Search astronomical objects",
+     "rect": {
+      "x": 67,
+      "y": 19,
+      "w": 88.453125,
+      "h": 36,
+      "r": 155.453125,
+      "b": 55
+     },
+     "issues": []
+    },
+    {
+     "label": "Cosmic Audio Engine controls",
+     "rect": {
+      "x": 163.453125,
+      "y": 20,
+      "w": 35.859375,
+      "h": 34,
+      "r": 199.3125,
+      "b": 54
+     },
+     "issues": []
+    },
+    {
+     "label": "More navigation",
+     "rect": {
+      "x": 205.3125,
+      "y": 20,
+      "w": 29.6875,
+      "h": 34,
+      "r": 235,
+      "b": 54
+     },
+     "issues": []
+    }
+   ],
+   "regions": {
+    "header": {
+     "x": 14,
+     "y": 10,
+     "w": 232,
+     "h": 54,
+     "r": 246,
+     "b": 64
+    },
+    "breadcrumbs": {
+     "x": 14,
+     "y": 70,
+     "w": 232,
+     "h": 38,
+     "r": 246,
+     "b": 108
+    },
+    "inspector": {
+     "x": 14,
+     "y": 116,
+     "w": 232,
+     "h": 221,
+     "r": 246,
+     "b": 337
+    },
+    "timebar": {
+     "x": 14,
+     "y": 341,
+     "w": 232,
+     "h": 122,
+     "r": 246,
+     "b": 463
+    },
+    "dock": {
+     "x": 14,
+     "y": 471,
+     "w": 232,
+     "h": 78,
+     "r": 246,
+     "b": 549
+    }
+   },
+   "overlaps": [],
+   "state": "inspector",
+   "navUnreachable": [],
+   "menuClosesOnEscape": true,
+   "searchResultsVisible": true,
+   "pageErrors": [],
+   "screenshot": "260x563_inspector.png"
+  }
+ ]
+}
