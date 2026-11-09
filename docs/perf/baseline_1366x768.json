@@ -1,0 +1,94 @@
+{
+ "base": "http://localhost:5175",
+ "viewport": [
+  1366,
+  768
+ ],
+ "windowMs": 4000,
+ "scenes": [
+  {
+   "scene": "cosmic-web",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  },
+  {
+   "scene": "milky-way",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  },
+  {
+   "scene": "solar-system",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  },
+  {
+   "scene": "earth-closeup",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  },
+  {
+   "scene": "moon-closeup",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.7,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  },
+  {
+   "scene": "black-hole-event",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  },
+  {
+   "scene": "nebula-event",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  },
+  {
+   "scene": "travel-mode",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  },
+  {
+   "scene": "timeline-playback",
+   "frames": 241,
+   "fps": 60.0,
+   "medianMs": 16.7,
+   "p95Ms": 16.8,
+   "maxMs": 16.8,
+   "jsHeapMB": 36
+  }
+ ],
+ "renderer": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+ "measuredAt": "2026-11-08T20:03:43"
+}

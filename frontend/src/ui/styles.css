@@ -3859,3 +3859,183 @@ option { background: #070d1e; color: #fff; }
 }
 
 
+
+/* ==========================================================================
+   LAYOUT SYSTEM (UI repair, see COSMIC_ATLAS_UI_AND_TRAVEL_REPAIR_REPORT.md)
+   One set of tokens positions every overlay so regions never collide:
+     header  →  breadcrumbs  →  side panels  ……  timebar → status → dock (bottom stack)
+   Later rules in this file intentionally override the older per-component positions above.
+   ========================================================================== */
+:root {
+  --gutter: 14px;
+  --header-top: 10px;
+  --header-h: 54px;
+  --crumbs-h: 38px;
+  --crumbs-top: calc(var(--header-top) + var(--header-h) + 6px);
+  --panel-top: calc(var(--crumbs-top) + var(--crumbs-h) + 8px);
+  /* height reserved at the bottom: dock + status (+ timebar when the Solar-System clock is shown) */
+  --stack-base: 108px;
+  --stack-time: 168px;
+  /* z-index layers */
+  --z-panels: 15;
+  --z-crumbs: 30;
+  --z-header: 42;
+  --z-menu: 46;
+}
+
+/* ---- Top navigation -------------------------------------------------------------------------------- */
+.top {
+  top: var(--header-top);
+  left: var(--gutter);
+  right: var(--gutter);
+  height: var(--header-h);
+  flex-wrap: nowrap;
+  min-width: 0;
+  z-index: var(--z-header); /* above the breadcrumbs so the search dropdown and menus are never covered */
+}
+.brand { min-width: 0; }
+.search { flex: 1 1 220px; min-width: 150px; max-width: 420px; }
+.topnav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex: 0 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  width: auto;
+  overflow: visible;
+  padding-top: 0;
+}
+.nav-group { display: flex; align-items: center; gap: 6px; flex: none; }
+.nav-more { position: relative; display: none; flex: none; }
+.nav-menu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  min-width: 240px;
+  max-height: calc(100vh - var(--header-top) - var(--header-h) - 24px);
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  z-index: var(--z-menu);
+  background: var(--glass-strong, rgba(8, 14, 26, 0.96));
+}
+.nav-menu-sec { display: none; flex-direction: column; gap: 2px; }
+.nav-menu-sec + .nav-menu-sec { border-top: 1px solid var(--line); margin-top: 6px; padding-top: 6px; }
+.nav-menu-h { font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mut); padding: 4px 10px; }
+.nav-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--txt, #e2e8f0);
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+}
+.nav-menu-item:hover, .nav-menu-item:focus-visible { background: rgba(103, 232, 249, 0.1); border-color: var(--line-hi); outline: none; }
+.nav-menu-item.on { color: #fff; border-color: var(--line-hi); }
+.nav-menu-ic { width: 18px; text-align: center; }
+
+/* visible keyboard focus everywhere in the chrome */
+.top :focus-visible, .dock :focus-visible, .timebar :focus-visible, .panel :focus-visible {
+  outline: 2px solid var(--cy, #67e8f9);
+  outline-offset: 2px;
+}
+
+/* priority collapse — each group is either inline or in "More", never both, never clipped */
+@media (max-width: 1760px) {
+  .nav-jumps { display: none !important; }
+  .nav-more, .menu-jumps { display: flex; }
+}
+@media (max-width: 1440px) {
+  .nav-tools { display: none !important; }
+  .menu-tools { display: flex; }
+  .audio-player-widget .audio-label, .audio-player-widget .audio-eq { display: none; }
+  .brand .sub { display: none; }
+}
+@media (max-width: 1180px) {
+  /* icon-only secondary primary actions (name kept as accessible label + tooltip) */
+  .nav-primary .events-btn .nav-label, .nav-primary .academy-btn .nav-label { display: none; }
+}
+@media (max-width: 860px) {
+  .nav-primary { display: none !important; }
+  .menu-primary { display: flex; }
+  .brand > div { display: none; }
+  .top { gap: 8px; padding: 0 8px 0 10px; }
+  .search { min-width: 0; }
+}
+@media (max-width: 480px) {
+  .nav-more-btn .nav-label { display: none; }
+  .search-kbd { display: none; }
+}
+
+/* ---- Breadcrumbs sit BELOW the header (they used to overlap its bottom edge) ------------------------ */
+.scale-breadcrumbs-bar {
+  top: var(--crumbs-top);
+  left: var(--gutter);
+  right: var(--gutter);
+  height: var(--crumbs-h);
+  z-index: var(--z-crumbs);
+}
+
+/* ---- Side panels: below the breadcrumbs, above the bottom stack ------------------------------------- */
+.panel, .tourcard, .reopen, .datapanel { top: var(--panel-top); }
+.panel, .datapanel { bottom: var(--stack-base); }
+.app[data-timebar] .panel, .app[data-timebar] .datapanel { bottom: var(--stack-time); }
+.panel { min-height: 0; }
+.panel > :last-child { min-height: 0; }
+
+/* wide screens: the centred bottom stack fits between the two panels, so panels may use the full height */
+@media (min-width: 1560px) {
+  .panel, .app[data-timebar] .panel { bottom: var(--gutter); }
+  .timebar, .status, .dock { max-width: calc(100vw - 2 * (360px + var(--gutter) + 10px)); }
+}
+
+/* ≤1080px: one side panel at a time — the inspector takes precedence over the object browser */
+@media (max-width: 1080px) {
+  .top { height: var(--header-h); flex-wrap: nowrap; padding: 0 10px 0 12px; }
+  .topnav { margin-left: auto; width: auto; overflow: visible; padding-top: 0; }
+  .app[data-right] .panel.left { display: none; }
+  .panel, .tourcard, .reopen, .datapanel { top: var(--panel-top); }
+}
+
+/* phones / portrait tablets: the bottom stack wraps and grows, so reserve more space for it */
+@media (max-width: 768px) {
+  :root { --stack-base: 132px; --stack-time: 236px; }
+  .timebar { bottom: 120px; max-width: calc(100vw - 2 * var(--gutter)); }
+  .dock { max-width: calc(100vw - 2 * var(--gutter)); }
+}
+
+/* ---- Phones: compact two-row dock, compact clock, breadcrumbs without the telemetry chips ----------- */
+@media (max-width: 560px) {
+  :root { --stack-base: 104px; --stack-time: 196px; }
+  .dock {
+    display: grid;
+    grid-template-columns: repeat(4, auto);
+    justify-content: center;
+    gap: 4px;
+    padding: 6px;
+    bottom: var(--gutter);
+  }
+  .dock .divider { display: none; }
+  .dock label { font-size: 0; gap: 0; padding-left: 0; } /* visible text hidden; it remains the select's accessible name */
+  .dock select { font-size: 12px; }
+  .timebar {
+    bottom: 100px;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px;
+    padding: 6px 8px;
+  }
+  .timebar > .eyebrow, .timebar > .pill { display: none; }
+  .breadcrumbs-telemetry { display: none; }
+}

@@ -1,0 +1,92 @@
+[
+ {
+  "check": "W moves forward",
+  "ok": true,
+  "detail": "thrust=1.00 cos(move,fwd)=1.000"
+ },
+ {
+  "check": "Releasing S while W held keeps W active",
+  "ok": true,
+  "detail": "thrust 0.48 -> 1.00"
+ },
+ {
+  "check": "S moves backward",
+  "ok": true,
+  "detail": "cos(move,fwd)=-1.000 |d|=9.488e+01"
+ },
+ {
+  "check": "A moves left",
+  "ok": true,
+  "detail": "cos(move,right)=-1.000 attitudeChanged=False"
+ },
+ {
+  "check": "D moves right",
+  "ok": true,
+  "detail": "cos(move,right)=1.000 attitudeChanged=False"
+ },
+ {
+  "check": "Space ascends",
+  "ok": true,
+  "detail": "cos(move,up)=1.000"
+ },
+ {
+  "check": "C descends",
+  "ok": true,
+  "detail": "cos(move,up)=-1.000"
+ },
+ {
+  "check": "Shift boosts only while held",
+  "ok": true,
+  "detail": "held=True released=False"
+ },
+ {
+  "check": "Window blur releases held keys (no stuck throttle)",
+  "ok": true,
+  "detail": "thrust 0.449 -> 0.449 after blur"
+ },
+ {
+  "check": "Mouse drag looks around in cockpit view",
+  "ok": true,
+  "detail": "|q0\u00b7q1|=0.95219"
+ },
+ {
+  "check": "Mouse wheel zooms the external camera",
+  "ok": true,
+  "detail": "dist 18 -> 20"
+ },
+ {
+  "check": "V cycles cockpit / chase / external",
+  "ok": true,
+  "detail": "['external', 'cockpit', 'chase']"
+ },
+ {
+  "check": "NavMap opens with M and its search accepts 'mars'",
+  "ok": true,
+  "detail": "opened=True stillOpenWithQuery=True"
+ },
+ {
+  "check": "Escape closes the NavMap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "check": "Escape exits Travel Mode",
+  "ok": true,
+  "detail": "phase=explore"
+ },
+ {
+  "check": "Autopilot arrives at the Moon",
+  "ok": true,
+  "detail": "last={'active': False, 'phase': 'arrive'}"
+ },
+ {
+  "check": "Station keeping: Moon distance stable while time plays at 1 d/s",
+  "ok": true,
+  "detail": "4,743 km -> 4,743 km"
+ },
+ {
+  "check": "No uncaught page errors",
+  "ok": true,
+  "detail": ""
+ }
+]

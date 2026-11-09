@@ -1,0 +1,104 @@
+{
+ "base": "http://localhost:5175",
+ "viewport": [
+  1366,
+  768
+ ],
+ "windowMs": 4000,
+ "uncapped": true,
+ "scenes": [
+  {
+   "scene": "cosmic-web",
+   "frames": 8421,
+   "fps": 2105.1,
+   "medianMs": 0.4,
+   "p95Ms": 0.7,
+   "maxMs": 7.3,
+   "jsHeapMB": 43,
+   "screenshot": "cosmic-web.png"
+  },
+  {
+   "scene": "milky-way",
+   "frames": 2704,
+   "fps": 675.9,
+   "medianMs": 1.4,
+   "p95Ms": 2.2,
+   "maxMs": 19.0,
+   "jsHeapMB": 43,
+   "screenshot": "milky-way.png"
+  },
+  {
+   "scene": "solar-system",
+   "frames": 2642,
+   "fps": 660.0,
+   "medianMs": 1.4,
+   "p95Ms": 2.5,
+   "maxMs": 13.5,
+   "jsHeapMB": 43,
+   "screenshot": "solar-system.png"
+  },
+  {
+   "scene": "earth-closeup",
+   "frames": 3198,
+   "fps": 799.4,
+   "medianMs": 1.1,
+   "p95Ms": 2.7,
+   "maxMs": 33.6,
+   "jsHeapMB": 43,
+   "screenshot": "earth-closeup.png"
+  },
+  {
+   "scene": "moon-closeup",
+   "frames": 3435,
+   "fps": 858.6,
+   "medianMs": 1.0,
+   "p95Ms": 2.2,
+   "maxMs": 25.6,
+   "jsHeapMB": 43,
+   "screenshot": "moon-closeup.png"
+  },
+  {
+   "scene": "black-hole-event",
+   "frames": 3372,
+   "fps": 842.9,
+   "medianMs": 1.2,
+   "p95Ms": 1.7,
+   "maxMs": 12.7,
+   "jsHeapMB": 43,
+   "screenshot": "black-hole-event.png"
+  },
+  {
+   "scene": "nebula-event",
+   "frames": 3678,
+   "fps": 919.3,
+   "medianMs": 1.1,
+   "p95Ms": 1.6,
+   "maxMs": 16.7,
+   "jsHeapMB": 43,
+   "screenshot": "nebula-event.png"
+  },
+  {
+   "scene": "travel-mode",
+   "frames": 3071,
+   "fps": 767.7,
+   "medianMs": 1.2,
+   "p95Ms": 2.4,
+   "maxMs": 13.9,
+   "jsHeapMB": 43,
+   "screenshot": "travel-mode.png"
+  },
+  {
+   "scene": "timeline-playback",
+   "frames": 372,
+   "fps": 92.8,
+   "medianMs": 10.4,
+   "p95Ms": 13.8,
+   "maxMs": 33.7,
+   "jsHeapMB": 43,
+   "screenshot": "timeline-playback.png"
+  }
+ ],
+ "renderer": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+ "measuredAt": "2026-11-08T20:05:06"
+}

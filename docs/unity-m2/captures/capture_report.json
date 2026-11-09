@@ -1,0 +1,51 @@
+{
+ "device": "Intel(R) Arc(TM) Graphics",
+ "graphicsApi": "Direct3D12",
+ "graphicsMemoryMB": 9099,
+ "autoSelectedQuality": "Medium",
+ "resolution": [1600, 900],
+ "captureQuality": "Medium",
+ "shots": [
+  {"station": "Stars", "shot": "stars_lineup", "file": "stars_lineup.png", "meanPixel": 14.8, "caption": "MK classes and luminosity classes at equal distance; colour = blackbody chromaticity of Teff; radius compressed as R^0.35"},
+  {"station": "Stars", "shot": "star_sun_closeup", "file": "star_sun_closeup.png", "meanPixel": 91.3, "caption": "Resolved G2 V photosphere: limb darkening u≈0.6, illustrative granulation"},
+  {"station": "Stars", "shot": "star_betelgeuse_closeup", "file": "star_betelgeuse_closeup.png", "meanPixel": 82.7, "caption": "Red supergiant: cool (≈3500 K class-typical), strongly limb-darkened, few giant convection cells (illustrative)"},
+  {"station": "JupiterSystem", "shot": "jupiter_shadow_transit", "file": "jupiter_shadow_transit.png", "meanPixel": 23.2, "caption": "Io shadow transit, 2026-11-10 01:20 UTC — positions from the shared Kepler engine; penumbra from the Sun's true angular size; Jupiter map: Solar System Scope (CC BY 4.0)"},
+  {"station": "JupiterSystem", "shot": "jupiter_system_wide", "file": "jupiter_system_wide.png", "meanPixel": 0.6, "caption": "Galilean moons at their computed positions for the same instant (true sizes and distances, 1 unit = 1000 km)"},
+  {"station": "Moons", "shot": "moons_gallery", "file": "moons_gallery.png", "meanPixel": 9.6, "caption": "True relative sizes (JPL mean radii); USGS/NASA mosaics (Moon: Solar System Scope CC BY 4.0); Lommel–Seeliger regolith; Titan = haze model, no surface map"},
+  {"station": "Moons", "shot": "moon_closeup", "file": "moon_closeup.png", "meanPixel": 115.1, "caption": "The Moon: maria and highlands from the albedo map; regolith photometry (Lommel–Seeliger) gives the flat-looking disk and sharp terminator"},
+  {"station": "Moons", "shot": "europa_closeup", "file": "europa_closeup.png", "meanPixel": 79.4, "caption": "Europa: Galileo/Voyager mosaic (USGS) — lineae and chaos terrain"},
+  {"station": "Moons", "shot": "titan_haze", "file": "titan_haze.png", "meanPixel": 12.7, "caption": "Titan: forward-scattering orange photochemical haze (single-scattering model, illustrative coefficients) hides the surface"},
+  {"station": "Earth", "shot": "earth_terminator", "file": "earth_terminator.png", "meanPixel": 24.1, "caption": "Earth: Rayleigh+Mie single scattering (blue limb, reddened terminator), night lights only on the dark side; maps: Solar System Scope (CC BY 4.0)"},
+  {"station": "Earth", "shot": "earth_limb", "file": "earth_limb.png", "meanPixel": 96.9, "caption": "Atmospheric limb at the terminator"},
+  {"station": "BlackHole", "shot": "blackhole_edge_on", "file": "blackhole_edge_on.png", "meanPixel": 19.6, "caption": "Schwarzschild ray tracing: shadow, photon ring and the lensed far side of the disk arching over and under the hole; approaching side brighter and bluer (Doppler beaming)"},
+  {"station": "BlackHole", "shot": "blackhole_inclined", "file": "blackhole_inclined.png", "meanPixel": 29.2, "caption": "Same model at 50° inclination"},
+  {"station": "BlackHole", "shot": "blackhole_jets_educational", "file": "blackhole_jets_educational.png", "meanPixel": 14.7, "caption": "EDUCATIONAL: relativistic jets as a Doppler-boosted emission cone (not a jet-physics model)"},
+  {"station": "Nebula", "shot": "nebula_wide", "file": "nebula_wide.png", "meanPixel": 18.0, "caption": "Volumetric H II region (ILLUSTRATIVE density field): Hα 656 nm red, [O III] 501 nm teal near the hottest stars, dust lanes in extinction, cavity carved around the cluster"},
+  {"station": "Nebula", "shot": "nebula_inside", "file": "nebula_inside.png", "meanPixel": 92.9, "caption": "Inside the volume: parallax and depth between dust columns that point toward the ionising stars"},
+  {"station": "Galaxies", "shot": "galaxy_spiral", "file": "galaxy_spiral.png", "meanPixel": 4.1, "caption": "Grand-design spiral (Sb-like, illustrative parameters): exponential disk, log-spiral arms (pitch 14°), Hernquist bulge, blue arms / yellow bulge, Hα knots, dust on the inner arm edges"},
+  {"station": "Galaxies", "shot": "galaxy_barred", "file": "galaxy_barred.png", "meanPixel": 4.8, "caption": "Barred spiral (SBb-like): arms start at the bar ends"},
+  {"station": "Galaxies", "shot": "galaxy_elliptical", "file": "galaxy_elliptical.png", "meanPixel": 4.9, "caption": "Elliptical E3: Hernquist (de Vaucouleurs-like) profile, smooth old red population, no dust lanes"},
+  {"station": "Galaxies", "shot": "galaxy_irregular", "file": "galaxy_irregular.png", "meanPixel": 7.4, "caption": "Irregular (Magellanic-type): clumpy star formation, no global symmetry"},
+  {"station": "Galaxies", "shot": "galaxy_dwarf", "file": "galaxy_dwarf.png", "meanPixel": 2.0, "caption": "Dwarf spheroidal: diffuse Plummer sphere, low surface brightness"},
+  {"station": "Galaxies", "shot": "galaxy_interacting", "file": "galaxy_interacting.png", "meanPixel": 2.7, "caption": "Interacting pair from a restricted three-body simulation (Toomre & Toomre 1972): tidal tails and bridge form from gravity alone"},
+  {"station": "Pulsar", "shot": "pulsar_offpulse", "file": "pulsar_offpulse.png", "meanPixel": 8.9, "caption": "Lighthouse model: neutron star, inclined magnetic dipole (field lines r = L sin²θ), beams along the magnetic axis — EDUCATIONAL depiction; rotation slowed ×300 (Crab P ≈ 33.7 ms); observer 50° from the spin axis"},
+  {"station": "Pulsar", "shot": "pulsar_onpulse", "file": "pulsar_onpulse.png", "meanPixel": 50.1, "caption": "Same pulsar at the rotation phase where a beam sweeps across the observer: the pulse"},
+  {"station": "SmallBodies", "shot": "phobos", "file": "phobos.png", "meanPixel": 21.7, "caption": "Phobos: triaxial shape from the catalogue (Thomas et al., scaled to the JPL mean radius); craters and grooves PROCEDURAL (not mapped); albedo ≈ 0.07"},
+  {"station": "SmallBodies", "shot": "asteroid", "file": "asteroid.png", "meanPixel": 24.2, "caption": "Generic S-type-like asteroid: irregular procedural shape, crater size distribution N(>D) ∝ D⁻²"},
+  {"station": "Comet", "shot": "comet_tails", "file": "comet_tails.png", "meanPixel": 2.9, "caption": "Comet at 1 AU: curved dust tail (grains under gravity reduced by radiation pressure, 1−β) and straight blue ion tail (solar wind) — both simulated; nucleus enlarged for visibility"},
+  {"station": "Comet", "shot": "comet_nucleus", "file": "comet_nucleus.png", "meanPixel": 206.0, "caption": "Dark bilobed nucleus (albedo ≈ 0.04, illustrative shape) inside its coma"}
+ ],
+ "timingMsPerFrame": {
+  "Low": {"Stars": 5.04, "JupiterSystem": 4.24, "Moons": 4.66, "Earth": 7.57, "BlackHole": 7.07, "Nebula": 11.81, "Galaxies": 4.17, "Pulsar": 4.40, "SmallBodies": 4.51, "Comet": 4.74},
+  "Medium": {"Stars": 5.13, "JupiterSystem": 4.45, "Moons": 5.20, "Earth": 7.30, "BlackHole": 6.60, "Nebula": 12.86, "Galaxies": 5.61, "Pulsar": 2.93, "SmallBodies": 2.80, "Comet": 3.72},
+  "High": {"Stars": 3.55, "JupiterSystem": 2.84, "Moons": 3.46, "Earth": 5.28, "BlackHole": 9.31, "Nebula": 32.38, "Galaxies": 3.78, "Pulsar": 2.81, "SmallBodies": 4.14, "Comet": 4.71},
+  "Ultra": {"Stars": 5.23, "JupiterSystem": 4.18, "Moons": 5.54, "Earth": 11.20, "BlackHole": 15.59, "Nebula": 24.17, "Galaxies": 8.46, "Pulsar": 2.94, "SmallBodies": 2.57, "Comet": 2.97}
+ },
+ "timingMinMsPerFrame": {
+  "Low": {"Stars": 4.70, "JupiterSystem": 4.13, "Moons": 4.14, "Earth": 5.44, "BlackHole": 5.74, "Nebula": 9.39, "Galaxies": 3.93, "Pulsar": 4.31, "SmallBodies": 4.23, "Comet": 4.17},
+  "Medium": {"Stars": 4.83, "JupiterSystem": 4.11, "Moons": 4.98, "Earth": 3.89, "BlackHole": 6.36, "Nebula": 12.08, "Galaxies": 4.10, "Pulsar": 2.68, "SmallBodies": 2.61, "Comet": 2.61},
+  "High": {"Stars": 3.30, "JupiterSystem": 2.63, "Moons": 3.10, "Earth": 4.87, "BlackHole": 8.99, "Nebula": 18.78, "Galaxies": 3.69, "Pulsar": 2.64, "SmallBodies": 3.19, "Comet": 4.13},
+  "Ultra": {"Stars": 5.05, "JupiterSystem": 4.06, "Moons": 5.17, "Earth": 10.50, "BlackHole": 15.32, "Nebula": 23.28, "Galaxies": 8.27, "Pulsar": 2.59, "SmallBodies": 2.36, "Comet": 2.80}
+ },
+ "timingNote": "Editor batch mode, 1600x900, median (and minimum) of 7 rounds of 10 camera.Render() calls, each round synchronised by a 1-pixel GPU readback; includes CPU submission; not a player-build FPS measurement."
+}

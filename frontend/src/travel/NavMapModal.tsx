@@ -52,7 +52,14 @@ export function NavMapModal({ onClose }: { onClose: () => void }) {
 
   useEffect(() => {
     const k = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'm') onClose()
+      if (e.key === 'Escape') {
+        onClose()
+        return
+      }
+      // 'M' toggles the map closed, but never while typing in its search box (e.g. "mars", "moon", "mimas")
+      const t = e.target as HTMLElement | null
+      const typing = !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)
+      if (!typing && !e.repeat && e.code === 'KeyM' && !e.ctrlKey && !e.metaKey && !e.altKey) onClose()
     }
     window.addEventListener('keydown', k)
     return () => window.removeEventListener('keydown', k)

@@ -1,0 +1,78 @@
+{
+ "base": "http://localhost:5174",
+ "quality": "high",
+ "headed": true,
+ "viewport": [
+  1920,
+  1080
+ ],
+ "poses": [
+  {
+   "planet": "earth",
+   "distanceR": 2.5,
+   "meanFrameMs": 16.66555555555556,
+   "frames": 90,
+   "centreLitFraction": 0.898,
+   "file": "earth_2p5R.jpg"
+  },
+  {
+   "planet": "earth",
+   "distanceR": 6.0,
+   "meanFrameMs": 16.668888888888876,
+   "frames": 90,
+   "centreLitFraction": 0.803,
+   "file": "earth_6p0R.jpg"
+  },
+  {
+   "planet": "saturn",
+   "distanceR": 2.5,
+   "meanFrameMs": 16.667777777777783,
+   "frames": 90,
+   "centreLitFraction": 1.0,
+   "file": "saturn_2p5R.jpg"
+  },
+  {
+   "planet": "saturn",
+   "distanceR": 6.0,
+   "meanFrameMs": 16.666666666666668,
+   "frames": 90,
+   "centreLitFraction": 0.947,
+   "file": "saturn_6p0R.jpg"
+  },
+  {
+   "planet": "uranus",
+   "distanceR": 2.5,
+   "meanFrameMs": 16.667032967032974,
+   "frames": 91,
+   "centreLitFraction": 0.998,
+   "file": "uranus_2p5R.jpg"
+  },
+  {
+   "planet": "uranus",
+   "distanceR": 6.0,
+   "meanFrameMs": 16.666666666666668,
+   "frames": 90,
+   "centreLitFraction": 0.998,
+   "file": "uranus_6p0R.jpg"
+  },
+  {
+   "planet": "neptune",
+   "distanceR": 2.5,
+   "meanFrameMs": 16.666666666666668,
+   "frames": 90,
+   "centreLitFraction": 0.935,
+   "file": "neptune_2p5R.jpg"
+  },
+  {
+   "planet": "neptune",
+   "distanceR": 6.0,
+   "meanFrameMs": 16.666666666666668,
+   "frames": 90,
+   "centreLitFraction": 0.932,
+   "file": "neptune_6p0R.jpg"
+  }
+ ],
+ "errors": [
+  "Failed to load resource: the server responded with a status of 404 (Not Found)"
+ ]
+}

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { OBJECTS, CosmicObject, positionOf, radiusLyOf, isDynamic } from '../data/catalog'
+import { OBJECTS, BY_ID, CosmicObject, positionOf, radiusLyOf, isDynamic } from '../data/catalog'
 import { nav, stepNavigation, updateNearest, interrupt, setCameraAt } from '../store/nav'
 import { useStore, advanceSim } from '../store/store'
 import { Vec3, len, sub, add, toThree, fromThree, SUN_POS, LY_PER_AU } from '../astro/coords'
@@ -23,6 +23,9 @@ import { stepTravel, travelEngineState } from '../travel/travelEngine'
 import { SOLAR_BODY_BY_ID, PLUTO_BODY, CHARON_PLUTO_MASS_RATIO, PLANET_RADIUS_KM } from '../data/solarSystem'
 import { orbitPathKm, positionAtMs, periodDays } from '../astro/kepler'
 import { AsteroidBeltLayer } from './AsteroidBeltLayer'
+import { isPlanet, planetOrientation, primeMeridianRad, URANUS_RINGS, NEPTUNE_RINGS } from '../astro/planetFrames'
+import { jdTdbFromUtcMs } from '../astro/time'
+import { IceGiantSurface, RingSystem } from './outerPlanets'
 
 const KM_TO_LY = 1 / 9.4607304725808e12
 const scaleVec = (v: Vec3, k: number): Vec3 => [v[0] * k, v[1] * k, v[2] * k]
@@ -101,6 +104,7 @@ export const planetaryUniforms = {
   uEarthSunDir: { value: new THREE.Vector3(1, 0, 0) },
   uSaturnSunDir: { value: new THREE.Vector3(1, 0, 0) },
   uSaturnSunDirLocal: { value: new THREE.Vector3(1, 0, 0) },
+  uSaturnSunDirSpin: { value: new THREE.Vector3(1, 0, 0) },
   uMarsSunDir: { value: new THREE.Vector3(1, 0, 0) },
   uVenusSunDir: { value: new THREE.Vector3(1, 0, 0) },
   uUranusSunDir: { value: new THREE.Vector3(1, 0, 0) },
@@ -178,6 +182,7 @@ function AtmosphereMesh({
 }
 
 const PLANET_IDS = Object.keys(PLANET_ELEMENTS)
+const tmpQuat = new THREE.Quaternion()
 const EXTENDED = new Set(['galaxy', 'cluster', 'supercluster', 'group', 'sheet', 'galactic-structure', 'nebula', 'star-cluster'])
 
 function SphereGeo() {
@@ -370,7 +375,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
     case 'planet':
       if (o.id === 'mercury') {
         return (
-          <mesh rotation={[0, 0, 0.03]} name="spin">
+          <mesh name="spin">
             <SphereGeo />
             <meshStandardMaterial
               map={A.getMercuryTexture()}
@@ -383,7 +388,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
       if (o.id === 'venus') {
         return (
           <>
-            <mesh rotation={[0, 0, 3.09]} name="spin">
+            <mesh name="spin">
               <SphereGeo />
               <meshStandardMaterial
                 map={A.getVenusTexture()}
@@ -398,7 +403,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
       if (o.id === 'earth') {
         return (
           <>
-            <mesh rotation={[0, 0, 0.409]} name="spin">
+            <mesh name="spin">
               <SphereGeo />
               <meshStandardMaterial
                 map={A.getEarthTexture()}
@@ -410,7 +415,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
               />
             </mesh>
             {/* Night-side city lights */}
-            <mesh rotation={[0, 0, 0.409]} scale={1.001} name="spin">
+            <mesh scale={1.001} name="spin">
               <SphereGeo />
               <shaderMaterial
                 transparent
@@ -453,7 +458,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
               />
             </mesh>
             {/* Dynamic rotating cloud layer */}
-            <mesh rotation={[0, 0, 0.409]} scale={1.015} name="earth-clouds">
+            <mesh scale={1.015} name="earth-clouds">
               <SphereGeo />
               <meshStandardMaterial
                 map={A.getEarthCloudsTexture()}
@@ -483,7 +488,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
       if (o.id === 'mars') {
         return (
           <>
-            <mesh rotation={[0, 0, 0.44]} name="spin">
+            <mesh name="spin">
               <SphereGeo />
               <meshStandardMaterial
                 map={A.getMarsTexture()}
@@ -497,7 +502,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
       }
       if (o.id === 'jupiter') {
         return (
-          <mesh rotation={[0, 0, 0.05]} name="spin">
+          <mesh name="spin">
             <SphereGeo />
             <meshStandardMaterial
               map={A.getJupiterTexture()}
@@ -510,14 +515,14 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
       if (o.id === 'saturn') {
         return (
           <>
-            <mesh rotation={[0.466, 0, 0.1]} name="spin">
+            <mesh name="spin">
               <SphereGeo />
               <shaderMaterial
                 uniforms={{
                   uSaturnTexture: { value: A.getSaturnTexture() },
                   uRingAlpha: { value: A.getSaturnRingsTexture() },
                   uSunDir: planetaryUniforms.uSaturnSunDir,
-                  uSunDirLocal: planetaryUniforms.uSaturnSunDirLocal,
+                  uSunDirLocal: planetaryUniforms.uSaturnSunDirSpin,
                 }}
                 vertexShader={`
                   #include <common>
@@ -574,7 +579,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
                 `}
               />
             </mesh>
-            <mesh rotation={[0.466, 0, 0.1]} geometry={getSaturnRingGeometry()}>
+            <mesh geometry={getSaturnRingGeometry()} name="saturn-rings">
               <shaderMaterial
                 transparent
                 depthWrite={false}
@@ -639,30 +644,26 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
       if (o.id === 'uranus') {
         return (
           <>
-            <mesh rotation={[1.706, 0, 0]} name="spin">
+            <mesh name="spin">
               <SphereGeo />
-              <meshStandardMaterial
-                map={A.getUranusTexture()}
-                roughness={0.82}
-                metalness={0}
-              />
+              <IceGiantSurface planet="uranus" map={A.getUranusTexture()} rings={URANUS_RINGS} radiusKm={PLANET_RADIUS_KM.uranus} sunDir={planetaryUniforms.uUranusSunDir} />
             </mesh>
-            <AtmosphereMesh scale={1.025} color="#6bd3e8" sunDir={planetaryUniforms.uUranusSunDir} power={3.4} intensity={1.5} />
+            <AtmosphereMesh scale={1.025} color="#8fdde8" sunDir={planetaryUniforms.uUranusSunDir} power={3.0} intensity={1.1} />
+            <RingSystem rings={URANUS_RINGS} radiusKm={PLANET_RADIUS_KM.uranus} sunDir={planetaryUniforms.uUranusSunDir}
+              colors={['#a8a39e', '#a8a39e', '#a8a39e', '#a8a39e', '#a8a39e', '#a8a39e', '#a8a39e', '#a8a39e', '#a8a39e', '#b3aca6', '#c99b80', '#86aef5']} />
           </>
         )
       }
       if (o.id === 'neptune') {
         return (
           <>
-            <mesh rotation={[0.494, 0, 0]} name="spin">
+            <mesh name="spin">
               <SphereGeo />
-              <meshStandardMaterial
-                map={A.getNeptuneTexture()}
-                roughness={0.82}
-                metalness={0}
-              />
+              <IceGiantSurface planet="neptune" map={A.getNeptuneTexture()} rings={NEPTUNE_RINGS} radiusKm={PLANET_RADIUS_KM.neptune} sunDir={planetaryUniforms.uNeptuneSunDir} />
             </mesh>
-            <AtmosphereMesh scale={1.025} color="#3f78ff" sunDir={planetaryUniforms.uNeptuneSunDir} power={3.4} intensity={1.8} />
+            <AtmosphereMesh scale={1.03} color="#3f6dff" sunDir={planetaryUniforms.uNeptuneSunDir} power={3.2} intensity={1.6} />
+            <RingSystem rings={NEPTUNE_RINGS} radiusKm={PLANET_RADIUS_KM.neptune} sunDir={planetaryUniforms.uNeptuneSunDir} arcs
+              colors={['#b09484', '#a39a92', '#b09484', '#b09484', '#a39a92']} />
           </>
         )
       }
@@ -824,7 +825,12 @@ function Objects() {
       const g = refs.current[o.id]
       if (!g) continue
       const P = positionOf(o, ms)
-      const rel = sub(P, cam)
+      let rel = sub(P, cam)
+      if (st.phase === 'travel' && o.id === ship.refBodyId && ship.localKm) {
+        // body − camera = −(ship offset from body + camera offset from ship), both exact
+        const c = fromThree(travelCam.fromShip)
+        rel = [-(ship.localKm[0] * KM_TO_LY + c[0]), -(ship.localKm[1] * KM_TO_LY + c[1]), -(ship.localKm[2] * KM_TO_LY + c[2])]
+      }
       const dLy = len(rel)
       const u = dLy / S
       const du = compressDistance(u)
@@ -880,8 +886,14 @@ function Objects() {
           c.rotation.y = ((ms / 86400000) * Math.PI * 2) * 1.06 + 0.1
       })
 
-      // Also traverse for nested spin meshes (e.g. Titan, Enceladus, Pluto)
+      // Also traverse for nested spin meshes (planets inside their IAU orientation frame; Titan, Enceladus, Pluto)
+      const W = isPlanet(o.id) ? primeMeridianRad(o.id, jdTdbFromUtcMs(ms)) : 0
       g.traverse((c) => {
+        if (isPlanet(o.id)) {
+          if (c.name === 'spin') c.rotation.y = W
+          else if (c.name === 'earth-clouds') c.rotation.y = W + ((ms / 86400000) * 0.06) % (Math.PI * 2) // clouds drift slowly
+          return
+        }
         if (c.name === 'spin') {
           const sb = SOLAR_BODY_BY_ID[o.id]
           if (sb) {
@@ -925,9 +937,14 @@ function Objects() {
     if (refs.current['saturn']) {
       const satSun = new THREE.Vector3().subVectors(sunPosScene, refs.current['saturn']!.position).normalize()
       planetaryUniforms.uSaturnSunDir.value.copy(satSun)
-      const satQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.466, 0, 0.1))
-      satSun.applyQuaternion(satQuat.clone().invert()).normalize()
-      planetaryUniforms.uSaturnSunDirLocal.value.copy(satSun)
+      const satG = refs.current['saturn']!
+      satG.updateWorldMatrix(true, true)
+      satG.traverse((m) => {
+        if (m.name !== 'spin' && m.name !== 'saturn-rings') return
+        const local = satSun.clone().applyQuaternion(m.getWorldQuaternion(tmpQuat).invert()).normalize()
+        if (m.name === 'spin') planetaryUniforms.uSaturnSunDirSpin.value.copy(local)
+        else planetaryUniforms.uSaturnSunDirLocal.value.copy(local)
+      })
     }
     if (refs.current['mars']) {
       planetaryUniforms.uMarsSunDir.value.subVectors(sunPosScene, refs.current['mars']!.position).normalize()
@@ -963,7 +980,13 @@ function Objects() {
             <sphereGeometry args={[1, 8, 6]} />
             <meshBasicMaterial transparent opacity={0} depthWrite={false} colorWrite={false} />
           </mesh>
-          <ObjectVisual o={o} />
+          {isPlanet(o.id) ? (
+            <group quaternion={planetOrientation(o.id)} name="iau-frame">
+              <ObjectVisual o={o} />
+            </group>
+          ) : (
+            <ObjectVisual o={o} />
+          )}
           <sprite ref={(el) => { ring.current[o.id] = el }} visible={false}>
             <spriteMaterial map={T.selectRingTexture()} transparent depthTest={false} />
           </sprite>
@@ -1383,9 +1406,10 @@ function SpacecraftLayer() {
     grp.visible = phase === 'travel' && ship.cameraView !== 'cockpit'
     if (!grp.visible) return
 
-    const rel = toThree(sub(ship.pos, nav.pos))
+    // exact: the camera offset from the ship is known in three axes (no root-frame round trip, see travelCam)
+    const rel = travelCam.fromShip
     const S = nav.scale
-    grp.position.set(rel[0] / S, rel[1] / S, rel[2] / S)
+    grp.position.set(-rel[0] / S, -rel[1] / S, -rel[2] / S)
     grp.quaternion.copy(ship.quat)
   })
 
@@ -1399,6 +1423,13 @@ function SpacecraftLayer() {
 }
 
 const rigInit = { done: false }
+
+/**
+ * Travel Mode camera offset from the spacecraft (light-years, three.js axes), written by the Rig every frame.
+ * Rendering the ship and its reference body from this and ship.localKm avoids the ~34 km quantisation of
+ * root-frame positions near the Sun (blueprint finding D1).
+ */
+export const travelCam = { fromShip: [0, 0, 0] as Vec3 }
 
 /** Drives navigation + time + camera each frame across Explore and Travel modes. */
 function Rig() {
@@ -1436,8 +1467,14 @@ function Rig() {
 
     if (st.phase === 'travel') {
       // TRAVEL MODE: Spacecraft simulation drives flight physics and camera
-      stepShipPhysics(dt, st.simMs, travelInput)
-      updateNearest(st.simMs)
+      // advanceSim() above already moved the clock: use the CURRENT time, not the snapshot taken before it
+      // (a one-frame lag made the ship trail moving bodies by ~43,000 km at 1 day/s).
+      const msNow = useStore.getState().simMs
+      stepShipPhysics(dt, msNow, travelInput)
+      // mouse-look deltas are per-step impulses: consumed by the physics step above
+      travelInput.lookYaw = 0
+      travelInput.lookPitch = 0
+      updateNearest(msNow)
       const S = Math.max(1e-12, adaptiveScale(nav.nearestSurface))
       nav.scale = S
 
@@ -1449,15 +1486,17 @@ function Rig() {
         // Cockpit first-person: camera is positioned at the cockpit
         nav.pos = [...ship.pos]
         nav.quat.copy(ship.quat)
+        travelCam.fromShip = [0, 0, 0]
       } else if (ship.cameraView === 'chase') {
         // Chase view: camera follows 14 units behind and 3.5 units above
-        const chaseDistUnits = 14
-        const chaseHeightUnits = 3.5
+        const chaseDistUnits = 14 * ship.chaseZoom
+        const chaseHeightUnits = 3.5 * ship.chaseZoom
         const camOffsetThree = fwd
           .clone()
           .multiplyScalar(-chaseDistUnits * S)
           .add(up.clone().multiplyScalar(chaseHeightUnits * S))
         nav.pos = add(ship.pos, fromThree([camOffsetThree.x, camOffsetThree.y, camOffsetThree.z]))
+        travelCam.fromShip = [camOffsetThree.x, camOffsetThree.y, camOffsetThree.z]
 
         // Look toward target point ahead of spacecraft
         const lookTargetThree = fwd.clone().multiplyScalar(25 * S)
@@ -1482,6 +1521,7 @@ function Rig() {
         ).applyQuaternion(q)
 
         nav.pos = add(ship.pos, fromThree([camOffset.x, camOffset.y, camOffset.z]))
+        travelCam.fromShip = [camOffset.x, camOffset.y, camOffset.z]
         const relToShip = toThree(sub(ship.pos, nav.pos))
         const m = new THREE.Matrix4().lookAt(
           new THREE.Vector3(0, 0, 0),
@@ -1489,6 +1529,22 @@ function Rig() {
           up
         )
         nav.quat.setFromRotationMatrix(m)
+      }
+
+      // Camera clipping guard: a chase/external camera must never sit inside the nearest body.
+      if (ship.cameraView !== 'cockpit') {
+        const body = BY_ID[ship.nearestId]
+        if (body) {
+          const P = positionOf(body, msNow)
+          const r = radiusLyOf(body)
+          const off = sub(nav.pos, P)
+          const d = len(off)
+          if (r > 0 && d < r * 1.02) {
+            const k = (r * 1.02) / Math.max(d, 1e-30)
+            nav.pos = add(P, [off[0] * k, off[1] * k, off[2] * k])
+            travelCam.fromShip = toThree(sub(nav.pos, ship.pos))
+          }
+        }
       }
 
       camera.position.set(0, 0, 0)

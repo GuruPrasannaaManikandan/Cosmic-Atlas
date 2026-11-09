@@ -1,0 +1,6 @@
+<!-- IL2CPP managed-code stripping must not remove members that Newtonsoft.Json sets by reflection
+     (the catalogue model) or MonoBehaviours created by AddComponent from code. -->
+<linker>
+  <assembly fullname="CosmicAtlas.Astro" preserve="all" />
+  <assembly fullname="CosmicAtlas.Rendering" preserve="all" />
+</linker>

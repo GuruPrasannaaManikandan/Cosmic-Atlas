@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ship, setFlightModel, setCameraView, cycleCameraView, toggleStabilization, setGear, cancelAutopilot, GEAR_SPEEDS } from './shipState'
+import { travelUi } from './travelControls'
 import { BY_ID, positionOf } from '../data/catalog'
 import { useStore } from '../store/store'
 import { sub, len, toThree, formatDistance, LY_PER_AU } from '../astro/coords'
@@ -16,6 +17,26 @@ export function TravelHUD() {
     const t = setInterval(() => setTick((x) => x + 1), 100)
     return () => clearInterval(t)
   }, [])
+
+  // The flight-controls dialog owns the keyboard while open (Escape closes it, not Travel Mode).
+  useEffect(() => {
+    travelUi.helpOpen = showHelp
+    if (!showHelp) return
+    const k = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowHelp(false)
+    }
+    window.addEventListener('keydown', k)
+    return () => {
+      window.removeEventListener('keydown', k)
+      travelUi.helpOpen = false
+    }
+  }, [showHelp])
+
+  const refObj = ship.refBodyId ? BY_ID[ship.refBodyId] : null
+  const nearestObj = BY_ID[ship.nearestId]
+  const altitudeText = Number.isFinite(ship.nearestSurfaceLy) ? formatDistance(Math.max(0, ship.nearestSurfaceLy)) : '—'
+  const eventText = ship.event && performance.now() - ship.event.at < 6000 ? ship.event.text : null
+  const arrivedObj = ship.arrivedId ? BY_ID[ship.arrivedId] : null
 
   const targetObj = ship.targetId ? BY_ID[ship.targetId] : null
   let targetDistText = '—'
@@ -123,11 +144,8 @@ export function TravelHUD() {
           {/* Return to Explore Mode */}
           <button
             className="btn primary"
-            onClick={() => {
-              cancelAutopilot()
-              set({ phase: 'explore' })
-            }}
-            title="Exit spacecraft and return to Observatory Explorer"
+            onClick={() => useStore.getState().exitTravelMode()}
+            title="Exit spacecraft and return to Observatory Explorer (Esc)"
           >
             ↩ Exit to Explore
           </button>
@@ -141,7 +159,10 @@ export function TravelHUD() {
           <div className="tf-metric">
             <label>LINEAR VELOCITY</label>
             <b className="val-hi">{speedDisplay}</b>
-            <small>{GEAR_SPEEDS[ship.gear].label}</small>
+            <small>
+              {refObj ? `relative to ${refObj.name} · ` : ''}
+              {GEAR_SPEEDS[ship.gear].label}
+            </small>
           </div>
 
           <div className="tf-metric">
@@ -160,9 +181,20 @@ export function TravelHUD() {
           <div className="tf-metric">
             <label>ATTITUDE HEADING</label>
             <b>Y {Math.round(ship.headingDeg.yaw)}° · P {Math.round(ship.headingDeg.pitch)}°</b>
-            <small>G-Force: {ship.gForce.toFixed(1)} G</small>
+            <small>Accel: {ship.gForce < 1000 ? `${ship.gForce.toFixed(1)} g` : `${ship.gForce.toExponential(1)} g (drive)`}</small>
+          </div>
+
+          <div className="tf-metric" data-testid="hud-altitude">
+            <label>ALTITUDE</label>
+            <b className={ship.systemStatus === 'proximity-alert' ? 'warn' : ''}>{altitudeText}</b>
+            <small>above {nearestObj ? nearestObj.name : '—'}{ship.systemStatus === 'proximity-alert' ? ' · ⚠ PROXIMITY' : ''}</small>
           </div>
         </div>
+        {eventText && (
+          <div className="travel-event" role="status" aria-live="polite">
+            {eventText}
+          </div>
+        )}
       </div>
 
       {/* Bottom Right Target Navigation / Autopilot Card */}
@@ -192,10 +224,17 @@ export function TravelHUD() {
               <button
                 className="btn sm"
                 style={{ width: '100%', height: '26px', fontSize: '11px', borderColor: 'var(--warm)' }}
-                onClick={cancelAutopilot}
+                onClick={() => cancelAutopilot('Autopilot disengaged')}
               >
                 Disengage Autopilot (Manual Takeover)
               </button>
+            </div>
+          )}
+
+          {!ship.autopilot.active && arrivedObj && (
+            <div className="autopilot-banner" style={{ marginTop: '8px', fontSize: '11px', color: 'var(--ok)' }}>
+              <b>ARRIVED · HOLDING STATION AT {arrivedObj.name.toUpperCase()}</b>
+              <div style={{ color: 'var(--txt-dim)' }}>Position is held relative to {arrivedObj.name} as time runs. Any thrust input resumes manual flight.</div>
             </div>
           )}
 
@@ -225,12 +264,13 @@ export function TravelHUD() {
                 <h4>Propulsion & Velocity</h4>
                 <table className="help-table">
                   <tbody>
-                    <tr><td><kbd>W</kbd></td><td>Increase Forward Thrust</td></tr>
-                    <tr><td><kbd>S</kbd></td><td>Decrease Thrust / Reverse</td></tr>
-                    <tr><td><kbd>Shift</kbd></td><td>Warp Afterburner Boost</td></tr>
-                    <tr><td><kbd>B</kbd></td><td>Emergency Retrorocket Brake</td></tr>
-                    <tr><td><kbd>1</kbd>–<kbd>4</kbd></td><td>Throttle Gear (Sub-light to Warp)</td></tr>
-                    <tr><td><kbd>X</kbd></td><td>Toggle RCS Stabilization</td></tr>
+                    <tr><td><kbd>W</kbd></td><td>Throttle up (forward thrust)</td></tr>
+                    <tr><td><kbd>S</kbd></td><td>Throttle down; hold at 0% to thrust backward</td></tr>
+                    <tr><td><kbd>A</kbd> / <kbd>D</kbd></td><td>Thrust left / right</td></tr>
+                    <tr><td><kbd>Space</kbd> / <kbd>C</kbd></td><td>Thrust up / down</td></tr>
+                    <tr><td><kbd>Shift</kbd></td><td>Boost ×3 while held</td></tr>
+                    <tr><td><kbd>B</kbd></td><td>Brake</td></tr>
+                    <tr><td><kbd>1</kbd>–<kbd>4</kbd></td><td>Speed range (sub-light → warp)</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -239,12 +279,12 @@ export function TravelHUD() {
                 <h4>Attitude & Orientation</h4>
                 <table className="help-table">
                   <tbody>
-                    <tr><td><kbd>A</kbd> / <kbd>D</kbd></td><td>Yaw Left / Right</td></tr>
-                    <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>Pitch Down / Up</td></tr>
-                    <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>Roll Left / Right</td></tr>
-                    <tr><td><kbd>Q</kbd> / <kbd>E</kbd></td><td>Strafe Left / Right</td></tr>
-                    <tr><td><kbd>Space</kbd> / <kbd>C</kbd></td><td>Vertical Strafe Up / Down</td></tr>
-                    <tr><td><kbd>F</kbd></td><td>Toggle Assisted vs Inertial</td></tr>
+                    <tr><td><kbd>Mouse drag</kbd></td><td>Look / steer (cockpit &amp; chase)</td></tr>
+                    <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>Yaw left / right</td></tr>
+                    <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>Pitch up / down</td></tr>
+                    <tr><td><kbd>Q</kbd> / <kbd>E</kbd></td><td>Roll left / right</td></tr>
+                    <tr><td><kbd>F</kbd></td><td>Assisted vs inertial flight</td></tr>
+                    <tr><td><kbd>X</kbd></td><td>Toggle stabilisation (damping)</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -254,11 +294,12 @@ export function TravelHUD() {
               <h4>Astrogation & Camera</h4>
               <table className="help-table">
                 <tbody>
-                  <tr><td><kbd>V</kbd></td><td>Cycle Camera: Cockpit / Chase / Orbit</td></tr>
-                  <tr><td><kbd>M</kbd></td><td>Open Solar System Navigation Map</td></tr>
-                  <tr><td><kbd>Mouse Drag</kbd></td><td>Orbit camera view around spacecraft</td></tr>
-                  <tr><td><kbd>Mouse Wheel</kbd></td><td>Adjust Throttle / Camera distance</td></tr>
-                  <tr><td><kbd>Escape</kbd></td><td>Exit Travel Mode to Observatory</td></tr>
+                  <tr><td><kbd>V</kbd></td><td>Cycle camera: cockpit / chase / external</td></tr>
+                  <tr><td><kbd>Mouse drag</kbd></td><td>Orbit the camera (external view)</td></tr>
+                  <tr><td><kbd>Mouse wheel</kbd></td><td>Camera distance (chase, external) · throttle (cockpit)</td></tr>
+                  <tr><td><kbd>M</kbd></td><td>Navigation map &amp; autopilot</td></tr>
+                  <tr><td><kbd>Esc</kbd></td><td>Close dialog / exit Travel Mode</td></tr>
+                  <tr><td colSpan={2} style={{ color: 'var(--txt-dim)' }}>Any flight input disengages the autopilot. Speed is limited near bodies so you cannot skip into a planet.</td></tr>
                 </tbody>
               </table>
             </div>

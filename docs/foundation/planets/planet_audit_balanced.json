@@ -1,0 +1,332 @@
+{
+ "base": "http://localhost:5174",
+ "quality": "balanced",
+ "headed": false,
+ "viewport": [
+  1280,
+  720
+ ],
+ "poses": [
+  {
+   "planet": "mercury",
+   "distanceR": 2.5,
+   "meanFrameMs": 1.040350877192981,
+   "frames": 399,
+   "centreLitFraction": 0.959,
+   "file": "mercury_2p5R.jpg"
+  },
+  {
+   "planet": "mercury",
+   "distanceR": 6.0,
+   "meanFrameMs": 1.5260651629072672,
+   "frames": 399,
+   "centreLitFraction": 0.984,
+   "file": "mercury_6p0R.jpg"
+  },
+  {
+   "planet": "mercury",
+   "distanceR": 20.0,
+   "meanFrameMs": 1.2090225563909764,
+   "frames": 399,
+   "centreLitFraction": 0.46,
+   "file": "mercury_20p0R.jpg"
+  },
+  {
+   "planet": "mercury",
+   "distanceR": 150.0,
+   "meanFrameMs": 1.192731829573934,
+   "frames": 399,
+   "centreLitFraction": 0.044,
+   "file": "mercury_150p0R.jpg"
+  },
+  {
+   "planet": "mercury",
+   "distanceR": 2000.0,
+   "meanFrameMs": 1.305513784461152,
+   "frames": 399,
+   "centreLitFraction": 0.054,
+   "file": "mercury_2000p0R.jpg"
+  },
+  {
+   "planet": "venus",
+   "distanceR": 2.5,
+   "meanFrameMs": 1.5035087719298237,
+   "frames": 399,
+   "centreLitFraction": 0.999,
+   "file": "venus_2p5R.jpg"
+  },
+  {
+   "planet": "venus",
+   "distanceR": 6.0,
+   "meanFrameMs": 1.252882205513788,
+   "frames": 399,
+   "centreLitFraction": 0.999,
+   "file": "venus_6p0R.jpg"
+  },
+  {
+   "planet": "venus",
+   "distanceR": 20.0,
+   "meanFrameMs": 1.1215538847117794,
+   "frames": 399,
+   "centreLitFraction": 0.515,
+   "file": "venus_20p0R.jpg"
+  },
+  {
+   "planet": "venus",
+   "distanceR": 150.0,
+   "meanFrameMs": 1.0593984962405942,
+   "frames": 399,
+   "centreLitFraction": 0.057,
+   "file": "venus_150p0R.jpg"
+  },
+  {
+   "planet": "venus",
+   "distanceR": 2000.0,
+   "meanFrameMs": 1.334335839599001,
+   "frames": 399,
+   "centreLitFraction": 0.056,
+   "file": "venus_2000p0R.jpg"
+  },
+  {
+   "planet": "earth",
+   "distanceR": 2.5,
+   "meanFrameMs": 2.0932330827067687,
+   "frames": 399,
+   "centreLitFraction": 0.965,
+   "file": "earth_2p5R.jpg"
+  },
+  {
+   "planet": "earth",
+   "distanceR": 6.0,
+   "meanFrameMs": 1.736340852130324,
+   "frames": 399,
+   "centreLitFraction": 0.934,
+   "file": "earth_6p0R.jpg"
+  },
+  {
+   "planet": "earth",
+   "distanceR": 20.0,
+   "meanFrameMs": 1.4676691729323363,
+   "frames": 399,
+   "centreLitFraction": 0.448,
+   "file": "earth_20p0R.jpg"
+  },
+  {
+   "planet": "earth",
+   "distanceR": 150.0,
+   "meanFrameMs": 1.6967418546365916,
+   "frames": 399,
+   "centreLitFraction": 0.052,
+   "file": "earth_150p0R.jpg"
+  },
+  {
+   "planet": "earth",
+   "distanceR": 2000.0,
+   "meanFrameMs": 1.7423558897243125,
+   "frames": 399,
+   "centreLitFraction": 0.067,
+   "file": "earth_2000p0R.jpg"
+  },
+  {
+   "planet": "mars",
+   "distanceR": 2.5,
+   "meanFrameMs": 1.236340852130324,
+   "frames": 399,
+   "centreLitFraction": 0.985,
+   "file": "mars_2p5R.jpg"
+  },
+  {
+   "planet": "mars",
+   "distanceR": 6.0,
+   "meanFrameMs": 1.5426065162907177,
+   "frames": 399,
+   "centreLitFraction": 0.994,
+   "file": "mars_6p0R.jpg"
+  },
+  {
+   "planet": "mars",
+   "distanceR": 20.0,
+   "meanFrameMs": 1.2889724310777015,
+   "frames": 399,
+   "centreLitFraction": 0.451,
+   "file": "mars_20p0R.jpg"
+  },
+  {
+   "planet": "mars",
+   "distanceR": 150.0,
+   "meanFrameMs": 1.4037593984962369,
+   "frames": 399,
+   "centreLitFraction": 0.115,
+   "file": "mars_150p0R.jpg"
+  },
+  {
+   "planet": "mars",
+   "distanceR": 2000.0,
+   "meanFrameMs": 1.554135338345861,
+   "frames": 399,
+   "centreLitFraction": 0.064,
+   "file": "mars_2000p0R.jpg"
+  },
+  {
+   "planet": "jupiter",
+   "distanceR": 2.5,
+   "meanFrameMs": 1.204010025062642,
+   "frames": 399,
+   "centreLitFraction": 0.999,
+   "file": "jupiter_2p5R.jpg"
+  },
+  {
+   "planet": "jupiter",
+   "distanceR": 6.0,
+   "meanFrameMs": 1.2298245614035015,
+   "frames": 399,
+   "centreLitFraction": 0.998,
+   "file": "jupiter_6p0R.jpg"
+  },
+  {
+   "planet": "jupiter",
+   "distanceR": 20.0,
+   "meanFrameMs": 1.1929824561403508,
+   "frames": 399,
+   "centreLitFraction": 0.47,
+   "file": "jupiter_20p0R.jpg"
+  },
+  {
+   "planet": "jupiter",
+   "distanceR": 150.0,
+   "meanFrameMs": 1.3403508771929715,
+   "frames": 399,
+   "centreLitFraction": 0.216,
+   "file": "jupiter_150p0R.jpg"
+  },
+  {
+   "planet": "jupiter",
+   "distanceR": 2000.0,
+   "meanFrameMs": 1.1436090225563982,
+   "frames": 399,
+   "centreLitFraction": 0.133,
+   "file": "jupiter_2000p0R.jpg"
+  },
+  {
+   "planet": "saturn",
+   "distanceR": 2.5,
+   "meanFrameMs": 1.7679197994987506,
+   "frames": 399,
+   "centreLitFraction": 0.999,
+   "file": "saturn_2p5R.jpg"
+  },
+  {
+   "planet": "saturn",
+   "distanceR": 6.0,
+   "meanFrameMs": 1.3759398496240602,
+   "frames": 399,
+   "centreLitFraction": 0.969,
+   "file": "saturn_6p0R.jpg"
+  },
+  {
+   "planet": "saturn",
+   "distanceR": 20.0,
+   "meanFrameMs": 1.723308270676688,
+   "frames": 399,
+   "centreLitFraction": 0.618,
+   "file": "saturn_20p0R.jpg"
+  },
+  {
+   "planet": "saturn",
+   "distanceR": 150.0,
+   "meanFrameMs": 1.7764411027568996,
+   "frames": 399,
+   "centreLitFraction": 0.237,
+   "file": "saturn_150p0R.jpg"
+  },
+  {
+   "planet": "saturn",
+   "distanceR": 2000.0,
+   "meanFrameMs": 1.8310776942355853,
+   "frames": 399,
+   "centreLitFraction": 0.148,
+   "file": "saturn_2000p0R.jpg"
+  },
+  {
+   "planet": "uranus",
+   "distanceR": 2.5,
+   "meanFrameMs": 1.380952380952381,
+   "frames": 399,
+   "centreLitFraction": 0.998,
+   "file": "uranus_2p5R.jpg"
+  },
+  {
+   "planet": "uranus",
+   "distanceR": 6.0,
+   "meanFrameMs": 1.337593984962417,
+   "frames": 399,
+   "centreLitFraction": 0.998,
+   "file": "uranus_6p0R.jpg"
+  },
+  {
+   "planet": "uranus",
+   "distanceR": 20.0,
+   "meanFrameMs": 1.3378446115288112,
+   "frames": 399,
+   "centreLitFraction": 0.547,
+   "file": "uranus_20p0R.jpg"
+  },
+  {
+   "planet": "uranus",
+   "distanceR": 150.0,
+   "meanFrameMs": 1.1711779448621444,
+   "frames": 399,
+   "centreLitFraction": 0.256,
+   "file": "uranus_150p0R.jpg"
+  },
+  {
+   "planet": "uranus",
+   "distanceR": 2000.0,
+   "meanFrameMs": 1.247619047619055,
+   "frames": 399,
+   "centreLitFraction": 0.085,
+   "file": "uranus_2000p0R.jpg"
+  },
+  {
+   "planet": "neptune",
+   "distanceR": 2.5,
+   "meanFrameMs": 1.9195488721804366,
+   "frames": 399,
+   "centreLitFraction": 0.934,
+   "file": "neptune_2p5R.jpg"
+  },
+  {
+   "planet": "neptune",
+   "distanceR": 6.0,
+   "meanFrameMs": 1.4907268170426138,
+   "frames": 399,
+   "centreLitFraction": 0.931,
+   "file": "neptune_6p0R.jpg"
+  },
+  {
+   "planet": "neptune",
+   "distanceR": 20.0,
+   "meanFrameMs": 1.2639097744360974,
+   "frames": 399,
+   "centreLitFraction": 0.446,
+   "file": "neptune_20p0R.jpg"
+  },
+  {
+   "planet": "neptune",
+   "distanceR": 150.0,
+   "meanFrameMs": 1.086716791979928,
+   "frames": 399,
+   "centreLitFraction": 0.187,
+   "file": "neptune_150p0R.jpg"
+  },
+  {
+   "planet": "neptune",
+   "distanceR": 2000.0,
+   "meanFrameMs": 1.5696741854636664,
+   "frames": 399,
+   "centreLitFraction": 0.15,
+   "file": "neptune_2000p0R.jpg"
+  }
+ ],
+ "errors": []
+}
