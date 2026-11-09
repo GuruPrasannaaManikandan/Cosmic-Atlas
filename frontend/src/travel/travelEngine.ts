@@ -8,8 +8,8 @@
 import * as THREE from 'three'
 import { BY_ID, positionOf, radiusLyOf, CosmicObject } from '../data/catalog'
 import { Vec3, add, fromThree, len, sub, toThree, SUN_POS, LY_PER_AU } from '../astro/coords'
-import { ease, logLerp, travelDuration } from '../astro/scale'
-import { nav, onInterrupt } from '../store/nav'
+import { ease, logLerp, travelDuration, adaptiveScale } from '../astro/scale'
+import { nav, onInterrupt, updateNearest } from '../store/nav'
 import { audio } from '../audio/CosmicAudioEngine'
 
 let arrivalHandler: ((id: string) => void) | null = null
@@ -77,22 +77,36 @@ export function computeIntelligentFraming(o: CosmicObject, P: Vec3): { approachD
   const dir = new THREE.Vector3(0, 0.35, 1).normalize()
 
   if (o.category === 'planet') {
-    // Approach sunlit hemisphere at 35° phase angle to highlight visible day/night terminator
+    // Approach sunlit hemisphere at 35° phase angle and 18° latitude to highlight equatorial continents & terminator
     const toSun = new THREE.Vector3(...toThree(sub(SUN_POS, P))).normalize()
     if (toSun.lengthSq() > 0.01) {
-      dir.copy(toSun).applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.55).add(new THREE.Vector3(0, 0.25, 0)).normalize()
+      const eqSun = new THREE.Vector3(toSun.x, 0, toSun.z).normalize()
+      if (eqSun.lengthSq() > 0.01) {
+        dir.copy(eqSun).applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.52)
+        dir.y = 0.32
+        dir.normalize()
+      } else {
+        dir.set(0.7, 0.32, 0.65).normalize()
+      }
     }
     const approachDist = Math.max(o.viewDistanceLy, rTrue * 3.2, 1e-10)
     return { approachDistanceLy: approachDist, targetDirection: dir }
   }
 
   if (o.category === 'moon' || o.category === 'dwarf-planet' || o.category === 'asteroid') {
-    // Approach on illuminated hemisphere
+    // Approach on illuminated hemisphere at gentle elevation
     const toSun = new THREE.Vector3(...toThree(sub(SUN_POS, P))).normalize()
     if (toSun.lengthSq() > 0.01) {
-      dir.copy(toSun).applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.45).add(new THREE.Vector3(0, 0.2, 0)).normalize()
+      const eqSun = new THREE.Vector3(toSun.x, 0, toSun.z).normalize()
+      if (eqSun.lengthSq() > 0.01) {
+        dir.copy(eqSun).applyAxisAngle(new THREE.Vector3(0, 1, 0), 0.45)
+        dir.y = 0.26
+        dir.normalize()
+      } else {
+        dir.set(0.6, 0.26, 0.75).normalize()
+      }
     } else {
-      dir.set(0.4, 0.3, 0.85).normalize()
+      dir.set(0.4, 0.26, 0.85).normalize()
     }
     const approachDist = Math.max(o.viewDistanceLy, rTrue * 3.0, 1e-12)
     return { approachDistanceLy: approachDist, targetDirection: dir }
@@ -145,7 +159,7 @@ let currentFlight: ActiveFlight | null = null
 /**
  * Initiates travel to any celestial landmark with full state machine lifecycle.
  */
-export function initiateTravel(id: string, ms: number, opts: { onArrive?: () => void; viewDistanceLy?: number } = {}) {
+export function initiateTravel(id: string, ms: number, opts: { onArrive?: () => void; viewDistanceLy?: number; instant?: boolean } = {}) {
   travelEngineState.phase = 'resolving_destination'
   travelEngineState.targetId = id
   travelEngineState.errorMsg = null
@@ -173,6 +187,26 @@ export function initiateTravel(id: string, ms: number, opts: { onArrive?: () => 
   const { approachDistanceLy, targetDirection } = computeIntelligentFraming(o, P)
   const d1 = opts.viewDistanceLy ?? approachDistanceLy
   const dir1 = targetDirection.clone()
+
+  if (opts.instant) {
+    const off: Vec3 = [dir1.x * d1, dir1.y * d1, dir1.z * d1]
+    nav.pos = add(P, fromThree(off))
+    nav.quat.copy(lookAtQuat(new THREE.Vector3(0, 0, 0), dir1.clone().multiplyScalar(-1)))
+    nav.followId = id
+    nav.lastFollowPos = P
+    nav.flight = null
+    currentFlight = null
+    travelEngineState.phase = 'inspecting'
+    travelEngineState.progress = 1.0
+    travelEngineState.etaSec = 0
+    travelEngineState.distanceLy = d1
+    updateNearest(ms)
+    nav.scale = adaptiveScale(nav.nearestSurface)
+    arrivalHandler?.(id)
+    opts.onArrive?.()
+    notify()
+    return
+  }
 
   // Compute duration with smooth curve
   const dur = travelDuration(d0, d1)

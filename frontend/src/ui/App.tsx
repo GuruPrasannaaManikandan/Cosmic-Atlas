@@ -1,7 +1,6 @@
-import { Component, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
+import { Component, ReactNode, Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { CosmicCanvas } from '../scene/Scene'
 import { Labels } from './Labels'
-import { DataPanel } from './DataPanel'
 import { useStore } from '../store/store'
 import { CosmicObject, searchObjects, registerObject } from '../data/catalog'
 import { nav, interrupt } from '../store/nav'
@@ -9,19 +8,31 @@ import { sub, len, SUN_POS } from '../astro/coords'
 import { api, SimbadResult } from './api'
 import { labelState } from '../scene/labelState'
 import { Browser, Info, TimeBar, StatusBar, Diagnostics, TourCard, CAT_ICON } from './Shell'
-import { TravelHUD } from '../travel/TravelHUD'
-import { CockpitOverlay } from '../travel/CockpitOverlay'
-import { NavMapModal } from '../travel/NavMapModal'
 import { AudioPlayer } from './AudioPlayer'
-import { CosmicEventsModal } from '../events/CosmicEventsModal'
-import { EventPlayerHUD } from '../events/EventPlayerHUD'
 import { startEvent, eventState, subscribeEventState } from '../events/eventState'
-import { WelcomeModal } from '../tutorial/WelcomeModal'
-import { TutorialOverlay } from '../tutorial/TutorialOverlay'
-import { AcademyCompleteModal } from '../tutorial/AcademyCompleteModal'
-import { checkFirstTimeUser, openWelcomeModal, startTutorial } from '../tutorial/tutorialState'
+import {
+  checkFirstTimeUser,
+  openWelcomeModal,
+  startTutorial,
+  tutorialState,
+  subscribeTutorialState,
+} from '../tutorial/tutorialState'
 import { ScaleBreadcrumbs } from './ScaleBreadcrumbs'
 import { TravelProgressHUD } from '../travel/TravelProgressHUD'
+import { ModuleBoundary, ModuleLoader } from './ModuleBoundary'
+
+// Lazy-loaded heavy modules for production bundle optimization and code-splitting
+const DataPanel = lazy(() => import('./DataPanel').then((m) => ({ default: m.DataPanel })))
+const TravelHUD = lazy(() => import('../travel/TravelHUD').then((m) => ({ default: m.TravelHUD })))
+const CockpitOverlay = lazy(() => import('../travel/CockpitOverlay').then((m) => ({ default: m.CockpitOverlay })))
+const NavMapModal = lazy(() => import('../travel/NavMapModal').then((m) => ({ default: m.NavMapModal })))
+const CosmicEventsModal = lazy(() => import('../events/CosmicEventsModal').then((m) => ({ default: m.CosmicEventsModal })))
+const EventPlayerHUD = lazy(() => import('../events/EventPlayerHUD').then((m) => ({ default: m.EventPlayerHUD })))
+const WelcomeModal = lazy(() => import('../tutorial/WelcomeModal').then((m) => ({ default: m.WelcomeModal })))
+const TutorialOverlay = lazy(() => import('../tutorial/TutorialOverlay').then((m) => ({ default: m.TutorialOverlay })))
+const AcademyCompleteModal = lazy(() => import('../tutorial/AcademyCompleteModal').then((m) => ({ default: m.AcademyCompleteModal })))
+const HelpModal = lazy(() => import('./HelpModal').then((m) => ({ default: m.HelpModal })))
+const AboutModal = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutModal })))
 
 class Boundary extends Component<{ children: ReactNode }, { err: Error | null }> {
   state = { err: null as Error | null }
@@ -56,7 +67,11 @@ function webglOk(): boolean {
   }
 }
 
-function Search() {
+interface SearchProps {
+  hasActiveModal?: boolean
+}
+
+function Search({ hasActiveModal = false }: SearchProps) {
   const [q, setQ] = useState('')
   const [live, setLive] = useState<{ state: 'idle' | 'busy' | 'err'; msg?: string }>({ state: 'idle' })
   const [open, setOpen] = useState(false)
@@ -67,9 +82,18 @@ function Search() {
   const travel = useStore((s) => s.travel)
   const bump = () => useStore.setState((s) => ({ objectsVersion: s.objectsVersion + 1 }))
 
-  // Global keyboard shortcut '/' or 'Ctrl+K'
+  // When a modal becomes active, dismiss search dropdown and blur input to prevent layer conflicts
+  useEffect(() => {
+    if (hasActiveModal) {
+      setOpen(false)
+      inputRef.current?.blur()
+    }
+  }, [hasActiveModal])
+
+  // Global keyboard shortcut '/' or 'Ctrl+K' (suppressed when any modal is open)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      if (hasActiveModal) return
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return
       if (e.key === '/' || ((e.ctrlKey || e.metaKey) && e.key === 'k')) {
@@ -80,7 +104,7 @@ function Search() {
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
+  }, [hasActiveModal])
 
   const liveSearch = async () => {
     setLive({ state: 'busy' })
@@ -155,6 +179,7 @@ function Search() {
         onBlur={() => setTimeout(() => setOpen(false), 220)}
         onKeyDown={(e) => {
           if (e.key === 'Escape') {
+            e.stopPropagation()
             setOpen(false)
             inputRef.current?.blur()
           } else if (e.key === 'ArrowDown') {
@@ -227,128 +252,6 @@ function Search() {
   )
 }
 
-function HelpModal({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', k)
-    return () => window.removeEventListener('keydown', k)
-  }, [onClose])
-
-  return (
-    <div className="modal" onClick={onClose} role="dialog" aria-modal="true" aria-label="Controls and help">
-      <div className="card glass" onClick={(e) => e.stopPropagation()}>
-        <div className="eyebrow">Observatory Operations</div>
-        <h2>Controls & Navigation Reference</h2>
-
-        <div className="help-grid">
-          <div className="help-box">
-            <h4>Mouse & Touch Controls</h4>
-            <table className="help-table">
-              <tbody>
-                <tr><td>Left Drag</td><td>Rotate camera (Yaw / Pitch)</td></tr>
-                <tr><td>Right Drag / Shift+Drag</td><td>Pan camera along screen plane</td></tr>
-                <tr><td>Mouse Wheel</td><td>Dolly (Zoom in / out)</td></tr>
-                <tr><td>Double Click</td><td>Direct flight to target landmark</td></tr>
-                <tr><td>Touch Drag</td><td>Rotate view</td></tr>
-                <tr><td>Pinch</td><td>Zoom / Dolly</td></tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="help-box">
-            <h4>Keyboard Flight Controls</h4>
-            <table className="help-table">
-              <tbody>
-                <tr><td><kbd>W</kbd> / <kbd>↑</kbd></td><td>Thrust forward</td></tr>
-                <tr><td><kbd>S</kbd> / <kbd>↓</kbd></td><td>Thrust backward</td></tr>
-                <tr><td><kbd>A</kbd> / <kbd>←</kbd></td><td>Strafe left</td></tr>
-                <tr><td><kbd>D</kbd> / <kbd>→</kbd></td><td>Strafe right</td></tr>
-                <tr><td><kbd>Space</kbd> / <kbd>E</kbd></td><td>Ascend vertically</td></tr>
-                <tr><td><kbd>C</kbd> / <kbd>Q</kbd></td><td>Descend vertically</td></tr>
-                <tr><td><kbd>Shift</kbd></td><td>6× Warp thrust booster</td></tr>
-                <tr><td><kbd>/</kbd> or <kbd>Ctrl+K</kbd></td><td>Focus universe search</td></tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="help-box">
-          <h4>Observatory Architecture & Multi-Scale Coordinates</h4>
-          <p style={{ margin: '4px 0', fontSize: '13px', color: 'var(--txt-dim)', lineHeight: 1.5 }}>
-            All bodies exist in a single double-precision Galactic-Centre Cartesian coordinate frame in light-years.
-            Camera-relative rendering with dynamic adaptive scale ensures jitter-free visualization from 1 billion light-years down to Earth orbital radius.
-          </p>
-        </div>
-
-        <div className="help-box" style={{ borderColor: 'rgba(56, 189, 248, 0.4)' }}>
-          <h4>🎓 Cosmic Academy Interactive Tutorial</h4>
-          <p style={{ margin: '4px 0 10px', fontSize: '13px', color: 'var(--txt-dim)', lineHeight: 1.5 }}>
-            Learn the complete observatory systems, 3D attitude controls, scale navigation, astrophysical inspection, and simulation labs in an 8-stage hands-on cadet mission.
-          </p>
-          <button
-            className="btn academy-btn"
-            onClick={() => {
-              onClose()
-              startTutorial(true)
-            }}
-          >
-            Launch Cosmic Academy Tutorial
-          </button>
-        </div>
-
-        <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>
-          <button className="btn primary" onClick={onClose}>
-            Close Reference
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function AboutModal({ onClose }: { onClose: () => void }) {
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', k)
-    return () => window.removeEventListener('keydown', k)
-  }, [onClose])
-
-  return (
-    <div className="modal" onClick={onClose} role="dialog" aria-modal="true" aria-label="Scientific notes">
-      <div className="card glass" onClick={(e) => e.stopPropagation()}>
-        <div className="eyebrow">Scientific Integrity Notes</div>
-        <h2>Astrophysical Principles & Data Provenance</h2>
-        <ul>
-          <li>
-            <b>Landmark Coordinates:</b> Landmarks originate from curated, peer-reviewed catalogues (SIMBAD, Hipparcos, Gaia, GRAVITY 2019, NED) converted into IAU Galactic Cartesian coordinates in light-years.
-          </li>
-          <li>
-            <b>Solar System Ephemerides:</b> Planetary positions utilize approximate analytical Keplerian orbital elements (NASA JPL, epoch valid 1800–2050). High-precision vector comparison is available live via JPL Horizons API.
-          </li>
-          <li>
-            <b>Scale & Perspective:</b> To facilitate visual exploration across 15 orders of magnitude, planet physical diameters and Moon separation are exaggerated. Logarithmic distance compression applies beyond 10⁶ render units while preserving angular diameter.
-          </li>
-          <li>
-            <b>Illustrative Geometry:</b> Milky Way disc particles, the cosmic web filaments, nebula sprites, and planet surface textures are procedural approximations. Laniakea, the Local Sheet, and the Orion Arm are represented as schematic markers.
-          </li>
-          <li>
-            <b>No Spatial Fabrication:</b> Ingested catalogue records lacking reliable distance measurements (parallax or cosmological redshift) are never assigned arbitrary 3D positions.
-          </li>
-        </ul>
-        <div style={{ marginTop: '18px', display: 'flex', justifyContent: 'flex-end' }}>
-          <button className="btn primary" onClick={onClose}>
-            Acknowledge & Close
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function Loader() {
   const [ready, setReady] = useState(false)
   useEffect(() => {
@@ -389,6 +292,9 @@ export function App() {
   const [help, setHelp] = useState(false)
   const [eventsModalOpen, setEventsModalOpen] = useState(false)
   const [activeEventId, setActiveEventId] = useState(eventState.activeId)
+  const [tutorialActive, setTutorialActive] = useState(tutorialState.isActive)
+  const [welcomeOpen, setWelcomeOpen] = useState(tutorialState.isWelcomeOpen)
+  const [completeOpen, setCompleteOpen] = useState(tutorialState.isCompleteOpen)
   const [gl, setGl] = useState<boolean | null>(null)
   const [speed, setSpeed] = useState(nav.speedMult)
   const [, force] = useState(0)
@@ -399,15 +305,27 @@ export function App() {
       openWelcomeModal()
     }
   }, [])
+
   useEffect(() => {
     return subscribeEventState(() => {
       setActiveEventId(eventState.activeId)
     })
   }, [])
+
+  useEffect(() => {
+    return subscribeTutorialState(() => {
+      setTutorialActive(tutorialState.isActive)
+      setWelcomeOpen(tutorialState.isWelcomeOpen)
+      setCompleteOpen(tutorialState.isCompleteOpen)
+    })
+  }, [])
+
   useEffect(() => {
     const t = setInterval(() => force((x) => x + 1), 500)
     return () => clearInterval(t)
   }, [])
+
+  const hasActiveModal = eventsModalOpen || help || about || navMapOpen || dataOpen || welcomeOpen || completeOpen
 
   const inSolar = len(sub(nav.pos, SUN_POS)) < 0.02
   const isTour = phase === 'tour'
@@ -448,7 +366,7 @@ export function App() {
             </div>
           </div>
 
-          <Search />
+          <Search hasActiveModal={hasActiveModal} />
 
           <nav className="topnav" aria-label="Navigation controls">
             <button
@@ -567,9 +485,25 @@ export function App() {
       {/* TRAVEL MODE INTERACTIVE SIMULATION */}
       {phase === 'travel' && (
         <>
-          <CockpitOverlay />
-          <TravelHUD />
-          {navMapOpen && <NavMapModal onClose={() => set({ navMapOpen: false })} />}
+          <ModuleBoundary name="Cockpit Overlay">
+            <Suspense fallback={<ModuleLoader label="Loading Cockpit…" />}>
+              <CockpitOverlay />
+            </Suspense>
+          </ModuleBoundary>
+
+          <ModuleBoundary name="Flight Systems HUD">
+            <Suspense fallback={<ModuleLoader label="Loading Flight HUD…" />}>
+              <TravelHUD />
+            </Suspense>
+          </ModuleBoundary>
+
+          {navMapOpen && (
+            <ModuleBoundary name="Tactical Nav Map">
+              <Suspense fallback={<ModuleLoader label="Loading Navigation Map…" />}>
+                <NavMapModal onClose={() => set({ navMapOpen: false })} />
+              </Suspense>
+            </ModuleBoundary>
+          )}
         </>
       )}
 
@@ -687,23 +621,74 @@ export function App() {
       )}
 
       {/* Astro Data Intelligence Workspace */}
-      {dataOpen && <DataPanel />}
+      {dataOpen && (
+        <ModuleBoundary name="Data Intelligence Workspace">
+          <Suspense fallback={<ModuleLoader label="Loading Data Intelligence…" />}>
+            <DataPanel />
+          </Suspense>
+        </ModuleBoundary>
+      )}
 
       {/* Modals & Simulation HUD */}
-      <EventPlayerHUD />
-      {eventsModalOpen && (
-        <CosmicEventsModal
-          isOpen={eventsModalOpen}
-          onClose={() => setEventsModalOpen(false)}
-        />
+      {activeEventId && (
+        <ModuleBoundary name="Cosmic Event HUD">
+          <Suspense fallback={<ModuleLoader label="Loading Event Simulation…" />}>
+            <EventPlayerHUD />
+          </Suspense>
+        </ModuleBoundary>
       )}
-      {help && <HelpModal onClose={() => setHelp(false)} />}
-      {about && <AboutModal onClose={() => setAbout(false)} />}
+
+      {eventsModalOpen && (
+        <ModuleBoundary name="Cosmic Events Observatory">
+          <Suspense fallback={<ModuleLoader label="Loading Cosmic Events…" />}>
+            <CosmicEventsModal
+              isOpen={eventsModalOpen}
+              onClose={() => setEventsModalOpen(false)}
+            />
+          </Suspense>
+        </ModuleBoundary>
+      )}
+
+      {help && (
+        <ModuleBoundary name="Controls & Reference">
+          <Suspense fallback={<ModuleLoader label="Loading Reference…" />}>
+            <HelpModal onClose={() => setHelp(false)} />
+          </Suspense>
+        </ModuleBoundary>
+      )}
+
+      {about && (
+        <ModuleBoundary name="Scientific Notes">
+          <Suspense fallback={<ModuleLoader label="Loading Scientific Notes…" />}>
+            <AboutModal onClose={() => setAbout(false)} />
+          </Suspense>
+        </ModuleBoundary>
+      )}
 
       {/* Cosmic Academy Tutorial System */}
-      <TutorialOverlay />
-      <WelcomeModal onOpenHelp={() => setHelp(true)} />
-      <AcademyCompleteModal onOpenEvents={() => setEventsModalOpen(true)} />
+      {tutorialActive && (
+        <ModuleBoundary name="Cosmic Academy Tutorial">
+          <Suspense fallback={<ModuleLoader label="Initializing Tutorial…" />}>
+            <TutorialOverlay />
+          </Suspense>
+        </ModuleBoundary>
+      )}
+
+      {welcomeOpen && (
+        <ModuleBoundary name="Welcome Modal">
+          <Suspense fallback={<ModuleLoader label="Loading Welcome…" />}>
+            <WelcomeModal onOpenHelp={() => setHelp(true)} />
+          </Suspense>
+        </ModuleBoundary>
+      )}
+
+      {completeOpen && (
+        <ModuleBoundary name="Academy Complete Modal">
+          <Suspense fallback={<ModuleLoader label="Loading Completion…" />}>
+            <AcademyCompleteModal onOpenEvents={() => setEventsModalOpen(true)} />
+          </Suspense>
+        </ModuleBoundary>
+      )}
 
       {error && (
         <div className="banner glass" role="alert">

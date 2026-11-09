@@ -1,0 +1,4 @@
+# .NET build output is redirected here by Directory.Build.props
+.build/
+*.user
+TestResults/

@@ -20,7 +20,7 @@ import { CosmicEventLayer } from '../events/CosmicEventLayer'
 import { EventControls } from '../events/EventControls'
 import * as A from '../data/assetRegistry'
 import { stepTravel, travelEngineState } from '../travel/travelEngine'
-import { SOLAR_BODY_BY_ID, PLUTO_BODY, CHARON_PLUTO_MASS_RATIO } from '../data/solarSystem'
+import { SOLAR_BODY_BY_ID, PLUTO_BODY, CHARON_PLUTO_MASS_RATIO, PLANET_RADIUS_KM } from '../data/solarSystem'
 import { orbitPathKm, positionAtMs, periodDays } from '../astro/kepler'
 import { AsteroidBeltLayer } from './AsteroidBeltLayer'
 
@@ -78,15 +78,16 @@ let saturnRingGeo: THREE.BufferGeometry | null = null
 
 export function getSaturnRingGeometry(): THREE.BufferGeometry {
   if (saturnRingGeo) return saturnRingGeo
-  const innerRadius = 1.28
-  const outerRadius = 2.41
-  const geo = new THREE.RingGeometry(innerRadius, outerRadius, 128, 4)
+  const innerRadius = 1.24
+  const outerRadius = 2.35
+  const geo = new THREE.RingGeometry(innerRadius, outerRadius, 256, 4)
+  geo.rotateX(-Math.PI / 2) // Orient ring into the equatorial X-Z plane
   const pos = geo.attributes.position
   const uv = geo.attributes.uv
   for (let i = 0; i < pos.count; i++) {
     const x = pos.getX(i)
-    const y = pos.getY(i)
-    const r = Math.sqrt(x * x + y * y)
+    const z = pos.getZ(i)
+    const r = Math.sqrt(x * x + z * z)
     const u = Math.max(0, Math.min(1, (r - innerRadius) / (outerRadius - innerRadius)))
     uv.setXY(i, u, 0.5)
   }
@@ -95,11 +96,92 @@ export function getSaturnRingGeometry(): THREE.BufferGeometry {
   return saturnRingGeo
 }
 
+export const planetaryUniforms = {
+  uSunDir: { value: new THREE.Vector3(1, 0, 0) },
+  uEarthSunDir: { value: new THREE.Vector3(1, 0, 0) },
+  uSaturnSunDir: { value: new THREE.Vector3(1, 0, 0) },
+  uSaturnSunDirLocal: { value: new THREE.Vector3(1, 0, 0) },
+  uMarsSunDir: { value: new THREE.Vector3(1, 0, 0) },
+  uVenusSunDir: { value: new THREE.Vector3(1, 0, 0) },
+  uUranusSunDir: { value: new THREE.Vector3(1, 0, 0) },
+  uNeptuneSunDir: { value: new THREE.Vector3(1, 0, 0) },
+}
+
+function AtmosphereMesh({
+  scale,
+  color,
+  sunDir,
+  power = 3.2,
+  intensity = 2.2,
+}: {
+  scale: number
+  color: THREE.ColorRepresentation
+  sunDir: { value: THREE.Vector3 }
+  power?: number
+  intensity?: number
+}) {
+  const c = useMemo(() => new THREE.Color(color), [color])
+  return (
+    <mesh scale={scale}>
+      <SphereGeo />
+      <shaderMaterial
+        transparent
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+        side={THREE.BackSide}
+        uniforms={{
+          uSunDir: sunDir,
+          uColor: { value: c },
+          uPower: { value: power },
+          uIntensity: { value: intensity },
+        }}
+        vertexShader={`
+          #include <common>
+          #include <logdepthbuf_pars_vertex>
+          varying vec3 vWorldNormal;
+          varying vec3 vWorldPosition;
+          void main() {
+            vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+            vec4 worldPos = modelMatrix * vec4(position, 1.0);
+            vWorldPosition = worldPos.xyz;
+            gl_Position = projectionMatrix * viewMatrix * worldPos;
+            #include <logdepthbuf_vertex>
+          }
+        `}
+        fragmentShader={`
+          #include <common>
+          #include <logdepthbuf_pars_fragment>
+          uniform vec3 uSunDir;
+          uniform vec3 uColor;
+          uniform float uPower;
+          uniform float uIntensity;
+          varying vec3 vWorldNormal;
+          varying vec3 vWorldPosition;
+          void main() {
+            #include <logdepthbuf_fragment>
+            vec3 V = normalize(cameraPosition - vWorldPosition);
+            vec3 N = normalize(vWorldNormal);
+            vec3 L = normalize(uSunDir);
+            float rim = 1.0 - max(0.0, dot(N, V));
+            float limb = pow(rim, uPower);
+            float sunDot = dot(N, L);
+            float sunFactor = smoothstep(-0.25, 0.25, sunDot);
+            float vDotL = max(0.0, dot(V, L));
+            float phase = 1.0 + 0.6 * vDotL;
+            float total = limb * sunFactor * phase * uIntensity;
+            gl_FragColor = vec4(uColor * total, total);
+          }
+        `}
+      />
+    </mesh>
+  )
+}
+
 const PLANET_IDS = Object.keys(PLANET_ELEMENTS)
 const EXTENDED = new Set(['galaxy', 'cluster', 'supercluster', 'group', 'sheet', 'galactic-structure', 'nebula', 'star-cluster'])
 
 function SphereGeo() {
-  return <sphereGeometry args={[1, 48, 32]} />
+  return <sphereGeometry args={[1, 64, 48]} />
 }
 
 function ObjectVisual({ o }: { o: CosmicObject }) {
@@ -286,55 +368,113 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
         </>
       )
     case 'planet':
+      if (o.id === 'mercury') {
+        return (
+          <mesh rotation={[0, 0, 0.03]} name="spin">
+            <SphereGeo />
+            <meshStandardMaterial
+              map={A.getMercuryTexture()}
+              roughness={0.95}
+              metalness={0.02}
+            />
+          </mesh>
+        )
+      }
+      if (o.id === 'venus') {
+        return (
+          <>
+            <mesh rotation={[0, 0, 3.09]} name="spin">
+              <SphereGeo />
+              <meshStandardMaterial
+                map={A.getVenusTexture()}
+                roughness={0.72}
+                metalness={0}
+              />
+            </mesh>
+            <AtmosphereMesh scale={1.025} color="#e8d5ab" sunDir={planetaryUniforms.uVenusSunDir} power={3.5} intensity={1.8} />
+          </>
+        )
+      }
       if (o.id === 'earth') {
         return (
           <>
-            <mesh rotation={[0, 0, 0.41]} name="spin">
+            <mesh rotation={[0, 0, 0.409]} name="spin">
               <SphereGeo />
               <meshStandardMaterial
                 map={A.getEarthTexture()}
+                normalMap={A.getEarthNormalTexture()}
+                normalScale={new THREE.Vector2(0.85, 0.85)}
                 roughnessMap={A.getEarthSpecularTexture()}
-                roughness={0.65}
-                metalness={0.05}
+                roughness={0.7}
+                metalness={0.02}
               />
             </mesh>
-            {/* Dynamic rotating cloud layer */}
-            <mesh rotation={[0, 0, 0.41]} scale={1.018} name="earth-clouds">
-              <SphereGeo />
-              <meshStandardMaterial
-                map={A.getEarthCloudsTexture()}
-                transparent
-                opacity={0.9}
-                depthWrite={false}
-                roughness={0.9}
-              />
-            </mesh>
-            {/* Atmospheric Rayleigh limb glow */}
-            <mesh scale={1.045}>
+            {/* Night-side city lights */}
+            <mesh rotation={[0, 0, 0.409]} scale={1.001} name="spin">
               <SphereGeo />
               <shaderMaterial
                 transparent
                 depthWrite={false}
                 blending={THREE.AdditiveBlending}
-                side={THREE.BackSide}
-                vertexShader={
-                  '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}'
-                }
-                fragmentShader={
-                  '#include <common>\n#include <logdepthbuf_pars_fragment>\nvarying vec3 vN; void main(){\n#include <logdepthbuf_fragment>\n float i = pow(max(0.0, 0.74 - dot(vN, vec3(0,0,1.0))), 3.2); gl_FragColor = vec4(0.28,0.62,1.0,1.0)*i*2.2; }'
-                }
+                uniforms={{
+                  uNightMap: { value: A.getEarthNightTexture() },
+                  uSunDir: planetaryUniforms.uEarthSunDir,
+                }}
+                vertexShader={`
+                  #include <common>
+                  #include <logdepthbuf_pars_vertex>
+                  varying vec2 vUv;
+                  varying vec3 vWorldNormal;
+                  void main() {
+                    vUv = uv;
+                    vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    #include <logdepthbuf_vertex>
+                  }
+                `}
+                fragmentShader={`
+                  #include <common>
+                  #include <logdepthbuf_pars_fragment>
+                  uniform sampler2D uNightMap;
+                  uniform vec3 uSunDir;
+                  varying vec2 vUv;
+                  varying vec3 vWorldNormal;
+                  void main() {
+                    #include <logdepthbuf_fragment>
+                    vec3 N = normalize(vWorldNormal);
+                    vec3 L = normalize(uSunDir);
+                    float nDotL = dot(N, L);
+                    float night = smoothstep(0.12, -0.15, nDotL);
+                    if (night <= 0.001) discard;
+                    vec4 lights = texture2D(uNightMap, vUv);
+                    gl_FragColor = vec4(lights.rgb * night * 1.8, night);
+                  }
+                `}
               />
             </mesh>
+            {/* Dynamic rotating cloud layer */}
+            <mesh rotation={[0, 0, 0.409]} scale={1.015} name="earth-clouds">
+              <SphereGeo />
+              <meshStandardMaterial
+                map={A.getEarthCloudsTexture()}
+                transparent
+                opacity={0.92}
+                depthWrite={false}
+                roughness={0.9}
+              />
+            </mesh>
+            {/* Atmospheric Rayleigh limb glow */}
+            <AtmosphereMesh scale={1.035} color="#3d94ff" sunDir={planetaryUniforms.uEarthSunDir} power={3.2} intensity={2.2} />
           </>
         )
       }
       if (o.id === 'moon') {
         return (
-          <mesh rotation={[0, 0, 0.1]} name="spin">
+          <mesh rotation={[0, 0, 0.11]} name="spin">
             <SphereGeo />
             <meshStandardMaterial
               map={A.getMoonTexture()}
-              roughness={0.92}
+              roughness={0.94}
               metalness={0}
             />
           </mesh>
@@ -351,21 +491,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
                 metalness={0.02}
               />
             </mesh>
-            <mesh scale={1.025}>
-              <SphereGeo />
-              <shaderMaterial
-                transparent
-                depthWrite={false}
-                blending={THREE.AdditiveBlending}
-                side={THREE.BackSide}
-                vertexShader={
-                  '#include <common>\n#include <logdepthbuf_pars_vertex>\nvarying vec3 vN; void main(){ vN = normalize(normalMatrix*normal); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0);\n#include <logdepthbuf_vertex>\n}'
-                }
-                fragmentShader={
-                  '#include <common>\n#include <logdepthbuf_pars_fragment>\nvarying vec3 vN; void main(){\n#include <logdepthbuf_fragment>\n float i = pow(max(0.0, 0.76 - dot(vN, vec3(0,0,1.0))), 3.8); gl_FragColor = vec4(0.9,0.55,0.38,1.0)*i*1.2; }'
-                }
-              />
-            </mesh>
+            <AtmosphereMesh scale={1.02} color="#d98555" sunDir={planetaryUniforms.uMarsSunDir} power={3.8} intensity={1.2} />
           </>
         )
       }
@@ -375,7 +501,7 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
             <SphereGeo />
             <meshStandardMaterial
               map={A.getJupiterTexture()}
-              roughness={0.8}
+              roughness={0.78}
               metalness={0}
             />
           </mesh>
@@ -384,23 +510,159 @@ function ObjectVisual({ o }: { o: CosmicObject }) {
       if (o.id === 'saturn') {
         return (
           <>
-            <mesh rotation={[Math.PI / 2 - 0.45, 0, 0.1]} name="spin">
+            <mesh rotation={[0.466, 0, 0.1]} name="spin">
+              <SphereGeo />
+              <shaderMaterial
+                uniforms={{
+                  uSaturnTexture: { value: A.getSaturnTexture() },
+                  uRingAlpha: { value: A.getSaturnRingsTexture() },
+                  uSunDir: planetaryUniforms.uSaturnSunDir,
+                  uSunDirLocal: planetaryUniforms.uSaturnSunDirLocal,
+                }}
+                vertexShader={`
+                  #include <common>
+                  #include <logdepthbuf_pars_vertex>
+                  varying vec3 vLocalPos;
+                  varying vec3 vWorldNormal;
+                  varying vec2 vUv;
+                  void main() {
+                    vLocalPos = position;
+                    vUv = uv;
+                    vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    #include <logdepthbuf_vertex>
+                  }
+                `}
+                fragmentShader={`
+                  #include <common>
+                  #include <logdepthbuf_pars_fragment>
+                  uniform sampler2D uSaturnTexture;
+                  uniform sampler2D uRingAlpha;
+                  uniform vec3 uSunDir;
+                  uniform vec3 uSunDirLocal;
+                  varying vec3 vLocalPos;
+                  varying vec3 vWorldNormal;
+                  varying vec2 vUv;
+                  void main() {
+                    #include <logdepthbuf_fragment>
+                    vec4 albedo = texture2D(uSaturnTexture, vUv);
+                    vec3 N = normalize(vWorldNormal);
+                    vec3 L = normalize(uSunDir);
+                    float nDotL = dot(N, L);
+                    float diffuse = smoothstep(-0.05, 0.25, nDotL);
+                    
+                    vec3 Lloc = normalize(uSunDirLocal);
+                    float ringShadow = 0.0;
+                    if (abs(Lloc.y) > 0.001) {
+                      float t = -vLocalPos.y / Lloc.y;
+                      if (t > 0.0) {
+                        vec3 I = vLocalPos + t * Lloc;
+                        float rRing = length(vec2(I.x, I.z));
+                        if (rRing >= 1.24 && rRing <= 2.35) {
+                          float u = (rRing - 1.24) / (2.35 - 1.24);
+                          vec4 ringSample = texture2D(uRingAlpha, vec2(u, 0.5));
+                          ringShadow = ringSample.a * 0.92;
+                        }
+                      }
+                    }
+                    
+                    float light = mix(diffuse, 0.04, ringShadow);
+                    float ambient = 0.035;
+                    vec3 finalColor = albedo.rgb * (ambient + light * 1.35);
+                    gl_FragColor = vec4(finalColor, 1.0);
+                  }
+                `}
+              />
+            </mesh>
+            <mesh rotation={[0.466, 0, 0.1]} geometry={getSaturnRingGeometry()}>
+              <shaderMaterial
+                transparent
+                depthWrite={false}
+                side={THREE.DoubleSide}
+                uniforms={{
+                  uRingTexture: { value: A.getSaturnRingsTexture() },
+                  uSunDir: planetaryUniforms.uSaturnSunDir,
+                  uSunDirLocal: planetaryUniforms.uSaturnSunDirLocal,
+                }}
+                vertexShader={`
+                  #include <common>
+                  #include <logdepthbuf_pars_vertex>
+                  varying vec3 vLocalPos;
+                  varying vec3 vWorldNormal;
+                  varying vec2 vUv;
+                  void main() {
+                    vLocalPos = position;
+                    vUv = uv;
+                    vWorldNormal = normalize((modelMatrix * vec4(normal, 0.0)).xyz);
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+                    #include <logdepthbuf_vertex>
+                  }
+                `}
+                fragmentShader={`
+                  #include <common>
+                  #include <logdepthbuf_pars_fragment>
+                  uniform sampler2D uRingTexture;
+                  uniform vec3 uSunDir;
+                  uniform vec3 uSunDirLocal;
+                  varying vec3 vLocalPos;
+                  varying vec3 vWorldNormal;
+                  varying vec2 vUv;
+                  void main() {
+                    #include <logdepthbuf_fragment>
+                    vec4 ring = texture2D(uRingTexture, vUv);
+                    if (ring.a < 0.01) discard;
+                    
+                    float nDotL = abs(dot(vWorldNormal, normalize(uSunDir)));
+                    float diffuse = max(0.18, nDotL);
+                    
+                    vec3 L = normalize(uSunDirLocal);
+                    float eps = 0.9;
+                    float A = L.x * L.x + (L.y / eps) * (L.y / eps) + L.z * L.z;
+                    float B = 2.0 * (vLocalPos.x * L.x + vLocalPos.z * L.z);
+                    float C = vLocalPos.x * vLocalPos.x + vLocalPos.z * vLocalPos.z - 1.0;
+                    float Delta = B * B - 4.0 * A * C;
+                    
+                    float inShadow = 0.0;
+                    if (B < 0.0 && Delta > 0.0) {
+                      inShadow = smoothstep(-0.02, 0.08, Delta);
+                    }
+                    
+                    float finalLight = mix(diffuse * 1.45, 0.025, inShadow);
+                    gl_FragColor = vec4(ring.rgb * finalLight, ring.a);
+                  }
+                `}
+              />
+            </mesh>
+          </>
+        )
+      }
+      if (o.id === 'uranus') {
+        return (
+          <>
+            <mesh rotation={[1.706, 0, 0]} name="spin">
               <SphereGeo />
               <meshStandardMaterial
-                map={A.getSaturnTexture()}
-                roughness={0.8}
+                map={A.getUranusTexture()}
+                roughness={0.82}
                 metalness={0}
               />
             </mesh>
-            <mesh rotation={[Math.PI / 2 - 0.45, 0, 0.1]} geometry={getSaturnRingGeometry()}>
+            <AtmosphereMesh scale={1.025} color="#6bd3e8" sunDir={planetaryUniforms.uUranusSunDir} power={3.4} intensity={1.5} />
+          </>
+        )
+      }
+      if (o.id === 'neptune') {
+        return (
+          <>
+            <mesh rotation={[0.494, 0, 0]} name="spin">
+              <SphereGeo />
               <meshStandardMaterial
-                map={A.getSaturnRingsTexture()}
-                transparent
-                side={THREE.DoubleSide}
-                depthWrite={false}
-                roughness={0.7}
+                map={A.getNeptuneTexture()}
+                roughness={0.82}
+                metalness={0}
               />
             </mesh>
+            <AtmosphereMesh scale={1.025} color="#3f78ff" sunDir={planetaryUniforms.uNeptuneSunDir} power={3.4} intensity={1.8} />
           </>
         )
       }
@@ -646,19 +908,45 @@ function Objects() {
       }
       const rg = ring.current[o.id]
       if (rg) {
-        rg.visible = st.selectedId === o.id
-        rg.scale.setScalar(EXTENDED.has(o.category) && rReal > rMin ? 1.15 : 2.2)
+        const isClose = dLy < rTrue * 8
+        rg.visible = st.selectedId === o.id && !isClose
+        rg.scale.setScalar(EXTENDED.has(o.category) && rReal > rMin ? 1.15 : 2.85)
         ;(rg.material as THREE.SpriteMaterial).opacity = 0.75
       }
       if (o.id === 'sun' && sunLight.current) sunLight.current.position.copy(g.position)
-      labelState.items.push({ id: o.id, pos: g.position.clone(), dLy, rTrue, o })
+      labelState.items.push({ id: o.id, pos: g.position.clone(), dLy, rTrue, rVisual: Math.max(r, 1e-9), o })
+    }
+
+    // Update solar directions for planetary materials and shaders
+    const sunPosScene = refs.current['sun'] ? refs.current['sun']!.position : new THREE.Vector3(0, 0, 0)
+    if (refs.current['earth']) {
+      planetaryUniforms.uEarthSunDir.value.subVectors(sunPosScene, refs.current['earth']!.position).normalize()
+    }
+    if (refs.current['saturn']) {
+      const satSun = new THREE.Vector3().subVectors(sunPosScene, refs.current['saturn']!.position).normalize()
+      planetaryUniforms.uSaturnSunDir.value.copy(satSun)
+      const satQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.466, 0, 0.1))
+      satSun.applyQuaternion(satQuat.clone().invert()).normalize()
+      planetaryUniforms.uSaturnSunDirLocal.value.copy(satSun)
+    }
+    if (refs.current['mars']) {
+      planetaryUniforms.uMarsSunDir.value.subVectors(sunPosScene, refs.current['mars']!.position).normalize()
+    }
+    if (refs.current['venus']) {
+      planetaryUniforms.uVenusSunDir.value.subVectors(sunPosScene, refs.current['venus']!.position).normalize()
+    }
+    if (refs.current['uranus']) {
+      planetaryUniforms.uUranusSunDir.value.subVectors(sunPosScene, refs.current['uranus']!.position).normalize()
+    }
+    if (refs.current['neptune']) {
+      planetaryUniforms.uNeptuneSunDir.value.subVectors(sunPosScene, refs.current['neptune']!.position).normalize()
     }
   })
 
   return (
     <>
-      <pointLight ref={sunLight} intensity={4} distance={0} decay={0} color="#fff3dc" />
-      <ambientLight intensity={0.12} />
+      <pointLight ref={sunLight} intensity={4.5} distance={0} decay={0} color="#fff6ea" />
+      <ambientLight intensity={0.035} />
       {list.map((o) => (
         <group key={o.id} ref={(el) => { refs.current[o.id] = el }}>
           <mesh
@@ -820,7 +1108,7 @@ function OrbitLines() {
       const isMinor = !PLANET_IDS.includes(id)
       return new THREE.Line(
         g,
-        new THREE.LineBasicMaterial({ color, transparent: true, opacity: isMinor ? 0.22 : 0.45 })
+        new THREE.LineBasicMaterial({ color, transparent: true, opacity: isMinor ? 0.22 : 0.45, depthTest: true, depthWrite: false })
       )
     }).filter(Boolean) as THREE.Line[]
   }, [])
@@ -844,7 +1132,7 @@ function OrbitLines() {
         lines.push(
           new THREE.Line(
             g,
-            new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.6 })
+            new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0.6, depthTest: true, depthWrite: false })
           )
         )
       })
@@ -857,7 +1145,7 @@ function OrbitLines() {
         lines.push(
           new THREE.Line(
             g,
-            new THREE.LineBasicMaterial({ color: '#d8b090', transparent: true, opacity: 0.6 })
+            new THREE.LineBasicMaterial({ color: '#d8b090', transparent: true, opacity: 0.6, depthTest: true, depthWrite: false })
           )
         )
       }
@@ -891,6 +1179,26 @@ function OrbitLines() {
       const t3 = toThree(relSun)
       hg.position.set(t3[0] / S, t3[1] / S, t3[2] / S)
       hg.scale.setScalar(1 / S)
+
+      // Contextually fade orbit line if camera is closely inspecting that planet
+      const activeId = st.selectedId || nav.followId
+      HELIO_BODIES.forEach(({ id }, idx) => {
+        const line = helioLines[idx]
+        if (!line) return
+        const isMinor = !PLANET_IDS.includes(id)
+        let baseOp = isMinor ? 0.22 : 0.45
+        if (activeId === id) {
+          baseOp = 0.0
+        } else if (!isMinor) {
+          const pPos = planetRootPos(id, ms)
+          const distToPlanet = len(sub(pPos, nav.pos))
+          const pRadLy = (PLANET_RADIUS_KM[id] || 6000) * KM_TO_LY
+          if (distToPlanet < pRadLy * 150) {
+            baseOp = 0.0
+          }
+        }
+        ;(line.material as THREE.LineBasicMaterial).opacity = baseOp
+      })
     }
 
     // Update satellite system orbits
@@ -1094,7 +1402,11 @@ const rigInit = { done: false }
 
 /** Drives navigation + time + camera each frame across Explore and Travel modes. */
 function Rig() {
-  const { camera } = useThree()
+  const { camera, scene } = useThree()
+  if (typeof window !== 'undefined') {
+    ;(window as any).__scene = scene
+    ;(window as any).__camera = camera
+  }
   const inputRef = Controls.input
 
   useFrame((_, dtRaw) => {
@@ -1259,7 +1571,13 @@ export function CosmicCanvas() {
   return (
     <Canvas
       key={quality}
-      gl={{ antialias: quality !== 'performance', logarithmicDepthBuffer: true, powerPreference: 'high-performance' }}
+      gl={{
+        antialias: quality !== 'performance',
+        logarithmicDepthBuffer: true,
+        powerPreference: 'high-performance',
+        toneMapping: THREE.ACESFilmicToneMapping,
+        toneMappingExposure: 1.1,
+      }}
       dpr={quality === 'performance' ? 1 : quality === 'balanced' ? [1, 1.5] : [1, 2]}
       camera={{ fov: 55, near: 0.001, far: 1e13, position: [0, 0, 0] }}
       onPointerMissed={() => {}}

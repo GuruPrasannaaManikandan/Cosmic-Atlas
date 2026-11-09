@@ -35,7 +35,7 @@ interface State {
   objectsVersion: number
   setPhase(p: Phase): void
   select(id: string | null): void
-  travel(id: string): void
+  travel(id: string, instant?: boolean, viewDistanceLy?: number): void
   goHome(): void
   setSim(ms: number): void
   setPlaying(p: boolean): void
@@ -122,12 +122,12 @@ export const useStore = create<State>((set, get) => {
     objectsVersion: 0,
     setPhase: (p) => set({ phase: p }),
     select: (id) => set({ selectedId: id, rightOpen: id ? true : get().rightOpen }),
-    travel: (id) => {
+    travel: (id, instant = false, viewDistanceLy?: number) => {
       clearDwell()
       const s = get()
       if (s.phase === 'tour') set({ tourStatus: 'interrupted' })
       set({ selectedId: id, breadcrumbs: [...s.breadcrumbs, id].slice(-8) })
-      initiateTravel(id, get().simMs, {})
+      initiateTravel(id, get().simMs, { instant, viewDistanceLy })
     },
     goHome: () => {
       clearDwell()
@@ -189,3 +189,5 @@ export function advanceSim(dtSec: number) {
   s.setSim(s.simMs + dtSec * s.daysPerSec * MS_PER_DAY)
 }
 export const hasObject = (id: string) => !!BY_ID[id]
+if (typeof window !== 'undefined') (window as any).__store = useStore
+

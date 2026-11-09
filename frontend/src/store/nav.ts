@@ -33,6 +33,8 @@ export const nav = {
   listeners: new Set<() => void>(),
 }
 
+if (typeof window !== 'undefined') (window as any).__nav = nav
+
 export function onInterrupt(fn: () => void) { nav.listeners.add(fn); return () => nav.listeners.delete(fn) }
 
 export function interrupt() {
@@ -44,7 +46,7 @@ export function interrupt() {
 export function targetObject(id: string): CosmicObject { return BY_ID[id] }
 
 function lookAtQuat(from: THREE.Vector3, to: THREE.Vector3): THREE.Quaternion {
-  const m = new THREE.Matrix4().lookAt(from, to, new THREE.Vector3(0, 1, 0))
+  const m = new THREE.Matrix4().lookAt(to, from, new THREE.Vector3(0, 1, 0))
   return new THREE.Quaternion().setFromRotationMatrix(m)
 }
 
