@@ -39,7 +39,7 @@ Each exhibit's caption (shown in the prototype and in `captures/capture_report.j
 | **Stars** | Blackbody chromaticity from Planck × CIE 1931 CMFs (Wyman et al. 2013 fit) → linear sRGB. Linear limb-darkening law. Stefan–Boltzmann, IAU 2015 solar Teff/M_bol. **Apparent brightness ≠ luminosity** (distance modulus). Point PSF (Moffat) when unresolved, disk when resolved (≥ 3 px). Parsing of MK types. | Granulation / spots (cell scale per class); class-typical radii and Teff interpolation; R^0.35 radius compression in the lineup | Editor verified, tested |
 | **Planets / moons** | Real maps (USGS / NASA 3D Resources / Solar System Scope CC BY 4.0). Lommel–Seeliger photometry for regolith. **Analytic eclipses/shadows** (solar-disk overlap → umbra + penumbra). **Galilean-moon positions, Jupiter's IAU pole and the Sun's true angular size from the shared Kepler engine.** A real Io shadow transit near 2026-11-08 is found and rendered. | Relief from the albedo gradient (maps are not DEMs) | Editor verified, tested |
 | **Atmospheres** | Single-scattering Rayleigh + Mie ray-march (Earth: standard sea-level coefficients and scale heights), planet shadowing, eclipse-aware | Titan haze coefficients; no multiple scattering | Editor verified |
-| **Black hole** | **Per-pixel null-geodesic integration in the Schwarzschild metric.** The shadow edge reproduces the analytic critical impact parameter 2.5979 r_s vs (3√3/2) r_s = 2.5981 (test). Photon ring and lensed far-side disk emerge. Thin disk with ISCO inner edge, Shakura–Sunyaev T(r), gravitational redshift × Doppler beaming (g⁴). Lensed starfield. | Jets (Doppler-boosted cone, **educational**); disk colour mapping temperature; **no spin (Kerr)** | Editor verified, tested |
+| **Black hole** | **Per-pixel null-geodesic integration in the Schwarzschild metric.** *Erratum (2026-11-09, see `COSMIC_ATLAS_UNITY_M2_VALIDATION_REPORT.md`): the integrator committed in this milestone renormalised the ray velocity every step while the shadow-edge test did not, so the test did not describe the shader and the rendered shadow was about 55 % too large. It was replaced by an RK4 orbit-equation integrator validated against the exact Schwarzschild deflection integral across trajectories (≤ 0.3 % at every tier).* Photon ring and lensed far-side disk emerge. Thin disk with ISCO inner edge, Shakura–Sunyaev T(r), gravitational redshift × Doppler beaming (g⁴). Lensed starfield. | Jets (Doppler-boosted cone, **educational**); disk colour mapping temperature; **no spin (Kerr)** | Editor verified, tested |
 | **Nebula** | Volumetric ray-march: emission ∝ density² (emission measure), Hα 656 nm / [O III] 501 nm / [S II] 672 nm line colours by ionisation, dust extinction with reddening, wind cavities, columns pointing at ionising stars | The 3-D density field is procedural (no measured 3-D map exists) | Editor verified |
 | **Galaxies** | Exponential disk, log-spiral arms (pitch), Hernquist bulge (exact inverse CDF; median tested), bar, Plummer dwarf. Blue young arms vs old red bulge. Dust on the **concave** side of the arms (tested). **Interacting pair from a restricted three-body simulation (Toomre & Toomre 1972)**: tails and bridge from gravity alone (tested). | Parameters are class-typical, not a specific galaxy | Editor verified, tested |
 | **Pulsar** | Inclined dipole: field lines r = L sin²θ. Beams along the magnetic axis. Pulse when a beam sweeps the observer. **The geometric selection effect is tested**: an observer 85° from the spin axis sees no pulse when α = 50°. | Beams drawn as luminous cones (**educational**); rotation slowed ×300 (Crab P ≈ 33.7 ms) | Editor verified, tested |
@@ -70,6 +70,8 @@ Each exhibit's caption (shown in the prototype and in `captures/capture_report.j
 
 ## 4. Performance (measured, this machine)
 
+> **Superseded figures:** the black-hole and nebula costs below are the Milestone-2 baseline. After the optimisation and validation pass they are 6.6 ms and 12.9 ms at Medium. See `COSMIC_ATLAS_UNITY_M2_VALIDATION_REPORT.md`, section 5.
+
 Editor batch mode, 1600×900, first viewpoint of each station. Each figure is the mean of 12 `camera.Render()` calls, synchronised by a 1-pixel GPU readback. It includes CPU submission. **It is not a player-build FPS measurement.** Source: `timing_report_medium_capture.json`.
 
 | Station | Low | Medium | High | Ultra |
@@ -93,7 +95,7 @@ Reading:
 
 ## 5. Limitations and honest gaps
 
-1. **WebGL / web build: not built or tested.** All shaders avoid geometry and compute shaders (billboards are expanded in the vertex shader), but WebGL2 compatibility is **unverified**. HDR render targets on WebGL2 are also unverified.
+1. **WebGL / web build:** *superseded*. A production WebGL build was made and tested in Chromium afterwards; see `COSMIC_ATLAS_UNITY_M2_VALIDATION_REPORT.md`.
 2. **Not implemented:** solar flares/prominences; Saturn and its rings in Unity; Kerr (spinning) black holes; multiple scattering in atmospheres; comet tail curvature is real but not obvious from the captured viewpoint.
 3. **Colour:** [O III] / Hα separation in the nebula is weak (they overlap spatially). The accretion disk reads near-grey after ACES. The O/B star blues look over-saturated.
 4. **Integration with React / FastAPI:** not started (Milestone 4). The prototype runs standalone.

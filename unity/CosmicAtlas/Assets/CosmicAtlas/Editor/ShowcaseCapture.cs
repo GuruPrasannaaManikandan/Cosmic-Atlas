@@ -130,31 +130,49 @@ namespace CosmicAtlas.Rendering.Editor
 
             if (timing)
             {
-                report.Append(",\n \"timingMsPerFrame\": {");
+                // Robust timing: Rounds × RendersPerRound renders per station and tier; the median round is reported
+                // (min round alongside) so a single clock-boost or background hiccup cannot dominate. One screenshot per
+                // station per tier is written to <outDir>/tiers for visual comparison of the quality levels.
+                const int Rounds = 7, RendersPerRound = 10;
+                var inv = System.Globalization.CultureInfo.InvariantCulture;
+                var tierDir = Path.Combine(outDir, "tiers");
+                Directory.CreateDirectory(tierDir);
+                var median = new StringBuilder();
+                var best = new StringBuilder();
                 bool firstQ = true;
                 foreach (AtlasQualityLevel q in Enum.GetValues(typeof(AtlasQualityLevel)))
                 {
                     AtlasQuality.Set(q);
                     var r2 = new GameObject("Showcase_" + q).transform;
                     var st2 = ShowcaseFactory.Build(r2, AtlasQuality.Settings, ShowcaseController.LoadTexture, catalog, date);
-                    report.Append(firstQ ? "\n" : ",\n").Append("  ").Append(Json(q.ToString())).Append(": {");
+                    median.Append(firstQ ? "\n" : ",\n").Append("  ").Append(Json(q.ToString())).Append(": {");
+                    best.Append(firstQ ? "\n" : ",\n").Append("  ").Append(Json(q.ToString())).Append(": {");
                     bool firstS = true;
                     foreach (var st in st2)
                     {
                         var shot = st.shots[0];
                         Frame(cam, st, st2, shot); // warm-up (shader compile, uploads)
-                        var ms = TimeRenders(cam, rt, 12);
-                        report.Append(firstS ? "" : ", ").Append(Json(st.name)).Append(": ").Append(ms.ToString("F2", System.Globalization.CultureInfo.InvariantCulture));
+                        SaveRT(rt, Path.Combine(tierDir, $"{q}_{shot.name}.png"));
+                        TimeRenders(cam, rt, 4);   // second warm-up after the readback
+                        var rounds = new List<double>();
+                        for (int k = 0; k < Rounds; k++) rounds.Add(TimeRenders(cam, rt, RendersPerRound));
+                        rounds.Sort();
+                        double med = rounds[Rounds / 2], min = rounds[0];
+                        median.Append(firstS ? "" : ", ").Append(Json(st.name)).Append(": ").Append(med.ToString("F2", inv));
+                        best.Append(firstS ? "" : ", ").Append(Json(st.name)).Append(": ").Append(min.ToString("F2", inv));
                         firstS = false;
-                        Debug.Log($"[Timing] {q} {st.name}: {ms:F2} ms/frame");
+                        Debug.Log($"[Timing] {q} {st.name}: median {med:F2} ms/frame (min {min:F2}, max {rounds[Rounds - 1]:F2})");
                     }
-                    report.Append("}");
+                    median.Append("}");
+                    best.Append("}");
                     firstQ = false;
                     UnityEngine.Object.DestroyImmediate(r2.gameObject);
                 }
-                report.Append("\n },\n \"timingNote\": \"Editor batch mode, ")
+                report.Append(",\n \"timingMsPerFrame\": {").Append(median).Append("\n }");
+                report.Append(",\n \"timingMinMsPerFrame\": {").Append(best).Append("\n }");
+                report.Append(",\n \"timingNote\": \"Editor batch mode, ")
                       .Append(Width).Append("x").Append(Height)
-                      .Append(", mean of 12 camera.Render() calls synchronised by a 1-pixel GPU readback; includes CPU submission; not a player-build FPS measurement.\"");
+                      .Append($", median (and minimum) of {Rounds} rounds of {RendersPerRound} camera.Render() calls, each round synchronised by a 1-pixel GPU readback; includes CPU submission; not a player-build FPS measurement.\"");
             }
             report.Append("\n}\n");
             File.WriteAllText(Path.Combine(outDir, "capture_report.json"), report.ToString());
@@ -179,6 +197,17 @@ namespace CosmicAtlas.Rendering.Editor
             foreach (var p in st.root.GetComponentsInChildren<PlanetBody>(true)) p.SendMessage("LateUpdate", SendMessageOptions.DontRequireReceiver);
             if (st.sun) st.sun.Publish();
             cam.Render();
+        }
+
+        static void SaveRT(RenderTexture rt, string path)
+        {
+            var tex = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false, false);
+            RenderTexture.active = rt;
+            tex.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            tex.Apply();
+            RenderTexture.active = null;
+            File.WriteAllBytes(path, tex.EncodeToPNG());
+            UnityEngine.Object.DestroyImmediate(tex);
         }
 
         static double TimeRenders(Camera cam, RenderTexture rt, int n)

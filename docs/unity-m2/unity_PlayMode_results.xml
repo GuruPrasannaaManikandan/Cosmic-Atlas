@@ -1,32 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-08 17:34:29Z" end-time="2026-11-08 17:34:36Z" duration="6.5578233">
-  <test-suite type="TestSuite" id="1011" name="CosmicAtlas" fullname="CosmicAtlas" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-08 17:34:29Z" end-time="2026-11-08 17:34:36Z" duration="6.557823" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+<test-run id="2" testcasecount="2" result="Passed" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0" engine-version="3.5.0.0" clr-version="4.0.30319.42000" start-time="2026-11-09 01:21:41Z" end-time="2026-11-09 01:21:49Z" duration="7.3320982">
+  <test-suite type="TestSuite" id="1011" name="CosmicAtlas" fullname="CosmicAtlas" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-09 01:21:41Z" end-time="2026-11-09 01:21:49Z" duration="7.332098" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
     <properties>
       <property name="platform" value="PlayMode" />
     </properties>
-    <test-suite type="Assembly" id="1004" name="CosmicAtlas.Rendering.Tests.PlayMode.dll" fullname="A:/CA/unity/CosmicAtlas/Library/ScriptAssemblies/CosmicAtlas.Rendering.Tests.PlayMode.dll" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-08 17:34:29Z" end-time="2026-11-08 17:34:36Z" duration="6.550058" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+    <test-suite type="Assembly" id="1004" name="CosmicAtlas.Rendering.Tests.PlayMode.dll" fullname="A:/CA/unity/CosmicAtlas/Library/ScriptAssemblies/CosmicAtlas.Rendering.Tests.PlayMode.dll" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-09 01:21:41Z" end-time="2026-11-09 01:21:49Z" duration="7.325508" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
       <properties>
-        <property name="_PID" value="31056" />
+        <property name="_PID" value="25168" />
         <property name="_APPDOMAIN" value="Unity Child Domain" />
         <property name="platform" value="PlayMode" />
         <property name="EditorOnly" value="False" />
       </properties>
-      <test-suite type="TestSuite" id="1005" name="CosmicAtlas" fullname="CosmicAtlas" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-08 17:34:29Z" end-time="2026-11-08 17:34:36Z" duration="6.549586" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+      <test-suite type="TestSuite" id="1005" name="CosmicAtlas" fullname="CosmicAtlas" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-09 01:21:41Z" end-time="2026-11-09 01:21:49Z" duration="7.325122" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
         <properties />
-        <test-suite type="TestSuite" id="1006" name="Rendering" fullname="CosmicAtlas.Rendering" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-08 17:34:29Z" end-time="2026-11-08 17:34:36Z" duration="6.549333" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+        <test-suite type="TestSuite" id="1006" name="Rendering" fullname="CosmicAtlas.Rendering" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-09 01:21:41Z" end-time="2026-11-09 01:21:49Z" duration="7.324928" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
           <properties />
-          <test-suite type="TestSuite" id="1007" name="Tests" fullname="CosmicAtlas.Rendering.Tests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-08 17:34:29Z" end-time="2026-11-08 17:34:36Z" duration="6.549064" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+          <test-suite type="TestSuite" id="1007" name="Tests" fullname="CosmicAtlas.Rendering.Tests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-09 01:21:41Z" end-time="2026-11-09 01:21:49Z" duration="7.324735" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
             <properties />
-            <test-suite type="TestFixture" id="1001" name="ShowcasePlayModeTests" fullname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests" classname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-08 17:34:29Z" end-time="2026-11-08 17:34:36Z" duration="6.548023" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
+            <test-suite type="TestFixture" id="1001" name="ShowcasePlayModeTests" fullname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests" classname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests" runstate="Runnable" testcasecount="2" result="Passed" start-time="2026-11-09 01:21:41Z" end-time="2026-11-09 01:21:49Z" duration="7.323804" total="2" passed="2" failed="0" inconclusive="0" skipped="0" asserts="0">
               <properties />
-              <test-case id="1002" name="Every_station_and_viewpoint_runs_at_every_quality_without_errors" fullname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests.Every_station_and_viewpoint_runs_at_every_quality_without_errors" methodname="Every_station_and_viewpoint_runs_at_every_quality_without_errors" classname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests" runstate="Runnable" seed="2130837457" result="Passed" start-time="2026-11-08 17:34:29Z" end-time="2026-11-08 17:34:36Z" duration="6.528069" asserts="0">
+              <test-case id="1002" name="Every_station_and_viewpoint_runs_at_every_quality_without_errors" fullname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests.Every_station_and_viewpoint_runs_at_every_quality_without_errors" methodname="Every_station_and_viewpoint_runs_at_every_quality_without_errors" classname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests" runstate="Runnable" seed="1803842663" result="Passed" start-time="2026-11-09 01:21:41Z" end-time="2026-11-09 01:21:48Z" duration="7.302596" asserts="0">
                 <properties>
                   <property name="_JOINTYPE" value="UnityCombinatorial" />
                   <property name="retryIteration" value="0" />
                   <property name="repeatIteration" value="0" />
                 </properties>
               </test-case>
-              <test-case id="1003" name="Pulsar_rotates_and_pulses_in_play_mode" fullname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests.Pulsar_rotates_and_pulses_in_play_mode" methodname="Pulsar_rotates_and_pulses_in_play_mode" classname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests" runstate="Runnable" seed="369730810" result="Passed" start-time="2026-11-08 17:34:36Z" end-time="2026-11-08 17:34:36Z" duration="0.008156" asserts="0">
+              <test-case id="1003" name="Pulsar_rotates_and_pulses_in_play_mode" fullname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests.Pulsar_rotates_and_pulses_in_play_mode" methodname="Pulsar_rotates_and_pulses_in_play_mode" classname="CosmicAtlas.Rendering.Tests.ShowcasePlayModeTests" runstate="Runnable" seed="1320800753" result="Passed" start-time="2026-11-09 01:21:48Z" end-time="2026-11-09 01:21:49Z" duration="0.010149" asserts="0">
                 <properties>
                   <property name="_JOINTYPE" value="UnityCombinatorial" />
                   <property name="retryIteration" value="0" />
