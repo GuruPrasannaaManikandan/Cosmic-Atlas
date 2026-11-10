@@ -10,6 +10,7 @@ export interface SurfaceUI {
   paused: boolean
   mapOpen: boolean
   helpOpen: boolean
+  driving?: boolean
   camMode: CamMode
   discovered: string[]
   /** the object whose "DISCOVERED" banner is showing */
@@ -35,6 +36,7 @@ const initial = {
   paused: false,
   mapOpen: false,
   helpOpen: false,
+  driving: false,
   camMode: 'third' as CamMode,
   discovered: [] as string[],
   banner: null,

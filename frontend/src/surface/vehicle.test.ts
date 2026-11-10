@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest'
 import { LRV, newVehicle, stepVehicle, wheelPoints } from './vehicle'
+import type { Ground } from './controller'
 
-const flat = { heightAt: () => 0 }
+const flat: Ground = { heightAt: () => 0 }
 const MOON_G = 1.62
 
-function drive(throttle: number, steer: number, seconds: number, v = newVehicle(0, 0, 0, flat), ground = flat) {
+function drive(throttle: number, steer: number, seconds: number, v = newVehicle(0, 0, 0, flat), ground: Ground = flat) {
   for (let t = 0; t < seconds; t += 1 / 60) v = stepVehicle(v, { throttle, steer }, ground, MOON_G, 1 / 60)
   return v
 }
