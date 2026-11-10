@@ -30,7 +30,7 @@ namespace CosmicAtlas.Rendering.Editor
             {
                 var args = Environment.GetCommandLineArgs();
                 int i = Array.IndexOf(args, "-outDir");
-                string outDir = i >= 0 && i + 1 < args.Length ? args[i + 1] : Path.GetFullPath("Builds/MarsPrototype");
+                string outDir = i >= 0 && i + 1 < args.Length ? args[i + 1] : Path.GetFullPath("Builds/MarsExplorer");
                 CreateScene();
                 code = BuildPlayer(outDir) ? 0 : 1;
             }
@@ -83,11 +83,27 @@ namespace CosmicAtlas.Rendering.Editor
             ti.SaveAndReimport();
             var albedo = Load<Texture2D>(Data + "victoria_albedo.png");
 
+            // neutral detail map (linear 0.5 x 2 = 1): keeps URP Lit's _DETAIL_MULX2 variant in the build; at runtime the
+            // explorer replaces it with the traverse overlay painted on the terrain (replaces the floating route line)
+            var neutralPath = Gen + "DetailNeutral.asset";
+            var neutral = AssetDatabase.LoadAssetAtPath<Texture2D>(neutralPath);
+            if (!neutral)
+            {
+                neutral = new Texture2D(4, 4, TextureFormat.RGB24, false, true) { name = "DetailNeutral" };
+                var px = new Color32[16]; for (int k = 0; k < 16; k++) px[k] = new Color32(128, 128, 128, 255);
+                neutral.SetPixels32(px); neutral.Apply();
+                AssetDatabase.CreateAsset(neutral, neutralPath);
+            }
             var terrainMat = Mat("MarsTerrain", "Universal Render Pipeline/Lit", m =>
             {
                 m.SetTexture("_BaseMap", albedo);
+                m.SetTexture("_DetailAlbedoMap", neutral);
+                // URP Lit "scaled" detail: albedo x (2 d s - s + 1); s = 3 lets the traverse overlay reach ~x2.4 on dark ground
+                m.SetFloat("_DetailAlbedoMapScale", 3f);
+                m.DisableKeyword("_DETAIL_MULX2");
+                m.EnableKeyword("_DETAIL_SCALED");
                 // ILLUSTRATIVE tint: the HiRISE RED band is grayscale; calibrated colour is a Stage 3 source item
-                m.SetColor("_BaseColor", new Color(0.78f, 0.55f, 0.40f, 1));
+                m.SetColor("_BaseColor", new Color(0.95f, 0.67f, 0.49f, 1)); // Stage 3: same hue, ~1.25x brighter (still ILLUSTRATIVE)
                 m.SetFloat("_Smoothness", 0.08f);
                 m.SetFloat("_Metallic", 0f);
             });

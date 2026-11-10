@@ -17,7 +17,7 @@ namespace CosmicAtlas.Rendering.Mars
     /// reported over the bridge (window.__mars). Purpose: measure the FINAL_VISUAL_REALISM_SPEC §2.1 gates on the
     /// reference integrated GPU. Everything not sourced is labelled on screen.
     /// </summary>
-    public sealed class MarsPrototype : MonoBehaviour
+    public sealed partial class MarsPrototype : MonoBehaviour
     {
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")] static extern void MarsReport(string kind, string json);
@@ -71,6 +71,10 @@ namespace CosmicAtlas.Rendering.Mars
 
         void Awake()
         {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            // the host app's input manager owns the keyboard (see MarsBridge.jslib): never swallow page key events
+            WebGLInput.captureAllKeyboardInput = false;
+#endif
             _oPipeline = QualitySettings.renderPipeline;
             if (pipeline)
             {
@@ -111,6 +115,7 @@ namespace CosmicAtlas.Rendering.Mars
             // rover at the first drive record at or after that sol (traverse, locally registered)
             var route = MiniJson.O(MiniJson.Parse(routeJson.text));
             var s0 = MiniJson.Ints(route["startSol"]); var e = MiniJson.Floats(route["eastM"]); var n = MiniJson.Floats(route["northM"]);
+            _routeSol = s0; _routeE = e; _routeN = n;
             int k = Array.FindIndex(s0, s => s >= _sol); if (k < 0) k = s0.Length - 1;
             int k2 = Mathf.Min(k + 1, s0.Length - 1);
             _roverPos = new Vector3(e[k], 0, n[k]);
@@ -121,16 +126,10 @@ namespace CosmicAtlas.Rendering.Mars
             _rover.transform.localPosition = _roverPos;
             var fwd = new Vector3(e[k2] - e[k], 0, n[k2] - n[k]);
             if (fwd.sqrMagnitude > 1e-4f) _rover.transform.localRotation = Quaternion.LookRotation(Vector3.Cross(fwd.normalized, Vector3.up)); // model X is its long axis
+            _sceneRoverPos = _roverPos; _sceneRoverRot = _rover.transform.localRotation; _sceneRouteIndex = k;
 
-            // route line, draped 0.3 m above the terrain
-            var line = new GameObject("Traverse (locally registered)").AddComponent<LineRenderer>();
-            line.transform.SetParent(_world, false);
-            line.useWorldSpace = false;
-            line.sharedMaterial = lineMaterial;
-            line.widthMultiplier = 0.6f;
-            var pts = new List<Vector3>();
-            for (int i = 0; i < e.Length; i++) { float h = _terrain.Sample(e[i], n[i]); if (!float.IsNaN(h)) pts.Add(new Vector3(e[i], h + 0.3f, n[i])); }
-            line.positionCount = pts.Count; line.SetPositions(pts.ToArray());
+            // Traverse: painted into a terrain detail map (replaces the floating 0.6 m cyan LineRenderer: defects V1 and V3)
+            InitExplorer();
 
             ApplySun();
             ApplyProfile(DefaultProfileId());
@@ -243,6 +242,7 @@ namespace CosmicAtlas.Rendering.Mars
 
         void LateUpdate()
         {
+            if (_mode != ExplorerMode.Flythrough && _bench == null) { ExplorerLateUpdate(); return; }
             _pathT += Time.deltaTime;
             var p = PathPosition(_pathT, out var look);
             // floating origin (spec §3): rebase when the camera is > 1 km from the current origin
@@ -257,6 +257,7 @@ namespace CosmicAtlas.Rendering.Mars
         void Update()
         {
             float dt = Time.unscaledDeltaTime;
+            if (_mode != ExplorerMode.Flythrough && _bench == null) ExplorerUpdate(Mathf.Min(Time.deltaTime, 0.1f));
             _ring[_ringN++ % _ring.Length] = dt;
             if (_bench != null)
             {
@@ -292,7 +293,8 @@ namespace CosmicAtlas.Rendering.Mars
                    $"\"profiles\":[{string.Join(",", _profiles.Select(x => MiniJson.Q(x.Id)))}],\"profile\":{MiniJson.Q(_profile.Id)}," +
                    $"\"utc\":{MiniJson.Q(_utc.ToString("yyyy-MM-ddTHH:mm:ssZ", inv))},\"sol\":{_sol},\"ltst\":{MiniJson.N(new MarsTime(_utc).LtstHours(_siteLon))}," +
                    $"\"sunElevation\":{MiniJson.N(_sunEl)},\"sunAzimuth\":{MiniJson.N(_sunAz)},\"tau\":{MiniJson.N(_tau)},\"tauLabel\":{MiniJson.Q(_tauLabel)}," +
-                   $"\"terrainTriangles\":{_terrain.Triangles},\"chunks\":{_terrain.Chunks.Count},\"rover\":{MiniJson.Q(_roverNote)},\"roverCalibration\":{MiniJson.Q(_calNote)}" +
+                   $"\"terrainTriangles\":{_terrain.Triangles},\"chunks\":{_terrain.Chunks.Count},\"rover\":{MiniJson.Q(_roverNote)},\"roverCalibration\":{MiniJson.Q(_calNote)}," +
+                   ExplorerReadyJson() +
                    ",\"heightCheck\":" + HeightCheckJson() + "}";
         }
 
@@ -360,7 +362,7 @@ namespace CosmicAtlas.Rendering.Mars
         // ---------------- on-screen labels (honesty first) ----------------
         void OnGUI()
         {
-            if (_profile == null) return;
+            if (_profile == null || _embedded) return; // embedded: the host app shows these labels in its own HUD
             var inv = CultureInfo.InvariantCulture;
             string txt =
                 "PROTOTYPE (Stage 2) - Victoria crater, Meridiani Planum\n" +
