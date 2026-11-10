@@ -80,7 +80,7 @@ export const DEEP_SPACE_MISSIONS: Mission[] = [
   },
   row('mariner-2', 'Mariner 2', '1962-08-27', 'venus', ['flyby'], 'Venus flyby'),
   row('mariner-4', 'Mariner 4', '1964-11-28', 'mars', ['flyby'], 'Mars flyby'),
-  row('mariner-9', 'Mariner 9', '1971-05-30', 'mars', ['orbiter'], 'Mars orbiter'),
+  // Mariner 9: sourced record in catalog/mars.ts (Mars orbiters)
   row('mariner-10', 'Mariner 10', '1973-11-04', 'mercury', ['flyby'], 'Venus/Mercury flybys'),
   row('pioneer-10', 'Pioneer 10', '1972-03-03', 'jupiter', ['flyby'], 'Jupiter flyby'),
   row('pioneer-11', 'Pioneer 11', '1973-04-05', 'saturn', ['flyby'], 'Jupiter/Saturn flyby'),
