@@ -26,6 +26,7 @@
 | WebGPU | Not used. Unity 6.3 documents it as experimental ([manual](https://docs.unity3d.com/6000.3/Documentation/Manual/WebGPU-limitations.html)) |
 | Approval | Approved with Stage 1 on 2026-11-10, **subject to the Stage 2 gates below** |
 | Fallback | If the gates fail, use the R3F pipeline with the same quality profiles, cascaded shadows and post-processing. This is decided from the Stage 2 measurements and recorded here |
+| **Stage 2 result (2026-11-10)** | **CONFIRMED.** Every §2.1 gate passes on the reference machine (Balanced: 4 ms p50 uncapped; heap 495 / 512 MB; Brotli 31.45 MB; load 4.6–6.4 s; terrain 0.6 mm), so the fallback is not triggered. Six conditions are attached: default to Balanced on an iGPU, a heap budget, serving Brotli, measuring inside the shell, a camera path that rebases, and a cross-browser pass. See `GRAPHICS_PERFORMANCE_REPORT.md` §3 |
 
 ### 2.1 Stage 2 gates (reference machine)
 

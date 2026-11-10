@@ -1,0 +1,191 @@
+{
+ "viewport": [
+  1366,
+  768
+ ],
+ "headed": true,
+ "uncapped": false,
+ "seconds": 60,
+ "profiles": {
+  "balanced": {
+   "running": false,
+   "profile": "balanced",
+   "frames": 3601,
+   "seconds": 60.0160026550293,
+   "fpsMean": 60.00066375732422,
+   "fpsP50": 58.823524475097656,
+   "fpsP5": 58.82350540161133,
+   "msP50": 17,
+   "msP95": 17.0000057220459,
+   "msP99": 17.0000057220459,
+   "msMax": 18.00000762939453,
+   "width": 1366,
+   "height": 768,
+   "renderScale": 0.8500000238418579,
+   "terrainTriangles": 979844,
+   "drawCalls": 135,
+   "device": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "heapMB": 239,
+   "terrainTrianglesLod0": 979844
+  },
+  "performance": {
+   "running": false,
+   "profile": "performance",
+   "frames": 3601,
+   "seconds": 60.01700210571289,
+   "fpsMean": 59.999664306640625,
+   "fpsP50": 58.823524475097656,
+   "fpsP5": 58.823524475097656,
+   "msP50": 17,
+   "msP95": 17,
+   "msP99": 19,
+   "msMax": 20,
+   "width": 1366,
+   "height": 768,
+   "renderScale": 0.699999988079071,
+   "terrainTriangles": 271068,
+   "drawCalls": 129,
+   "device": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "heapMB": 239,
+   "terrainTrianglesLod0": 271068
+  },
+  "high": {
+   "running": false,
+   "profile": "high",
+   "frames": 3549,
+   "seconds": 60.00200271606445,
+   "fpsMean": 59.14802551269531,
+   "fpsP50": 58.823524475097656,
+   "fpsP5": 52.6315803527832,
+   "msP50": 17,
+   "msP95": 19,
+   "msP99": 33,
+   "msMax": 36,
+   "width": 1366,
+   "height": 768,
+   "renderScale": 1,
+   "terrainTriangles": 3709546,
+   "drawCalls": 251,
+   "device": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "heapMB": 495,
+   "terrainTrianglesLod0": 3709546
+  },
+  "ultra": {
+   "running": false,
+   "profile": "ultra",
+   "frames": 3344,
+   "seconds": 60.0150032043457,
+   "fpsMean": 55.71940231323242,
+   "fpsP50": 58.823524475097656,
+   "fpsP5": 30.303024291992188,
+   "msP50": 17,
+   "msP95": 33.00000762939453,
+   "msP99": 34,
+   "msMax": 37.00000762939453,
+   "width": 1366,
+   "height": 768,
+   "renderScale": 1,
+   "terrainTriangles": 3709546,
+   "drawCalls": 279,
+   "device": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "heapMB": 495,
+   "terrainTrianglesLod0": 3709546
+  }
+ },
+ "errors": [],
+ "browserVersion": "151.0.7922.34",
+ "loadSeconds": 6.4,
+ "pageError": null,
+ "ready": {
+  "device": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "api": "OpenGLES3",
+  "profiles": [
+   "ultra",
+   "high",
+   "balanced",
+   "performance"
+  ],
+  "profile": "balanced",
+  "utc": "2007-09-11T16:48:00Z",
+  "sol": 1291,
+  "ltst": 13.992163989375499,
+  "sunElevation": 56.38259988027646,
+  "sunAzimuth": 238.52481308361234,
+  "tau": 0.9,
+  "tauLabel": "tau 0.9 ASSUMED (no sourced value for this sol)",
+  "terrainTriangles": 979844,
+  "chunks": 130,
+  "rover": "rover: drive record starting sol 1291 (traverse, locally registered)",
+  "roverCalibration": "footprint scale 0.1754; height deviation -17% vs PDS 1.54 m",
+  "heightCheck": {
+   "samples": 100,
+   "maxAbsErrorM": 0.0006043526715897585,
+   "gateM": 0.05,
+   "pass": true
+  }
+ },
+ "renderer": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+ "visibility": "visible",
+ "heapAfterLoadMB": 239,
+ "heapAfter10SwitchesMB": 495,
+ "readyFinal": {
+  "device": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+  "api": "OpenGLES3",
+  "profiles": [
+   "ultra",
+   "high",
+   "balanced",
+   "performance"
+  ],
+  "profile": "balanced",
+  "utc": "2007-09-11T16:48:00Z",
+  "sol": 1291,
+  "ltst": 13.992163989375499,
+  "sunElevation": 56.38259988027646,
+  "sunAzimuth": 238.52481308361234,
+  "tau": 0.9,
+  "tauLabel": "tau 0.9 ASSUMED (no sourced value for this sol)",
+  "terrainTriangles": 979844,
+  "chunks": 130,
+  "rover": "rover: drive record starting sol 1291 (traverse, locally registered)",
+  "roverCalibration": "footprint scale 0.1754; height deviation -17% vs PDS 1.54 m",
+  "heightCheck": {
+   "samples": 100,
+   "maxAbsErrorM": 0.0006043526715897585,
+   "gateM": 0.05,
+   "pass": true
+  }
+ },
+ "buildSize": {
+  "MarsPrototype.data": {
+   "raw": 34454036,
+   "brotli": 21374824
+  },
+  "MarsPrototype.framework.js": {
+   "raw": 460345,
+   "brotli": 75206
+  },
+  "MarsPrototype.loader.js": {
+   "raw": 26983,
+   "brotli": 8139
+  },
+  "MarsPrototype.wasm": {
+   "raw": 57945632,
+   "brotli": 9988965
+  },
+  "total": {
+   "raw": 92886996,
+   "brotli": 31447134
+  }
+ },
+ "gates": {
+  "balancedFpsP50>=30": true,
+  "balancedFpsP5>=24": true,
+  "firstSceneBrotli<=40MB": true,
+  "heap<=512MB(after load and 10 switches)": true,
+  "heapStableAfterSwitches": true,
+  "loadToFirstFrame<=15s": true,
+  "terrainHeights<=0.05m": true,
+  "consoleErrors": 0
+ }
+}
