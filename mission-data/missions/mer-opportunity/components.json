@@ -1,0 +1,262 @@
+{
+  "plannedObjects": [
+    {
+      "id": "opportunity-edl-system",
+      "name": "Opportunity entry, descent and landing system (backshell, heat shield, parachute, lander)",
+      "missionId": "mer-opportunity",
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    }
+  ],
+  "components": [
+    {
+      "id": "merb-rover",
+      "objectId": "opportunity-rover",
+      "name": "Opportunity rover",
+      "parentId": null,
+      "category": "vehicle",
+      "function": { "text": "Six-wheel-drive, four-wheel-steered solar-powered rover carrying the Athena science payload.", "sources": ["pds-mer-insthost"] },
+      "massKg": {
+        "value": 185, "status": "conflicting", "sources": ["nasa-opportunity"],
+        "alternatives": [{ "value": 180, "sources": ["pds-mer-insthost"] }],
+        "note": "NASA's mission page gives 185 kg; the PDS instrument-host description gives 180 kg \"including the science package\"."
+      },
+      "dimensions": {
+        "value": { "heightM": 1.54, "widthAtPanelM": 2.25, "lengthAtPanelM": 1.51, "wheelbaseLengthM": 1.41, "wheelbaseWidthM": 1.22 },
+        "status": "verified", "sources": ["pds-mer-insthost"],
+        "note": "Given as approximate; height with the Pancam Mast Assembly deployed."
+      },
+      "representation": "nasa-model",
+      "views": { "exterior": "implemented", "exploded": "unavailable", "cutaway": "unavailable", "operation": "planned" },
+      "viewSources": { "operation": ["pds-mer-insthost"] },
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    },
+    {
+      "id": "merb-solar-array",
+      "objectId": "opportunity-rover",
+      "name": "Solar array",
+      "parentId": "merb-rover",
+      "category": "power",
+      "function": { "text": "30 strings of triple-junction cells (GaInP / GaAs / Ge) covering 1.3 m², producing about 800–900 Wh per sol at the start of the mission and about 600 Wh per sol by sol 90 (season and dust).", "sources": ["pds-mer-insthost"] },
+      "dimensions": { "value": { "areaM2": 1.3 }, "status": "verified", "sources": ["pds-mer-insthost"] },
+      "representation": "nasa-model",
+      "views": { "exterior": "partial", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost"]
+    },
+    {
+      "id": "merb-batteries",
+      "objectId": "opportunity-rover",
+      "name": "Lithium-ion batteries",
+      "parentId": "merb-web",
+      "category": "power",
+      "function": { "text": "Two 8 Ah rechargeable lithium-ion batteries (over 400 Wh) for peak loads, night-time operations and survival heating.", "sources": ["pds-mer-insthost"] },
+      "quantity": { "value": 2, "status": "verified", "sources": ["pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost"]
+    },
+    {
+      "id": "merb-web",
+      "objectId": "opportunity-rover",
+      "name": "Warm Electronics Box (WEB)",
+      "parentId": "merb-rover",
+      "category": "thermal",
+      "function": { "text": "Honeycomb composite box insulated with 2.5 cm of opacified aerogel; radioisotope heater units, electronics waste heat and survival heaters keep the electronics between −40 and +50 °C while outside temperatures range from 0 to −97 °C.", "sources": ["pds-mer-insthost"] },
+      "representation": "nasa-model",
+      "views": { "exterior": "partial", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost"]
+    },
+    {
+      "id": "merb-avionics",
+      "objectId": "opportunity-rover",
+      "name": "Flight computer",
+      "parentId": "merb-web",
+      "category": "avionics",
+      "function": { "text": "20 MHz 32-bit RAD6000 processor with 128 MB DRAM and 256 MB flash in a VME card cage; could drive up to 10 of the rover's 35 motors at once.", "sources": ["pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost"]
+    },
+    {
+      "id": "merb-telecom",
+      "objectId": "opportunity-rover",
+      "name": "Antennas (high-gain, low-gain, UHF)",
+      "parentId": "merb-rover",
+      "category": "telecom",
+      "function": { "text": "Direct-to-Earth X-band through a steerable high-gain antenna (up to 28.8 kbps to a 70 m DSN station early on) and a low-gain antenna; UHF relay through Mars orbiters at up to 256 kbps.", "sources": ["pds-mer-insthost"] },
+      "representation": "nasa-model",
+      "views": { "exterior": "partial", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost"]
+    },
+    {
+      "id": "merb-mobility",
+      "objectId": "opportunity-rover",
+      "name": "Rocker-bogie suspension and wheels",
+      "parentId": "merb-rover",
+      "category": "mobility",
+      "function": { "text": "Rocker-bogie suspension crossing obstacles about one wheel diameter in size; each wheel and steering axis independently driven; turns in place in 1.9 m; top speed 5 cm/s on flat ground, about 1 cm/s average under autonomous hazard avoidance.", "sources": ["pds-mer-insthost"] },
+      "dimensions": { "value": { "wheelDiameterM": 0.26 }, "status": "verified", "sources": ["pds-mer-insthost"] },
+      "quantity": { "value": 6, "status": "verified", "sources": ["pds-mer-insthost"], "note": "six wheels" },
+      "representation": "nasa-model",
+      "views": { "exterior": "partial", "exploded": "unavailable", "cutaway": "unavailable", "operation": "planned" },
+      "viewSources": { "operation": ["pds-mer-insthost"] },
+      "sources": ["pds-mer-insthost"]
+    },
+    {
+      "id": "merb-pma",
+      "objectId": "opportunity-rover",
+      "name": "Pancam Mast Assembly",
+      "parentId": "merb-rover",
+      "category": "mechanism",
+      "function": { "text": "Mast carrying the remote-sensing instruments 1.54 m above the ground, with azimuth and elevation actuators for targeted views and full panoramas.", "sources": ["pds-mer-insthost"] },
+      "dimensions": { "value": { "heightAboveGroundM": 1.54 }, "status": "verified", "sources": ["pds-mer-insthost"], "note": "NASA's mission page: \"about 1.5 meters off the ground\"." },
+      "representation": "nasa-model",
+      "views": { "exterior": "partial", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    },
+    {
+      "id": "merb-pancam",
+      "objectId": "opportunity-rover",
+      "name": "Panoramic Camera (Pancam)",
+      "parentId": "merb-pma",
+      "category": "instrument",
+      "function": { "text": "Stereo multispectral panoramic camera on the mast.", "sources": ["pds-mer-insthost", "nasa-opportunity"] },
+      "representation": "nasa-model",
+      "views": { "exterior": "partial", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    },
+    {
+      "id": "merb-navcam",
+      "objectId": "opportunity-rover",
+      "name": "Navigation cameras (Navcam)",
+      "parentId": "merb-pma",
+      "category": "instrument",
+      "function": { "text": "Navigation cameras on the mast.", "sources": ["nasa-opportunity"] },
+      "representation": "nasa-model",
+      "views": { "exterior": "partial", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["nasa-opportunity"]
+    },
+    {
+      "id": "merb-minites",
+      "objectId": "opportunity-rover",
+      "name": "Miniature Thermal Emission Spectrometer (Mini-TES)",
+      "parentId": "merb-pma",
+      "category": "instrument",
+      "function": { "text": "Thermal-infrared spectrometer viewing the terrain from the top of the mast.", "sources": ["pds-mer-insthost", "nasa-opportunity"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    },
+    {
+      "id": "merb-idd",
+      "objectId": "opportunity-rover",
+      "name": "Instrument Deployment Device (robotic arm)",
+      "parentId": "merb-rover",
+      "category": "mechanism",
+      "function": { "text": "Five-degree-of-freedom arm placing four in-situ tools on rocks and soils.", "sources": ["pds-mer-insthost", "nasa-opportunity"] },
+      "representation": "nasa-model",
+      "views": { "exterior": "partial", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    },
+    {
+      "id": "merb-apxs",
+      "objectId": "opportunity-rover",
+      "name": "Alpha Particle X-ray Spectrometer (APXS)",
+      "parentId": "merb-idd",
+      "category": "instrument",
+      "function": { "text": "Measures the elemental chemistry of rocks and soils; carried on the arm.", "sources": ["nasa-opportunity", "pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["nasa-opportunity", "pds-mer-insthost"]
+    },
+    {
+      "id": "merb-mossbauer",
+      "objectId": "opportunity-rover",
+      "name": "Mössbauer Spectrometer (MB)",
+      "parentId": "merb-idd",
+      "category": "instrument",
+      "function": { "text": "Identifies iron-bearing minerals; carried on the arm.", "sources": ["nasa-opportunity", "pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["nasa-opportunity", "pds-mer-insthost"]
+    },
+    {
+      "id": "merb-mi",
+      "objectId": "opportunity-rover",
+      "name": "Microscopic Imager (MI)",
+      "parentId": "merb-idd",
+      "category": "instrument",
+      "function": { "text": "Close-up camera on the arm.", "sources": ["nasa-opportunity", "pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["nasa-opportunity", "pds-mer-insthost"]
+    },
+    {
+      "id": "merb-rat",
+      "objectId": "opportunity-rover",
+      "name": "Rock Abrasion Tool (RAT)",
+      "parentId": "merb-idd",
+      "category": "instrument",
+      "function": { "text": "Grinds away rock surfaces to expose fresh interiors; carried on the arm.", "sources": ["nasa-opportunity", "pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["nasa-opportunity", "pds-mer-insthost"]
+    },
+    {
+      "id": "merb-entry-vehicle",
+      "objectId": "opportunity-edl-system",
+      "name": "Entry vehicle",
+      "parentId": null,
+      "category": "edl",
+      "function": { "text": "After separation from the cruise stage, a backshell and heat shield enclosing the lander, protecting it with ablative material during the hyperbolic entry into the Martian atmosphere.", "sources": ["pds-mer-insthost"] },
+      "massKg": { "value": 840, "status": "verified", "sources": ["pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost"]
+    },
+    {
+      "id": "merb-heat-shield",
+      "objectId": "opportunity-edl-system",
+      "name": "Heat shield",
+      "parentId": "merb-entry-vehicle",
+      "category": "edl",
+      "function": { "text": "Ablative front shield of the entry vehicle; discarded during descent and later seen on the surface.", "sources": ["pds-mer-insthost", "nasa-opportunity"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    },
+    {
+      "id": "merb-backshell",
+      "objectId": "opportunity-edl-system",
+      "name": "Backshell",
+      "parentId": "merb-entry-vehicle",
+      "category": "edl",
+      "function": { "text": "Rear shell of the entry vehicle housing the parachute, the deceleration (RAD) and transverse-impulse (TIRS) solid rocket motors, an inertial measurement unit and thermal batteries.", "sources": ["pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost"]
+    },
+    {
+      "id": "merb-parachute",
+      "objectId": "opportunity-edl-system",
+      "name": "Parachute",
+      "parentId": "merb-backshell",
+      "category": "edl",
+      "function": { "text": "Mounted inside the backshell; later seen on the surface with the backshell.", "sources": ["pds-mer-insthost", "nasa-opportunity"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    },
+    {
+      "id": "merb-lander",
+      "objectId": "opportunity-edl-system",
+      "name": "Lander",
+      "parentId": "merb-entry-vehicle",
+      "category": "edl",
+      "function": { "text": "Tetrahedral structure surrounded by airbags, housing the airbag gas generators, the radar altimeter, the motors that opened its four petals and the rover lift mechanism; it carried the stowed rover to the surface.", "sources": ["pds-mer-insthost"] },
+      "massKg": { "value": 550, "status": "verified", "sources": ["pds-mer-insthost"] },
+      "representation": "none",
+      "views": { "exterior": "unavailable", "exploded": "unavailable", "cutaway": "unavailable", "operation": "unavailable" },
+      "sources": ["pds-mer-insthost", "nasa-opportunity"]
+    }
+  ]
+}

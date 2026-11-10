@@ -1,0 +1,115 @@
+[
+  {
+    "id": "merb-launch",
+    "missionId": "mer-opportunity",
+    "kind": "launch",
+    "title": "Launch",
+    "description": "Opportunity launched on a Delta II 7925H from Cape Canaveral, 7 July 2003, 20:18:15 PDT.",
+    "time": { "utc": "2003-07-08T03:18:15Z", "basis": "spacecraft-utc", "sol": null, "note": "A launch is observed on Earth, so event and observation time coincide." },
+    "status": "verified",
+    "sources": ["nasa-opportunity"]
+  },
+  {
+    "id": "merb-landing",
+    "missionId": "mer-opportunity",
+    "kind": "landing",
+    "title": "Landing in Eagle crater, Meridiani Planum",
+    "description": "Opportunity bounced at least 26 times on its airbags and came to rest inside a small impact crater later named Eagle, about 14.9 km from its target point.",
+    "time": {
+      "utc": "2004-01-25T04:54:00Z",
+      "basis": "utc-unspecified",
+      "sol": 1,
+      "solSources": ["giss-mars24-notes"],
+      "note": "NASA gives 21:05 PST 24 Jan = 04:54 UTC 25 Jan without saying whether this is spacecraft or Earth-received time. MER counts the touchdown sol as Sol 1."
+    },
+    "status": "verified",
+    "sources": ["nasa-opportunity"],
+    "camera": { "mode": "orbit-target", "targetId": "opportunity-rover", "durationS": 12 }
+  },
+  {
+    "id": "merb-eagle-exit",
+    "missionId": "mer-opportunity",
+    "kind": "traverse",
+    "title": "Out of Eagle crater",
+    "description": "Opportunity drove out of Eagle crater.",
+    "time": { "utc": "2004-03-22", "basis": "date-only", "sol": null },
+    "status": "verified",
+    "sources": ["nasa-opportunity"]
+  },
+  {
+    "id": "merb-heat-shield-rock",
+    "missionId": "mer-opportunity",
+    "kind": "science",
+    "title": "Heat Shield Rock",
+    "description": "Opportunity found a basketball-sized rock, named Heat Shield Rock, that turned out to be an iron-nickel meteorite.",
+    "time": { "utc": "2005-01", "basis": "month-only", "sol": null },
+    "status": "verified",
+    "sources": ["nasa-opportunity"]
+  },
+  {
+    "id": "merb-victoria-arrival",
+    "missionId": "mer-opportunity",
+    "kind": "arrival",
+    "title": "Arrival at Victoria crater",
+    "description": "Opportunity reached Victoria crater, about 800 m across.",
+    "time": { "utc": "2006-09", "basis": "month-only", "sol": null },
+    "status": "verified",
+    "sources": ["nasa-opportunity"]
+  },
+  {
+    "id": "merb-victoria-entry",
+    "missionId": "mer-opportunity",
+    "kind": "traverse",
+    "title": "Into Victoria crater",
+    "description": "Opportunity drove into Victoria crater.",
+    "time": { "utc": "2007-09-11", "basis": "date-only", "sol": null },
+    "status": "verified",
+    "sources": ["nasa-opportunity"]
+  },
+  {
+    "id": "merb-endeavour-arrival",
+    "missionId": "mer-opportunity",
+    "kind": "arrival",
+    "title": "Arrival at Endeavour crater",
+    "description": "Opportunity reached the rim of Endeavour crater, about 22 km across.",
+    "time": { "utc": "2011-08-09", "basis": "date-only", "sol": null },
+    "status": "verified",
+    "sources": ["nasa-opportunity"]
+  },
+  {
+    "id": "merb-final-tau",
+    "missionId": "mer-opportunity",
+    "kind": "environment",
+    "title": "The darkest sky: tau about 10.8",
+    "description": "In Perseverance Valley, Pancam images taken through 440 nm and 750 nm filters pointed at the Sun were used to estimate the atmospheric opacity: a tau of about 10.8 — only a tiny amount of sunlight reached the ground.",
+    "time": {
+      "utc": "2018-06-10T16:33:00Z",
+      "basis": "utc-unspecified",
+      "sol": 5111,
+      "solSources": ["nasa-pia22930"],
+      "note": "Caption: \"around 9:33 a.m. PDT\" (= 16:33 UTC); it also prints \"12:33 a.m. EDT\", which does not match. Not stated whether this is spacecraft or Earth-received time."
+    },
+    "status": "verified",
+    "sources": ["nasa-pia22930"]
+  },
+  {
+    "id": "merb-last-contact",
+    "missionId": "mer-opportunity",
+    "kind": "last-contact",
+    "title": "Last communication",
+    "description": "A severe Mars-wide dust storm blanketed the rover's location; Opportunity stopped communicating with Earth.",
+    "time": { "utc": "2018-06-10", "basis": "date-only", "sol": null },
+    "status": "verified",
+    "sources": ["nasa-opportunity"]
+  },
+  {
+    "id": "merb-end",
+    "missionId": "mer-opportunity",
+    "kind": "end",
+    "title": "End of mission",
+    "description": "NASA declared the end of the Opportunity mission.",
+    "time": { "utc": "2019-02-13", "basis": "date-only", "sol": null },
+    "status": "verified",
+    "sources": ["nasa-opportunity"]
+  }
+]

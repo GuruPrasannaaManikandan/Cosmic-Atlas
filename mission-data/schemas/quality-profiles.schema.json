@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "quality-profiles.schema.json",
+  "title": "Rendering quality profiles (Ultra / High / Balanced / Performance)",
+  "type": "array",
+  "minItems": 4,
+  "maxItems": 4,
+  "items": {
+    "type": "object",
+    "required": ["id", "label", "intendedHardware", "renderScale", "antiAliasing", "shadows", "ssao", "terrainSpacingM", "detailNormals",
+                 "maxTextureSize", "skyLut", "dustFraction", "bloom", "autoExposure", "lod1DistanceM", "gate"],
+    "additionalProperties": false,
+    "properties": {
+      "id": { "enum": ["ultra", "high", "balanced", "performance"] },
+      "label": { "type": "string" },
+      "intendedHardware": { "type": "string" },
+      "renderScale": { "type": "number", "minimum": 0.25, "maximum": 2 },
+      "antiAliasing": { "enum": ["msaa4+smaa", "msaa2", "fxaa", "none"] },
+      "shadows": {
+        "type": "object",
+        "required": ["cascades", "distanceM", "mapSize"],
+        "additionalProperties": false,
+        "properties": {
+          "cascades": { "type": "integer", "minimum": 0, "maximum": 4 },
+          "distanceM": { "type": "number", "minimum": 0 },
+          "mapSize": { "enum": [512, 1024, 2048, 4096] }
+        }
+      },
+      "ssao": { "type": "boolean" },
+      "terrainSpacingM": { "type": ["string", "number"] },
+      "detailNormals": { "type": "boolean" },
+      "maxTextureSize": { "enum": [512, 1024, 2048, 4096, 8192] },
+      "skyLut": {
+        "type": "object",
+        "required": ["transmittance", "scattering", "multipleScattering"],
+        "additionalProperties": false,
+        "properties": {
+          "transmittance": { "type": "integer", "minimum": 8 },
+          "scattering": { "type": "integer", "minimum": 8 },
+          "multipleScattering": { "enum": ["full", "approximate"] }
+        }
+      },
+      "dustFraction": { "type": "number", "minimum": 0, "maximum": 1 },
+      "bloom": { "type": "boolean" },
+      "autoExposure": { "type": "boolean" },
+      "lod1DistanceM": { "type": ["number", "null"] },
+      "gate": {
+        "type": ["object", "null"],
+        "required": ["fpsP50", "width", "height"],
+        "additionalProperties": false,
+        "properties": {
+          "fpsP50": { "type": "number" },
+          "fpsP5": { "type": "number" },
+          "width": { "type": "integer" },
+          "height": { "type": "integer" }
+        }
+      }
+    }
+  }
+}
