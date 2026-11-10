@@ -1,0 +1,327 @@
+{
+ "checks": [
+  {
+   "check": "M03 expedition starts at Earth departure",
+   "pass": true,
+   "detail": "departure"
+  },
+  {
+   "check": "M03 expedition flight is autonomous (keyboard owned by UI)",
+   "pass": true,
+   "detail": "UI_INTERACTION"
+  },
+  {
+   "check": "M04 approach stage reached",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M06 Mars surface opens inside Cosmic Atlas",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M06 Unity Mars player loaded and reported ready",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M06 terrain height check still passes in the embedded player",
+   "pass": true,
+   "detail": {
+    "samples": 100,
+    "maxAbsErrorM": 0.0006043526715897585,
+    "gateM": 0.05,
+    "pass": true
+   }
+  },
+  {
+   "check": "M05 Mars arrival sequence plays",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M06 arrival ends in exploration",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M06 input mode is VEHICLE_EXPLORATION",
+   "pass": true,
+   "detail": "VEHICLE_EXPLORATION"
+  },
+  {
+   "check": "M07 W drives the rover forward",
+   "pass": true,
+   "detail": "10.07 m"
+  },
+  {
+   "check": "M07 W does not rotate the camera",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M08 ArrowLeft turns the camera",
+   "pass": true,
+   "detail": "-1.47 rad"
+  },
+  {
+   "check": "M08 ArrowLeft never moves or steers the rover",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M08 ArrowDown tilts the camera only",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M07 D steers the rover (heading changes)",
+   "pass": true,
+   "detail": "0.42 rad"
+  },
+  {
+   "check": "M07 D does not change the camera's look offset or pitch",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M09 Opportunity discovered on approach",
+   "pass": true,
+   "detail": [
+    "opportunity-rover"
+   ]
+  },
+  {
+   "check": "M09 inspect prompt within reach",
+   "pass": true,
+   "detail": "3.0 m"
+  },
+  {
+   "check": "M09 the rover cannot drive through Opportunity",
+   "pass": true,
+   "detail": "2.96 m"
+  },
+  {
+   "check": "M10 E opens Opportunity's record",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M10 Unity switches to the inspection camera",
+   "pass": true,
+   "detail": "Inspect"
+  },
+  {
+   "check": "M15 Relive the mission enters the historical replay",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M15 input mode is HISTORICAL_REPLAY",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M15 present-day state saved (site, pose, camera, record)",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M15 Opportunity moves through its recorded sols",
+   "pass": true,
+   "detail": "sol 951 -> 1011"
+  },
+  {
+   "check": "M15 event jump: 'Into Victoria crater' moves the replay to sol ~1291",
+   "pass": true,
+   "detail": "sol 1291.0, 2007-09-11T16:48:00Z"
+  },
+  {
+   "check": "M16 GO BACK TO PRESENT returns to exploration",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M17 position, heading and camera restored exactly",
+   "pass": true,
+   "detail": {
+    "x": 0.0,
+    "z": 0.0,
+    "heading": 0.0,
+    "camYawOffset": 0.0,
+    "camPitch": 0.0,
+    "camDist": 0
+   }
+  },
+  {
+   "check": "M17 selected object and record tab restored",
+   "pass": true,
+   "detail": {
+    "objectId": "opportunity-rover",
+    "tab": "inspect"
+   }
+  },
+  {
+   "check": "M17 scene clock back to the present scene date",
+   "pass": true,
+   "detail": "2007-09-11T16:48:00Z"
+  },
+  {
+   "check": "M17 Opportunity back at its scene position",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "M17 exploration resumes from the same spot",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "C4 embedded Mars view meets the Balanced 30 fps gate (p50 <= 33 ms)",
+   "pass": true,
+   "detail": {
+    "msP50": 17,
+    "msP95": 17,
+    "backbuffer": [
+     1366,
+     768
+    ],
+    "drawCalls": 155,
+    "triangles": 221297,
+    "profile": "balanced"
+   }
+  },
+  {
+   "check": "M-exit Return to orbit leaves Mars and destroys the Unity player",
+   "pass": true,
+   "detail": {
+    "running": false,
+    "canvases": 1
+   }
+  },
+  {
+   "check": "L01 Moon info panel offers the expedition",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "L02 expedition lands at Tranquility Base",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "L02 lands at the site's sourced daylight moment",
+   "pass": true,
+   "detail": "1969-07-21T03:17:40.000Z"
+  },
+  {
+   "check": "L03 walking reaches Apollo 11 hardware",
+   "pass": true,
+   "detail": "a11-lm-descent"
+  },
+  {
+   "check": "L04 Relive the mission on the Moon",
+   "pass": true,
+   "detail": "a11-lm-descent"
+  },
+  {
+   "check": "L05 GO BACK TO PRESENT restores astronaut position and camera",
+   "pass": true,
+   "detail": {
+    "dpos": 0.0
+   }
+  },
+  {
+   "check": "L05 clock restored",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "L05 record reopened on the same object",
+   "pass": true,
+   "detail": null
+  }
+ ],
+ "metrics": {
+  "unityLoadMs": 1002.5,
+  "ready": {
+   "device": "ANGLE (Intel, Intel(R) Arc(TM) Graphics (0x00007D55) Direct3D11 vs_5_0 ps_5_0, D3D11)",
+   "profile": "balanced",
+   "sol": 1291,
+   "utc": "2007-09-11T16:48:00Z",
+   "terrainTriangles": 979844,
+   "heightCheck": {
+    "samples": 100,
+    "maxAbsErrorM": 0.0006043526715897585,
+    "gateM": 0.05,
+    "pass": true
+   },
+   "route": {
+    "points": 2524,
+    "firstSol": 951,
+    "lastSol": 1686
+   },
+   "objects": [
+    {
+     "id": "opportunity-rover",
+     "x": -403.2200012207031,
+     "z": 134.2899932861328,
+     "noticeM": 45,
+     "interactM": 7,
+     "routeIndex": 1590,
+     "sol": 1291
+    }
+   ],
+   "trail": {
+    "scaled": true,
+    "mulx2": false,
+    "texture": "Traverse overlay",
+    "visible": true
+   }
+  },
+  "driveToOpportunitySec": 24.7,
+  "c4EmbeddedFrame": {
+   "msP50": 17,
+   "msP95": 17,
+   "backbuffer": [
+    1366,
+    768
+   ],
+   "drawCalls": 155,
+   "triangles": 221297,
+   "profile": "balanced"
+  }
+ },
+ "screenshots": [
+  "m01_home_abandoned_but_not_forgotten.png",
+  "m02_expedition_departure.png",
+  "m03_expedition_cruise.png",
+  "m04_expedition_approach.png",
+  "m05_mars_arrival_descent.png",
+  "m06_mars_surface_explore.png",
+  "m07_approach_opportunity.png",
+  "m08_record_overview.png",
+  "m09_record_story.png",
+  "m10_record_specifications.png",
+  "m12_record_timeline.png",
+  "m11_inspect_solar_array_highlight.png",
+  "m11b_inspect_rocker_bogie.png",
+  "m13_replay_victoria_campaign.png",
+  "m14_replay_event_into_victoria.png",
+  "m15_back_to_present_record.png",
+  "m16_back_to_present_explore.png",
+  "m17_back_in_orbit.png",
+  "l01_moon_descent.png",
+  "l02_moon_surface.png",
+  "l03_moon_record.png",
+  "l04_moon_replay_descent.png",
+  "l05_moon_back_to_present.png"
+ ],
+ "consoleErrors": [],
+ "viewport": [
+  1366,
+  768
+ ],
+ "mode": "headless"
+}
