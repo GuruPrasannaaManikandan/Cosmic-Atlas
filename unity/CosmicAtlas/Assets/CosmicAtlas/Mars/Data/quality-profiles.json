@@ -1,0 +1,36 @@
+[
+  {
+    "id": "ultra", "label": "Ultra", "intendedHardware": "discrete GPU, desktop",
+    "renderScale": 1.0, "antiAliasing": "msaa4+smaa",
+    "shadows": { "cascades": 4, "distanceM": 400, "mapSize": 4096 },
+    "ssao": true, "terrainSpacingM": "native", "detailNormals": true, "maxTextureSize": 4096,
+    "skyLut": { "transmittance": 256, "scattering": 64, "multipleScattering": "full" },
+    "dustFraction": 1.0, "bloom": true, "autoExposure": true, "lod1DistanceM": null, "gate": null
+  },
+  {
+    "id": "high", "label": "High", "intendedHardware": "discrete or strong integrated GPU",
+    "renderScale": 1.0, "antiAliasing": "msaa2",
+    "shadows": { "cascades": 4, "distanceM": 250, "mapSize": 2048 },
+    "ssao": true, "terrainSpacingM": "native", "detailNormals": true, "maxTextureSize": 2048,
+    "skyLut": { "transmittance": 128, "scattering": 32, "multipleScattering": "full" },
+    "dustFraction": 0.6, "bloom": true, "autoExposure": true, "lod1DistanceM": null, "gate": null
+  },
+  {
+    "id": "balanced", "label": "Balanced", "intendedHardware": "integrated GPU (reference machine: Intel Core Ultra 7 155H, Intel Arc iGPU)",
+    "renderScale": 0.85, "antiAliasing": "fxaa",
+    "shadows": { "cascades": 2, "distanceM": 150, "mapSize": 2048 },
+    "ssao": false, "terrainSpacingM": 2, "detailNormals": true, "maxTextureSize": 2048,
+    "skyLut": { "transmittance": 64, "scattering": 32, "multipleScattering": "approximate" },
+    "dustFraction": 0.3, "bloom": true, "autoExposure": false, "lod1DistanceM": 20,
+    "gate": { "fpsP50": 30, "fpsP5": 24, "width": 1366, "height": 768 }
+  },
+  {
+    "id": "performance", "label": "Performance", "intendedHardware": "low-end laptops and tablets",
+    "renderScale": 0.7, "antiAliasing": "none",
+    "shadows": { "cascades": 1, "distanceM": 80, "mapSize": 1024 },
+    "ssao": false, "terrainSpacingM": 4, "detailNormals": false, "maxTextureSize": 1024,
+    "skyLut": { "transmittance": 32, "scattering": 16, "multipleScattering": "approximate" },
+    "dustFraction": 0.1, "bloom": false, "autoExposure": false, "lod1DistanceM": 8,
+    "gate": { "fpsP50": 45, "width": 1366, "height": 768 }
+  }
+]
