@@ -1,0 +1,709 @@
+{
+ "file": "Mars Exploration Rover - Spirit and Opportunity.blend",
+ "blenderVersion": "402",
+ "pointerSize": 8,
+ "endian": "<",
+ "blocks": 3680,
+ "objects": [
+  {
+   "name": "OB_Hemi",
+   "type": null,
+   "parent": null,
+   "data": "LAHemi.005"
+  },
+  {
+   "name": "OB_Hemi.001",
+   "type": null,
+   "parent": null,
+   "data": "LAHemi.006"
+  },
+  {
+   "name": "OB_root",
+   "type": null,
+   "parent": null,
+   "data": "MECube.000"
+  },
+  {
+   "name": "OBarm_base",
+   "type": null,
+   "parent": "OBarm_mount",
+   "data": "MECylinder.018"
+  },
+  {
+   "name": "OBarm_joint1",
+   "type": null,
+   "parent": "OBCube.010",
+   "data": "MECylinder.006"
+  },
+  {
+   "name": "OBarm_joint2",
+   "type": null,
+   "parent": "OBCube.008",
+   "data": "MECylinder.002"
+  },
+  {
+   "name": "OBarm_mount",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MECylinder"
+  },
+  {
+   "name": "OBarm_turret",
+   "type": null,
+   "parent": "OBarm_wrist",
+   "data": "MECylinder.005"
+  },
+  {
+   "name": "OBarm_wrist",
+   "type": null,
+   "parent": "OBCube.007",
+   "data": "MECylinder.016"
+  },
+  {
+   "name": "OBbody",
+   "type": null,
+   "parent": "OB_root",
+   "data": "MEPlane.004"
+  },
+  {
+   "name": "OBCube",
+   "type": null,
+   "parent": "OBsuspension_right_rear_axl",
+   "data": "MECube"
+  },
+  {
+   "name": "OBCube.000",
+   "type": null,
+   "parent": "OBsuspension_right_front",
+   "data": "MECube.004"
+  },
+  {
+   "name": "OBCube.001",
+   "type": null,
+   "parent": "OBsuspension_right_front_rocker",
+   "data": "MECube.005"
+  },
+  {
+   "name": "OBCube.002",
+   "type": null,
+   "parent": "OBsuspension_right_rear_rocker1",
+   "data": "MECube.006"
+  },
+  {
+   "name": "OBCube.003",
+   "type": null,
+   "parent": "OBsuspension_left_rear_rocker1",
+   "data": "MECube.008"
+  },
+  {
+   "name": "OBCube.004",
+   "type": null,
+   "parent": "OBsuspension_left_rear_axl",
+   "data": "MECube.009"
+  },
+  {
+   "name": "OBCube.005",
+   "type": null,
+   "parent": "OBsuspension_left_front_axl",
+   "data": "MECube.010"
+  },
+  {
+   "name": "OBCube.006",
+   "type": null,
+   "parent": "OBpanels_left_front",
+   "data": "MECube.014"
+  },
+  {
+   "name": "OBCube.007",
+   "type": null,
+   "parent": "OBarm_joint2",
+   "data": "MECube.022"
+  },
+  {
+   "name": "OBCube.008",
+   "type": null,
+   "parent": "OBarm_joint1",
+   "data": "MECube.025"
+  },
+  {
+   "name": "OBCube.009",
+   "type": null,
+   "parent": "OBsuspension_right_front_axl",
+   "data": "MECube.011"
+  },
+  {
+   "name": "OBCube.010",
+   "type": null,
+   "parent": "OBarm_base",
+   "data": "MECube.027"
+  },
+  {
+   "name": "OBCube.012",
+   "type": null,
+   "parent": "OBmast",
+   "data": "MECube.029"
+  },
+  {
+   "name": "OBCube.020",
+   "type": null,
+   "parent": "OBsuspension_right_rear_rocker2",
+   "data": "MECube.038"
+  },
+  {
+   "name": "OBCube.021",
+   "type": null,
+   "parent": "OBsuspension_left_rear_rocker2",
+   "data": "MECube.040"
+  },
+  {
+   "name": "OBCube.022",
+   "type": null,
+   "parent": "OBsuspension_left_front_rocker",
+   "data": "MECube.041"
+  },
+  {
+   "name": "OBCube.025",
+   "type": null,
+   "parent": "OBsuspension_left_front",
+   "data": "MECube.044"
+  },
+  {
+   "name": "OBCube.029",
+   "type": null,
+   "parent": "OBpanels_right_front",
+   "data": "MECube.055"
+  },
+  {
+   "name": "OBHGAA",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MECylinder.011"
+  },
+  {
+   "name": "OBHGAA_arm",
+   "type": null,
+   "parent": "OBHGAA_top",
+   "data": "MECylinder.008"
+  },
+  {
+   "name": "OBHGAA_top",
+   "type": null,
+   "parent": "OBHGAA",
+   "data": "MECylinder.009"
+  },
+  {
+   "name": "OBmast",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MECylinder.007"
+  },
+  {
+   "name": "OBmast_base",
+   "type": null,
+   "parent": "OBCube.012",
+   "data": "MECylinder.004"
+  },
+  {
+   "name": "OBmast_cam",
+   "type": null,
+   "parent": "OBmast_neck",
+   "data": "MECylinder.021"
+  },
+  {
+   "name": "OBmast_neck",
+   "type": null,
+   "parent": "OBmast_base",
+   "data": "MECylinder.013"
+  },
+  {
+   "name": "OBmast_top",
+   "type": null,
+   "parent": "OBmast_neck",
+   "data": "MECylinder.001"
+  },
+  {
+   "name": "OBpanels_left",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MECube.062"
+  },
+  {
+   "name": "OBpanels_left_front",
+   "type": null,
+   "parent": "OBpanels_left",
+   "data": "MECube.015"
+  },
+  {
+   "name": "OBpanels_left_rear",
+   "type": null,
+   "parent": "OBCube.006",
+   "data": "MECube.017"
+  },
+  {
+   "name": "OBpanels_rear",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MECube.007"
+  },
+  {
+   "name": "OBpanels_right",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MECube.057"
+  },
+  {
+   "name": "OBpanels_right_front",
+   "type": null,
+   "parent": "OBpanels_right",
+   "data": "MECube.013"
+  },
+  {
+   "name": "OBpanels_right_rear",
+   "type": null,
+   "parent": "OBCube.029",
+   "data": "MECube.018"
+  },
+  {
+   "name": "OBsuspension_left_front",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MEPlane.019"
+  },
+  {
+   "name": "OBsuspension_left_front_axl",
+   "type": null,
+   "parent": "OBCube.022",
+   "data": "MEPlane.017"
+  },
+  {
+   "name": "OBsuspension_left_front_rocker",
+   "type": null,
+   "parent": "OBCube.025",
+   "data": "MEPlane.012"
+  },
+  {
+   "name": "OBsuspension_left_front_wheel",
+   "type": null,
+   "parent": "OBCube.005",
+   "data": "MEPlane.007"
+  },
+  {
+   "name": "OBsuspension_left_middle_rocker",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MEPlane.002"
+  },
+  {
+   "name": "OBsuspension_left_middle_wheel",
+   "type": null,
+   "parent": "OBCube.003",
+   "data": "MEPlane.008"
+  },
+  {
+   "name": "OBsuspension_left_rear_axl",
+   "type": null,
+   "parent": "OBCube.021",
+   "data": "MEPlane.018"
+  },
+  {
+   "name": "OBsuspension_left_rear_rocker1",
+   "type": null,
+   "parent": "OBsuspension_left_middle_rocker",
+   "data": "MEPlane.003"
+  },
+  {
+   "name": "OBsuspension_left_rear_rocker2",
+   "type": null,
+   "parent": "OBsuspension_left_rear_rocker1",
+   "data": "MEPlane.020"
+  },
+  {
+   "name": "OBsuspension_left_rear_wheel",
+   "type": null,
+   "parent": "OBCube.004",
+   "data": "MEPlane.009"
+  },
+  {
+   "name": "OBsuspension_right_front",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MEPlane.032"
+  },
+  {
+   "name": "OBsuspension_right_front_axl",
+   "type": null,
+   "parent": "OBCube.001",
+   "data": "MEPlane.034"
+  },
+  {
+   "name": "OBsuspension_right_front_rocker",
+   "type": null,
+   "parent": "OBCube.000",
+   "data": "MEPlane.033"
+  },
+  {
+   "name": "OBsuspension_right_front_wheel",
+   "type": null,
+   "parent": "OBCube.009",
+   "data": "MEPlane.035"
+  },
+  {
+   "name": "OBsuspension_right_middle_rocker",
+   "type": null,
+   "parent": "OBbody",
+   "data": "MEPlane.000"
+  },
+  {
+   "name": "OBsuspension_right_middle_wheel",
+   "type": null,
+   "parent": "OBCube.002",
+   "data": "MEPlane.010"
+  },
+  {
+   "name": "OBsuspension_right_rear_axl",
+   "type": null,
+   "parent": "OBCube.020",
+   "data": "MEPlane.015"
+  },
+  {
+   "name": "OBsuspension_right_rear_rocker1",
+   "type": null,
+   "parent": "OBsuspension_right_middle_rocker",
+   "data": "MEPlane.013"
+  },
+  {
+   "name": "OBsuspension_right_rear_rocker2",
+   "type": null,
+   "parent": "OBsuspension_right_rear_rocker1",
+   "data": "MEPlane.023"
+  },
+  {
+   "name": "OBsuspension_right_rear_wheel",
+   "type": null,
+   "parent": "OBCube",
+   "data": "MEPlane.011"
+  }
+ ],
+ "meshes": [
+  {
+   "name": "MECube",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.000",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.004",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.005",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.006",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.007",
+   "verts": 968,
+   "faces": 529
+  },
+  {
+   "name": "MECube.008",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.009",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.010",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.011",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.013",
+   "verts": 1016,
+   "faces": 541
+  },
+  {
+   "name": "MECube.014",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.015",
+   "verts": 787,
+   "faces": 421
+  },
+  {
+   "name": "MECube.017",
+   "verts": 284,
+   "faces": 142
+  },
+  {
+   "name": "MECube.018",
+   "verts": 324,
+   "faces": 162
+  },
+  {
+   "name": "MECube.022",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.025",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.027",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.029",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.038",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.040",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.041",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.044",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.055",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.057",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECube.062",
+   "verts": 8,
+   "faces": 6
+  },
+  {
+   "name": "MECylinder",
+   "verts": 567,
+   "faces": 374
+  },
+  {
+   "name": "MECylinder.001",
+   "verts": 1460,
+   "faces": 938
+  },
+  {
+   "name": "MECylinder.002",
+   "verts": 532,
+   "faces": 365
+  },
+  {
+   "name": "MECylinder.004",
+   "verts": 715,
+   "faces": 387
+  },
+  {
+   "name": "MECylinder.005",
+   "verts": 2291,
+   "faces": 1357
+  },
+  {
+   "name": "MECylinder.006",
+   "verts": 1212,
+   "faces": 748
+  },
+  {
+   "name": "MECylinder.007",
+   "verts": 239,
+   "faces": 135
+  },
+  {
+   "name": "MECylinder.008",
+   "verts": 469,
+   "faces": 314
+  },
+  {
+   "name": "MECylinder.009",
+   "verts": 679,
+   "faces": 361
+  },
+  {
+   "name": "MECylinder.011",
+   "verts": 689,
+   "faces": 383
+  },
+  {
+   "name": "MECylinder.013",
+   "verts": 913,
+   "faces": 471
+  },
+  {
+   "name": "MECylinder.016",
+   "verts": 426,
+   "faces": 252
+  },
+  {
+   "name": "MECylinder.018",
+   "verts": 1234,
+   "faces": 692
+  },
+  {
+   "name": "MECylinder.021",
+   "verts": 144,
+   "faces": 72
+  },
+  {
+   "name": "MEPlane.000",
+   "verts": 719,
+   "faces": 398
+  },
+  {
+   "name": "MEPlane.002",
+   "verts": 718,
+   "faces": 398
+  },
+  {
+   "name": "MEPlane.003",
+   "verts": 452,
+   "faces": 369
+  },
+  {
+   "name": "MEPlane.004",
+   "verts": 4563,
+   "faces": 2760
+  },
+  {
+   "name": "MEPlane.007",
+   "verts": 787,
+   "faces": 484
+  },
+  {
+   "name": "MEPlane.008",
+   "verts": 787,
+   "faces": 484
+  },
+  {
+   "name": "MEPlane.009",
+   "verts": 787,
+   "faces": 484
+  },
+  {
+   "name": "MEPlane.010",
+   "verts": 787,
+   "faces": 484
+  },
+  {
+   "name": "MEPlane.011",
+   "verts": 787,
+   "faces": 484
+  },
+  {
+   "name": "MEPlane.012",
+   "verts": 251,
+   "faces": 164
+  },
+  {
+   "name": "MEPlane.013",
+   "verts": 452,
+   "faces": 369
+  },
+  {
+   "name": "MEPlane.015",
+   "verts": 381,
+   "faces": 208
+  },
+  {
+   "name": "MEPlane.017",
+   "verts": 381,
+   "faces": 208
+  },
+  {
+   "name": "MEPlane.018",
+   "verts": 381,
+   "faces": 208
+  },
+  {
+   "name": "MEPlane.019",
+   "verts": 862,
+   "faces": 456
+  },
+  {
+   "name": "MEPlane.020",
+   "verts": 210,
+   "faces": 144
+  },
+  {
+   "name": "MEPlane.023",
+   "verts": 210,
+   "faces": 144
+  },
+  {
+   "name": "MEPlane.032",
+   "verts": 862,
+   "faces": 456
+  },
+  {
+   "name": "MEPlane.033",
+   "verts": 251,
+   "faces": 164
+  },
+  {
+   "name": "MEPlane.034",
+   "verts": 381,
+   "faces": 208
+  },
+  {
+   "name": "MEPlane.035",
+   "verts": 787,
+   "faces": 484
+  }
+ ],
+ "materials": [
+  "MAfoil_silver",
+  "MASilver",
+  "MAtex_arm",
+  "MAtex_body_n",
+  "MAtex_instruments",
+  "MAtex_mast",
+  "MAtex_panels2_n",
+  "MAtex_panels_n",
+  "MAtex_suspension_n"
+ ],
+ "meshCount": 61,
+ "objectCount": 63,
+ "totalVerts": 30913,
+ "totalFaces": 18328
+}

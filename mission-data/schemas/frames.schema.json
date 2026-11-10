@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "frames.schema.json",
+  "title": "Coordinate frames used by a mission's data",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "bodyId", "kind", "description", "sources"],
+    "additionalProperties": false,
+    "properties": {
+      "id": { "$ref": "common.schema.json#/$defs/id" },
+      "bodyId": { "type": "string" },
+      "kind": { "enum": ["planetocentric", "local-enu", "rover-site", "map-projected", "unknown"] },
+      "description": { "type": "string", "minLength": 1 },
+      "axes": { "type": "string" },
+      "origin": { "$ref": "common.schema.json#/$defs/fact" },
+      "radiusM": { "$ref": "common.schema.json#/$defs/fact" },
+      "sources": { "$ref": "common.schema.json#/$defs/sourceIds" }
+    }
+  }
+}

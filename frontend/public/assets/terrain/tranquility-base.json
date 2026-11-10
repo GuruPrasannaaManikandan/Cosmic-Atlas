@@ -1,0 +1,32 @@
+{
+ "site": "tranquility-base",
+ "apollo": 11,
+ "width": 1501,
+ "height": 801,
+ "cellM": 2.0000000000006,
+ "x0": -1500.0,
+ "z0": -800.0,
+ "hMin": -1966.418112399895,
+ "hMax": -1899.760553289403,
+ "encoding": "uint16 little-endian, row-major (rows = +z south); 0 = no data; h = hMin + (v - 1) / 65534 * (hMax - hMin)",
+ "heightRef": "metres relative to the 1737.4 km lunar sphere (DTM datum)",
+ "lmHeightDtm": -1927.437756226151,
+ "lmElevationLroc": -1926,
+ "lmDeltaM": -1.4377562261508956,
+ "validFraction": 0.8727473403082922,
+ "source": {
+  "product": "NAC_DTM_APOLLO11",
+  "productPage": "https://data.lroc.im-ldi.com/lroc/view_rdr_product/NAC_DTM_APOLLO11",
+  "file": "https://pds.mcp.nasa.gov/data/store/img/lunar_reconnaissance_orbiter/pds4/lroc/lro-l-lroc-5-rdr/LROLRC_2001/DATA/SDP/NAC_DTM/APOLLO11/NAC_DTM_APOLLO11.TIF",
+  "crs": "+proj=eqc +lat_ts=1 +lat_0=0 +lon_0=180 +x_0=0 +y_0=0 +R=1737400 +units=m +no_defs=True",
+  "postSpacingM": 2.0000000000006,
+  "rowsRead": [
+   8124,
+   8928
+  ],
+  "bytesRead": 6788976,
+  "accuracy": "tied to LOLA (see the product README)"
+ },
+ "lmLat": 0.67416,
+ "lmLon": 23.47314
+}

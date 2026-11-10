@@ -1,0 +1,65 @@
+[
+  {
+    "id": "mars-planetocentric",
+    "bodyId": "mars",
+    "kind": "planetocentric",
+    "description": "Planetocentric latitude, east-positive longitude, height above the Mars reference sphere. Used for catalogue positions and for the HiRISE DTMs.",
+    "radiusM": {
+      "value": 3396190,
+      "status": "verified",
+      "sources": [
+        "hirise-dtm-endeavour",
+        "hirise-dtm-victoria"
+      ],
+      "note": "A_AXIS_RADIUS = 3396.19 km in both HiRISE DTM labels."
+    },
+    "sources": [
+      "hirise-dtm-endeavour",
+      "hirise-dtm-victoria"
+    ]
+  },
+  {
+    "id": "merb-traverse-corrected",
+    "bodyId": "mars",
+    "kind": "local-enu",
+    "description": "CORRECTED_X / CORRECTED_Y of MERB_traverse_5130.csv. Stage 2 tests (scripts/mars/fit_traverse.py, fit_victoria.py): the sol-1 row is exactly (0, 0); the rover leaves the 27 m Eagle-crater DTM grid on sol 57 (NASA: exit 22 Mar 2004); rows lie inside the Endurance DTM grid on sols 94-319; on Victoria's rim 2,104 drives fit a circle of 410.1 m radius against the DTM's 408.7 m rim crest (scale correct to 0.3%). So: metres east/north of the landing site. ABSOLUTE registration is unresolved: the Victoria centre lands 316-335 m from where the published landing coordinates put it, explainable by a ~2.8 deg rotation or a ~300 m origin offset; one tie point cannot separate them (needs an Endeavour tie).",
+    "sources": [
+      "an-mer-traverse",
+      "nasa-opportunity",
+      "pds-ode-mars-sites",
+      "hirise-dtm-victoria"
+    ],
+    "axes": "x east, y north, metres from the rover position on sol 1 (landing site)",
+    "origin": {
+      "value": {
+        "latDeg": -1.9483,
+        "lonEastDeg": 354.47417
+      },
+      "status": "conflicting",
+      "sources": [
+        "nasa-opportunity"
+      ],
+      "alternatives": [
+        {
+          "value": {
+            "latDeg": -1.9462,
+            "lonEastDeg": 354.4734
+          },
+          "sources": [
+            "pds-ode-mars-sites"
+          ]
+        }
+      ],
+      "note": "The two published landing coordinates differ by ~125 m, and neither reproduces the Victoria tie (316-335 m residual). Not usable for absolute placement until a second tie is fitted."
+    }
+  },
+  {
+    "id": "osu-crater-dtm-local",
+    "bodyId": "mars",
+    "kind": "unknown",
+    "description": "Local metric grid of the Eagle and Endurance crater DTMs from the traverse page's osu/ folder (producer not named on the page) (header: MAP_UNITS meters, PROJECTION_NAME Unknown). Eagle spans x −13…14 m, y −13…14 m; Endurance x 667.7…834.8 m, y −43.2…−219.4 m — consistent with a landing-site-centred east/north grid, but the axes and origin are not stated, so it is recorded as unknown.",
+    "sources": [
+      "an-mer-traverse"
+    ]
+  }
+]

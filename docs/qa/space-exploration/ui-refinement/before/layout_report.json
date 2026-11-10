@@ -1,0 +1,1510 @@
+{
+ "checks": [
+  {
+   "check": "[1920x1080] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": false,
+   "detail": [
+    "headerxcompass:1560px2"
+   ]
+  },
+  {
+   "check": "[1920x1080] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1920x1080] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": false,
+   "detail": {
+    "clipped": [
+     "Science"
+    ],
+    "scrollbar": true
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": false,
+   "detail": {
+    "canvasRight": 1920,
+    "panelLeft": 1448,
+    "canvasW": 1920
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting: no HUD element hidden under the panel",
+   "pass": false,
+   "detail": [
+    "header"
+   ]
+  },
+  {
+   "check": "[1920x1080] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Historical Story",
+    "Technical Specifications",
+    "Mission Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1920x1080] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1600x900] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": false,
+   "detail": [
+    "headerxcompass:1560px2"
+   ]
+  },
+  {
+   "check": "[1600x900] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1600x900] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1600x900] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1600x900] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": false,
+   "detail": {
+    "clipped": [
+     "Science"
+    ],
+    "scrollbar": true
+   }
+  },
+  {
+   "check": "[1600x900] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": false,
+   "detail": {
+    "canvasRight": 1600,
+    "panelLeft": 1128,
+    "canvasW": 1600
+   }
+  },
+  {
+   "check": "[1600x900] inspecting: no HUD element hidden under the panel",
+   "pass": false,
+   "detail": [
+    "header"
+   ]
+  },
+  {
+   "check": "[1600x900] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Historical Story",
+    "Technical Specifications",
+    "Mission Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1600x900] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1366x768] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": false,
+   "detail": [
+    "headerxcompass:1560px2"
+   ]
+  },
+  {
+   "check": "[1366x768] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1366x768] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1366x768] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1366x768] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": false,
+   "detail": {
+    "clipped": [
+     "Science"
+    ],
+    "scrollbar": true
+   }
+  },
+  {
+   "check": "[1366x768] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": false,
+   "detail": {
+    "canvasRight": 1366,
+    "panelLeft": 894,
+    "canvasW": 1366
+   }
+  },
+  {
+   "check": "[1366x768] inspecting: no HUD element hidden under the panel",
+   "pass": false,
+   "detail": [
+    "header",
+    "compass",
+    "banner"
+   ]
+  },
+  {
+   "check": "[1366x768] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Historical Story",
+    "Technical Specifications",
+    "Mission Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1366x768] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1280x720] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": false,
+   "detail": [
+    "headerxcompass:1560px2",
+    "bannerxbubble:1053px2"
+   ]
+  },
+  {
+   "check": "[1280x720] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1280x720] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1280x720] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1280x720] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": false,
+   "detail": {
+    "clipped": [
+     "Science"
+    ],
+    "scrollbar": true
+   }
+  },
+  {
+   "check": "[1280x720] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": false,
+   "detail": {
+    "canvasRight": 1280,
+    "panelLeft": 808,
+    "canvasW": 1280
+   }
+  },
+  {
+   "check": "[1280x720] inspecting: no HUD element hidden under the panel",
+   "pass": false,
+   "detail": [
+    "header",
+    "compass",
+    "banner"
+   ]
+  },
+  {
+   "check": "[1280x720] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Historical Story",
+    "Technical Specifications",
+    "Mission Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1280x720] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1024x768] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": false,
+   "detail": [
+    "headerxcompass:1560px2",
+    "bannerxbubble:5794px2"
+   ]
+  },
+  {
+   "check": "[1024x768] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1024x768] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1024x768] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1024x768] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": false,
+   "detail": {
+    "clipped": [
+     "Science"
+    ],
+    "scrollbar": true
+   }
+  },
+  {
+   "check": "[1024x768] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": false,
+   "detail": {
+    "canvasRight": 1024,
+    "panelLeft": 552,
+    "canvasW": 1024
+   }
+  },
+  {
+   "check": "[1024x768] inspecting: no HUD element hidden under the panel",
+   "pass": false,
+   "detail": [
+    "header",
+    "compass",
+    "banner"
+   ]
+  },
+  {
+   "check": "[1024x768] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Historical Story",
+    "Technical Specifications",
+    "Mission Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1024x768] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[768x1024] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": false,
+   "detail": [
+    "headerxcompass:15600px2",
+    "headerxbanner:2688px2",
+    "promptxminimap:3030px2"
+   ]
+  },
+  {
+   "check": "[768x1024] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[768x1024] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[768x1024] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[768x1024] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": false,
+   "detail": {
+    "clipped": [
+     "Science"
+    ],
+    "scrollbar": true
+   }
+  },
+  {
+   "check": "[768x1024] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": false,
+   "detail": {
+    "canvasRight": 768,
+    "panelLeft": 296,
+    "canvasW": 768
+   }
+  },
+  {
+   "check": "[768x1024] inspecting: no HUD element hidden under the panel",
+   "pass": false,
+   "detail": [
+    "header",
+    "compass",
+    "banner"
+   ]
+  },
+  {
+   "check": "[768x1024] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Historical Story",
+    "Technical Specifications",
+    "Mission Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[768x1024] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[390x844] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": false,
+   "detail": [
+    "headerxbanner:7605px2",
+    "compassxbanner:5850px2",
+    "bannerxminimap:85px2",
+    "promptxtouchBtns:1440px2",
+    "minimapxbubble:8606px2"
+   ]
+  },
+  {
+   "check": "[390x844] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[390x844] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[390x844] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[390x844] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": false,
+   "detail": {
+    "clipped": [
+     "Mission Timeline",
+     "Science"
+    ],
+    "scrollbar": true
+   }
+  },
+  {
+   "check": "[390x844] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": false,
+   "detail": {
+    "canvasRight": 390,
+    "panelLeft": 12,
+    "canvasW": 390
+   }
+  },
+  {
+   "check": "[390x844] inspecting: no HUD element hidden under the panel",
+   "pass": false,
+   "detail": [
+    "header",
+    "compass",
+    "banner"
+   ]
+  },
+  {
+   "check": "[390x844] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Historical Story",
+    "Technical Specifications",
+    "Mission Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[390x844] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "Z1 no page errors",
+   "pass": true,
+   "detail": []
+  }
+ ],
+ "viewports": {
+  "1920x1080": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1896,
+      "h": 77
+     },
+     "compass": {
+      "x": 700,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 654.8046875,
+      "y": 128,
+      "w": 610.390625,
+      "h": 52
+     },
+     "prompt": {
+      "x": 723.125,
+      "y": 916,
+      "w": 473.75,
+      "h": 44
+     },
+     "minimap": {
+      "x": 16,
+      "y": 856,
+      "w": 200,
+      "h": 200
+     },
+     "keys": {
+      "x": 1274.984375,
+      "y": 1043.203125,
+      "w": 629.015625,
+      "h": 22.796875
+     },
+     "bubble": {
+      "x": 769.9996337890625,
+      "y": 316.139892578125,
+      "w": 380,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1920,
+     "h": 1080
+    },
+    "overflowX": false,
+    "vw": 1920,
+    "vh": 1080
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1896,
+      "h": 77
+     },
+     "compass": {
+      "x": 700,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": null,
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 319.18353271484375,
+      "y": 706.7391357421875,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 1448,
+     "y": 12,
+     "w": 460,
+     "h": 1056
+    },
+    "tabInfo": {
+     "scrollbar": true,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Historical Story",
+       "clipped": false
+      },
+      {
+       "label": "Technical Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Mission Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": true
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1920,
+     "h": 1080
+    },
+    "overflowX": false,
+    "vw": 1920,
+    "vh": 1080
+   }
+  },
+  "1600x900": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1576,
+      "h": 77
+     },
+     "compass": {
+      "x": 540,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 494.8046875,
+      "y": 128,
+      "w": 610.390625,
+      "h": 52
+     },
+     "prompt": {
+      "x": 563.125,
+      "y": 736,
+      "w": 473.75,
+      "h": 44
+     },
+     "minimap": {
+      "x": 16,
+      "y": 676,
+      "w": 200,
+      "h": 200
+     },
+     "keys": {
+      "x": 954.984375,
+      "y": 863.203125,
+      "w": 629.015625,
+      "h": 22.796875
+     },
+     "bubble": {
+      "x": 609.9996948242188,
+      "y": 246.68426513671875,
+      "w": 380,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900
+    },
+    "overflowX": false,
+    "vw": 1600,
+    "vh": 900
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1576,
+      "h": 77
+     },
+     "compass": {
+      "x": 540,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 494.8046875,
+      "y": 128,
+      "w": 610.390625,
+      "h": 52
+     },
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 234.31961059570312,
+      "y": 576.0169677734375,
+      "w": 379.9999694824219,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 1128,
+     "y": 12,
+     "w": 460,
+     "h": 876
+    },
+    "tabInfo": {
+     "scrollbar": true,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Historical Story",
+       "clipped": false
+      },
+      {
+       "label": "Technical Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Mission Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": true
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900
+    },
+    "overflowX": false,
+    "vw": 1600,
+    "vh": 900
+   }
+  },
+  "1366x768": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1342,
+      "h": 77
+     },
+     "compass": {
+      "x": 423,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 377.8046875,
+      "y": 128,
+      "w": 610.390625,
+      "h": 52
+     },
+     "prompt": {
+      "x": 446.125,
+      "y": 604,
+      "w": 473.75,
+      "h": 44
+     },
+     "minimap": {
+      "x": 16,
+      "y": 544,
+      "w": 200,
+      "h": 200
+     },
+     "keys": {
+      "x": 720.984375,
+      "y": 731.203125,
+      "w": 629.015625,
+      "h": 22.796875
+     },
+     "bubble": {
+      "x": 492.99969482421875,
+      "y": 195.75009155273438,
+      "w": 380,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1366,
+     "h": 768
+    },
+    "overflowX": false,
+    "vw": 1366,
+    "vh": 768
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1342,
+      "h": 77
+     },
+     "compass": {
+      "x": 423,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 377.8046875,
+      "y": 128,
+      "w": 610.390625,
+      "h": 52
+     },
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 172.41940307617188,
+      "y": 480.154052734375,
+      "w": 380.0000305175781,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 894,
+     "y": 12,
+     "w": 460,
+     "h": 744
+    },
+    "tabInfo": {
+     "scrollbar": true,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Historical Story",
+       "clipped": false
+      },
+      {
+       "label": "Technical Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Mission Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": true
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1366,
+     "h": 768
+    },
+    "overflowX": false,
+    "vw": 1366,
+    "vh": 768
+   }
+  },
+  "1280x720": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1256,
+      "h": 77
+     },
+     "compass": {
+      "x": 380,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 334.8046875,
+      "y": 128,
+      "w": 610.390625,
+      "h": 52
+     },
+     "prompt": {
+      "x": 403.125,
+      "y": 556,
+      "w": 473.75,
+      "h": 44
+     },
+     "minimap": {
+      "x": 16,
+      "y": 496,
+      "w": 200,
+      "h": 200
+     },
+     "keys": {
+      "x": 634.984375,
+      "y": 683.203125,
+      "w": 629.015625,
+      "h": 22.796875
+     },
+     "bubble": {
+      "x": 449.999755859375,
+      "y": 177.22866821289062,
+      "w": 380,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 720
+    },
+    "overflowX": false,
+    "vw": 1280,
+    "vh": 720
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1256,
+      "h": 77
+     },
+     "compass": {
+      "x": 380,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 334.8046875,
+      "y": 128,
+      "w": 610.390625,
+      "h": 52
+     },
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 149.4556884765625,
+      "y": 445.29486083984375,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 808,
+     "y": 12,
+     "w": 460,
+     "h": 696
+    },
+    "tabInfo": {
+     "scrollbar": true,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Historical Story",
+       "clipped": false
+      },
+      {
+       "label": "Technical Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Mission Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": true
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 720
+    },
+    "overflowX": false,
+    "vw": 1280,
+    "vh": 720
+   }
+  },
+  "1024x768": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1000,
+      "h": 77
+     },
+     "compass": {
+      "x": 252,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 256,
+      "y": 128,
+      "w": 512,
+      "h": 83
+     },
+     "prompt": {
+      "x": 275.125,
+      "y": 604,
+      "w": 473.75,
+      "h": 44
+     },
+     "minimap": {
+      "x": 16,
+      "y": 544,
+      "w": 200,
+      "h": 200
+     },
+     "keys": {
+      "x": 434.5625,
+      "y": 708.40625,
+      "w": 573.4375,
+      "h": 45.59375
+     },
+     "bubble": {
+      "x": 321.9997253417969,
+      "y": 195.75015258789062,
+      "w": 380.0000305175781,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1024,
+     "h": 768
+    },
+    "overflowX": false,
+    "vw": 1024,
+    "vh": 768
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1000,
+      "h": 77
+     },
+     "compass": {
+      "x": 252,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 256,
+      "y": 128,
+      "w": 512,
+      "h": 83
+     },
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 1.4194183349609375,
+      "y": 480.154052734375,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 552,
+     "y": 12,
+     "w": 460,
+     "h": 744
+    },
+    "tabInfo": {
+     "scrollbar": true,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Historical Story",
+       "clipped": false
+      },
+      {
+       "label": "Technical Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Mission Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": true
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1024,
+     "h": 768
+    },
+    "overflowX": false,
+    "vw": 1024,
+    "vh": 768
+   }
+  },
+  "768x1024": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 744,
+      "h": 123
+     },
+     "compass": {
+      "x": 124,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 192,
+      "y": 128,
+      "w": 384,
+      "h": 67
+     },
+     "prompt": {
+      "x": 147.125,
+      "y": 860,
+      "w": 473.75,
+      "h": 44
+     },
+     "minimap": {
+      "x": 16,
+      "y": 800,
+      "w": 200,
+      "h": 200
+     },
+     "keys": {
+      "x": 321.921875,
+      "y": 964.40625,
+      "w": 430.078125,
+      "h": 45.59375
+     },
+     "bubble": {
+      "x": 193.99957275390625,
+      "y": 294.5313720703125,
+      "w": 380,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 768,
+     "h": 1024
+    },
+    "overflowX": false,
+    "vw": 768,
+    "vh": 1024
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 744,
+      "h": 123
+     },
+     "compass": {
+      "x": 124,
+      "y": 86,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 192,
+      "y": 128,
+      "w": 384,
+      "h": 67
+     },
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 18,
+      "y": 796.40625,
+      "w": 248,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 296,
+     "y": 12,
+     "w": 460,
+     "h": 1000
+    },
+    "tabInfo": {
+     "scrollbar": true,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Historical Story",
+       "clipped": false
+      },
+      {
+       "label": "Technical Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Mission Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": true
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 768,
+     "h": 1024
+    },
+    "overflowX": false,
+    "vw": 768,
+    "vh": 1024
+   }
+  },
+  "390x844": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 366,
+      "h": 155
+     },
+     "compass": {
+      "x": 16,
+      "y": 176,
+      "w": 358,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 97.5,
+      "y": 128,
+      "w": 195,
+      "h": 89
+     },
+     "prompt": {
+      "x": 16,
+      "y": 624,
+      "w": 358,
+      "h": 44
+     },
+     "minimap": {
+      "x": 264,
+      "y": 214,
+      "w": 110,
+      "h": 110
+     },
+     "keys": null,
+     "bubble": {
+      "x": 38.99974060058594,
+      "y": 225.07589721679688,
+      "w": 312,
+      "h": 100.59375
+     },
+     "touch": {
+      "x": 22,
+      "y": 682,
+      "w": 128,
+      "h": 128
+     },
+     "touchBtns": {
+      "x": 300,
+      "y": 648,
+      "w": 72,
+      "h": 156
+     }
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 390,
+     "h": 844
+    },
+    "overflowX": false,
+    "vw": 390,
+    "vh": 844
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 366,
+      "h": 155
+     },
+     "compass": {
+      "x": 16,
+      "y": 176,
+      "w": 358,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 97.5,
+      "y": 128,
+      "w": 195,
+      "h": 89
+     },
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": null,
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 12,
+     "y": 12,
+     "w": 366,
+     "h": 820
+    },
+    "tabInfo": {
+     "scrollbar": true,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Historical Story",
+       "clipped": false
+      },
+      {
+       "label": "Technical Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Mission Timeline",
+       "clipped": true
+      },
+      {
+       "label": "Science",
+       "clipped": true
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 390,
+     "h": 844
+    },
+    "overflowX": false,
+    "vw": 390,
+    "vh": 844
+   }
+  }
+ },
+ "errors": []
+}

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "merb-traverse",
+    "missionId": "mer-opportunity",
+    "objectId": "opportunity-rover",
+    "frameId": "merb-traverse-corrected",
+    "status": "partial",
+    "product": {
+      "name": "MERB_traverse_5130.csv",
+      "url": "https://an.rsl.wustl.edu/mera/AN/meri/MER/traverse/MERB_traverse_5130.csv",
+      "producer": "June Wang, Washington University in St. Louis (PDS Geosciences Node); corrections by science team member Tim Parker",
+      "pdsArchived": false,
+      "solRange": [
+        1,
+        5130
+      ],
+      "sizeBytes": 1463086
+    },
+    "uncertaintyM": {
+      "value": null,
+      "status": "unverified",
+      "sources": [
+        "an-mer-traverse"
+      ],
+      "note": "Not stated by the product. Locally (Victoria rim): 14.5 m RMS radial scatter of the rim drive about a circle; absolute: 316-335 m unresolved."
+    },
+    "points": [],
+    "notes": "Downloaded with approval (Stage 2), SHA-256 prefix bd0a50b39c62f021. 21,104 drives, sols 1-5130 (last START_SOL 5076). One START_SOL decrease (2170 -> 2169). Frame: local east/north metres from the landing site (verified locally: Eagle exit sol, Endurance sols, Victoria rim radius). Absolute registration unresolved (see frame). Points stay out of this record until the frame is absolute; the Victoria prototype uses the rim-drive segment registered LOCALLY by the Victoria tie (unity Mars/Data/victoria_route.json).",
+    "sources": [
+      "an-mer-traverse",
+      "naif-mer1-spice",
+      "hirise-dtm-victoria"
+    ]
+  }
+]

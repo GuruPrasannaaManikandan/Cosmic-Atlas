@@ -1,0 +1,92 @@
+{
+ "rows": 21104,
+ "solRange": [
+  1,
+  5081
+ ],
+ "T1": {
+  "sol1Row": [
+   0.0,
+   0.0
+  ],
+  "earlyRows": 180,
+  "earlyXRange": [
+   -6.680691238,
+   10.72869977
+  ],
+  "earlyYRange": [
+   -19.25042714,
+   9.055078556
+  ],
+  "firstSolOutsideEagleGrid": 57
+ },
+ "T2": {
+  "rowsInsideEnduranceGrid": 995,
+  "solsInside": [
+   94,
+   319
+  ]
+ },
+ "T3": {
+  "victoriaCentre": {
+   "lat": -2.0513630760095034,
+   "lonE": 354.5042359725547,
+   "rimCrestRadiusM": 408.7481717480011,
+   "crestCircleRmsM": 17.065455517549964,
+   "crestAzimuthBins": 360
+  },
+  "nasa-doppler": {
+   "pointsNearRim": 1051,
+   "solsNearRim": [
+    1014,
+    1196
+   ],
+   "traverseCircleRadiusM": 153.96100911803546,
+   "offsetEastM": 324.6892577388177,
+   "offsetNorthM": -68.39281463144289,
+   "offsetM": 331.8142419851735,
+   "radialSpreadRmsM": 33.29968965917874,
+   "impliedOrigin": {
+    "lat": -1.9494538281507814,
+    "lonE": 354.4796508726
+   }
+  },
+  "cartographic": {
+   "pointsNearRim": 995,
+   "solsNearRim": [
+    1041,
+    1187
+   ],
+   "traverseCircleRadiusM": 164.7037985393192,
+   "offsetEastM": 307.02310204071136,
+   "offsetNorthM": -176.2329097899492,
+   "offsetM": 354.00737800183407,
+   "radialSpreadRmsM": 19.939087162304855,
+   "impliedOrigin": {
+    "lat": -1.949173155784062,
+    "lonE": 354.47858265501714
+   }
+  }
+ },
+ "finalPoint": {
+  "nasa-doppler": {
+   "sol": 5081,
+   "lat": -2.3310527845431768,
+   "lonE": 354.6508153880859,
+   "insideEndeavourDtm": true
+  },
+  "cartographic": {
+   "sol": 5081,
+   "lat": -2.328952784543177,
+   "lonE": 354.6500451679631,
+   "insideEndeavourDtm": true
+  }
+ },
+ "startSolDecreases": [
+  [
+   2170,
+   2169
+  ]
+ ],
+ "startSolDecreaseCount": 1
+}

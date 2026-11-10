@@ -1,0 +1,233 @@
+{
+ "checks": [
+  {
+   "check": "T1 time bar lists the Moon's sourced mission events and jumps the clock (first = Apollo 11 launch 13:32 UT)",
+   "pass": true,
+   "detail": {
+    "events": 25,
+    "jumpedTo": -14552880000
+   }
+  },
+  {
+   "check": "E1 approaching the Moon shows the contextual EXPLORE MOON action",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "E2 site picker: Tranquility Base explorable, other Apollo sites catalogued, Chandrayaan-3 labelled non-NASA",
+   "pass": true,
+   "detail": "CHOOSE A LANDING SITE\nExplore the Moon\n\u2715\nTranquility Base \u2014 Apollo 11\n0.67416\u00b0N, 23.47314\u00b0E \u00b7 3 historical objects at their LRO-measured positions\nDescend \u25be\nOceanus Procellarum \u2014 Apollo 12\n3.01280\u00b0S, "
+  },
+  {
+   "check": "E3 descent: surface canvas renders, orbital UI hidden",
+   "pass": true,
+   "detail": {
+    "surfaceCanvas": true,
+    "orbitalHidden": "hidden"
+   }
+  },
+  {
+   "check": "A1 astronaut stands on the ground at the start",
+   "pass": true,
+   "detail": {
+    "pos": [
+     -14,
+     -0.22409263249014688,
+     10
+    ]
+   }
+  },
+  {
+   "check": "L1 daylight at the Apollo 11 moonwalk date: low Sun in the east",
+   "pass": true,
+   "detail": "\u2934 Return to orbit"
+  },
+  {
+   "check": "A2 mouse drag turns the camera",
+   "pass": true,
+   "detail": {
+    "yawChange": -0.5279999999999996
+   }
+  },
+  {
+   "check": "A3 W walks toward where the camera looks, then stops (no drift)",
+   "pass": true,
+   "detail": {
+    "along": 2.7,
+    "across": -0.0
+   }
+  },
+  {
+   "check": "A4 astronaut turns to face the direction of travel",
+   "pass": true,
+   "detail": {
+    "facingError": 0.0
+   }
+  },
+  {
+   "check": "A5 Shift lopes faster than walking",
+   "pass": true,
+   "detail": {
+    "speed": 2.2
+   }
+  },
+  {
+   "check": "A6 Space hops under lunar gravity (~0.7 m) and lands again",
+   "pass": true,
+   "detail": {
+    "apexM": 0.68
+   }
+  },
+  {
+   "check": "A7 cannot walk through the Lunar Module descent stage",
+   "pass": true,
+   "detail": {
+    "distFromLmCentre": 3.65,
+    "x": -3.64
+   }
+  },
+  {
+   "check": "A9 the Lunar Module on the surface is the official NASA model with its ascent stage removed",
+   "pass": true,
+   "detail": {
+    "removed": 85,
+    "height": 2.82
+   }
+  },
+  {
+   "check": "D1 walking up to the Lunar Module discovers it",
+   "pass": true,
+   "detail": [
+    "a11-lm-descent",
+    "a11-lrrr"
+   ]
+  },
+  {
+   "check": "D2 next to the retroreflector: E-to-inspect prompt; newly found hardware gets a DISCOVERED banner",
+   "pass": true,
+   "detail": {
+    "banner": "a11-easep-pse",
+    "near": "a11-lrrr",
+    "disc": [
+     "a11-lm-descent",
+     "a11-lrrr",
+     "a11-easep-pse"
+    ],
+    "prompt": "E\nInspect Laser Ranging Retroreflector\nInspect"
+   }
+  },
+  {
+   "check": "D3 E opens the record of the right object (Apollo 11 LRRR)",
+   "pass": true,
+   "detail": "NASA HARDWARE\nLaser Ranging Retroreflector\n\nApollo 11 \u00b7 retroreflector\n\n\u25be\n\u2715\nInspect\nStory\nSpecifications\nTimeline\nScienc"
+  },
+  {
+   "check": "D4 inspecting a component focuses it",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "D4b the LM record offers the NASA model and the dimension-accurate reconstruction",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "D5 specifications show the sourced LRO position and verification badges",
+   "pass": true,
+   "detail": "NASA HARDWARE\nLaser Ranging Retroreflector\n\nApollo 11 \u00b7 retroreflector\n\n\u25be\n\u2715\nInspect\nStory\nSpecifications\nTimeline\nScience\nBuilt by\nNASA (PI: C. O. Alley, Univer"
+  },
+  {
+   "check": "D6 story tab: short story from the catalogue with a full scientific version",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "D7 mission timeline lists Apollo 11 milestones in order",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "D8 Return to Exploration closes the record",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "M1 M opens the surface map listing the hardware with distances and the terrain source",
+   "pass": true,
+   "detail": "SURFACE MAP\nTranquility Base \u2014 Apollo 11\n\nYou: 0.67348\u00b0N 23.47300\u00b0E \u00b7 Mean Earth/Polar Axis frame\n\n\uff0b\n\uff0d\nCenter on me\nClose (M)\nHISTORICAL HARDWARE\nLaser Ranging "
+  },
+  {
+   "check": "M2 choosing a destination sets a waypoint",
+   "pass": true,
+   "detail": "a11-easep-pse"
+  },
+  {
+   "check": "M3 HUD guides to the waypoint (distance + bearing)",
+   "pass": true,
+   "detail": "\u25ce EASEP passive seismic station \u00b7 9 m \u00b7 bearing 151\u00b0"
+  },
+  {
+   "check": "A8 V switches to first person",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "P1 surface frame rate (headless Chrome, balanced quality)",
+   "pass": true,
+   "detail": {
+    "fps": 60.2
+   }
+  },
+  {
+   "check": "L2 a lunar-night date shows the night warning (Sun below the horizon)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "L3 the warning's button returns the clock to the moonwalk",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "R1 surface HUD at 1366x768: no horizontal overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "R1 surface HUD at 390x844: no horizontal overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "R2 Escape pauses with a menu",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "R3 Return to orbit restores the view and selection next to the Moon",
+   "pass": true,
+   "detail": {
+    "posDeltaLy": 0.0
+   }
+  },
+  {
+   "check": "R4 existing Travel Mode still starts exactly at the restored view, at rest",
+   "pass": true,
+   "detail": {
+    "phase": "travel",
+    "d": 0,
+    "v": 0
+   }
+  },
+  {
+   "check": "Z1 no console errors",
+   "pass": true,
+   "detail": []
+  }
+ ],
+ "errors": [],
+ "metrics": {
+  "surfaceFps": 60.2
+ },
+ "browser": "chrome 157.0.8103.39"
+}

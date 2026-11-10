@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "components.schema.json",
+  "title": "Hardware component records for engineering inspection",
+  "type": "object",
+  "required": ["plannedObjects", "components"],
+  "additionalProperties": false,
+  "properties": {
+    "plannedObjects": {
+      "description": "Objects referenced here that are not yet in the mission catalogue (frontend/src/missions/catalog)",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "missionId", "sources"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/id" },
+          "name": { "type": "string" },
+          "missionId": { "type": "string" },
+          "sources": { "$ref": "common.schema.json#/$defs/sourceIds" }
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "objectId", "name", "parentId", "category", "function", "representation", "views", "sources"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "$ref": "common.schema.json#/$defs/id" },
+          "objectId": { "type": "string" },
+          "name": { "type": "string", "minLength": 1 },
+          "parentId": { "type": ["string", "null"] },
+          "category": { "enum": ["vehicle", "structure", "mobility", "power", "thermal", "avionics", "telecom", "instrument", "mechanism", "edl"] },
+          "function": { "$ref": "common.schema.json#/$defs/storyText" },
+          "massKg": { "$ref": "common.schema.json#/$defs/fact" },
+          "dimensions": { "$ref": "common.schema.json#/$defs/fact" },
+          "quantity": { "$ref": "common.schema.json#/$defs/fact" },
+          "representation": { "enum": ["nasa-model", "reconstruction", "illustrative", "none"] },
+          "modelNode": { "type": "string" },
+          "views": {
+            "type": "object",
+            "required": ["exterior", "exploded", "cutaway", "operation"],
+            "additionalProperties": false,
+            "properties": {
+              "exterior": { "$ref": "common.schema.json#/$defs/implStatus" },
+              "exploded": { "$ref": "common.schema.json#/$defs/implStatus" },
+              "cutaway": { "$ref": "common.schema.json#/$defs/implStatus" },
+              "operation": { "$ref": "common.schema.json#/$defs/implStatus" }
+            }
+          },
+          "viewSources": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "exploded": { "$ref": "common.schema.json#/$defs/sourceIds" },
+              "cutaway": { "$ref": "common.schema.json#/$defs/sourceIds" },
+              "operation": { "$ref": "common.schema.json#/$defs/sourceIds" }
+            }
+          },
+          "sources": { "$ref": "common.schema.json#/$defs/sourceIds" }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+{
+ "rimCrestRadiusM": 408.7481717480011,
+ "nasa-doppler": {
+  "trueCentreENU": [
+   1781.1211871472847,
+   -6109.032656284837
+  ],
+  "traverseCentre": [
+   1523.2138905976713,
+   -6322.488063755625
+  ],
+  "inliers": 2104,
+  "pointsWithin1500m": 3338,
+  "inlierSolRange": [
+   951,
+   1686
+  ],
+  "inlierRadialRmsM": 14.544074389242198,
+  "offsetM": 334.7825930242649,
+  "offsetEN": [
+   257.9072965496134,
+   213.4554074707885
+  ],
+  "rotationDeg": 2.7087621817206227,
+  "scale": 0.9784725731904077,
+  "distanceTraverse": 6503.386492654581,
+  "distanceTrue": 6363.385315919469
+ },
+ "cartographic": {
+  "trueCentreENU": [
+   1826.7385957403628,
+   -6233.509521083779
+  ],
+  "traverseCentre": [
+   1523.2138905976713,
+   -6322.488063755625
+  ],
+  "inliers": 2104,
+  "pointsWithin1500m": 3322,
+  "inlierSolRange": [
+   951,
+   1686
+  ],
+  "inlierRadialRmsM": 14.544074389242198,
+  "offsetM": 316.298004558934,
+  "offsetEN": [
+   303.5247051426916,
+   88.9785426718463
+  ],
+  "rotationDeg": 2.7877311229294963,
+  "scale": 0.9988121173138932,
+  "distanceTraverse": 6503.386492654581,
+  "distanceTrue": 6495.661232438896
+ }
+}

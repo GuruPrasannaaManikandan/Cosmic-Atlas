@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "routes.schema.json",
+  "title": "Historical routes (traverses, flight paths) with coordinate provenance",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "missionId", "objectId", "frameId", "status", "product", "uncertaintyM", "points", "notes", "sources"],
+    "additionalProperties": false,
+    "properties": {
+      "id": { "$ref": "common.schema.json#/$defs/id" },
+      "missionId": { "type": "string" },
+      "objectId": { "type": "string" },
+      "frameId": { "type": "string" },
+      "status": { "$ref": "common.schema.json#/$defs/implStatus" },
+      "product": {
+        "type": "object",
+        "required": ["name", "url", "producer", "pdsArchived", "solRange"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "url": { "type": "string", "pattern": "^https://" },
+          "producer": { "type": "string" },
+          "pdsArchived": { "type": "boolean" },
+          "solRange": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "minItems": 2, "maxItems": 2 },
+          "sizeBytes": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "uncertaintyM": { "$ref": "common.schema.json#/$defs/fact" },
+      "points": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["sol", "x", "y"],
+          "additionalProperties": false,
+          "properties": {
+            "sol": { "type": "integer", "minimum": 0 },
+            "endSol": { "type": "integer", "minimum": 0 },
+            "x": { "type": "number" },
+            "y": { "type": "number" },
+            "z": { "type": "number" }
+          }
+        }
+      },
+      "notes": { "type": "string" },
+      "sources": { "$ref": "common.schema.json#/$defs/sourceIds" }
+    }
+  }
+}

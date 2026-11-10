@@ -1,0 +1,32 @@
+{
+ "site": "apollo-15",
+ "apollo": 15,
+ "width": 1801,
+ "height": 801,
+ "cellM": 2.0000000000006,
+ "x0": -1800.0,
+ "z0": -800.0,
+ "hMin": -2071.143052208882,
+ "hMax": -1890.0164195405068,
+ "encoding": "uint16 little-endian, row-major (rows = +z south); 0 = no data; h = hMin + (v - 1) / 65534 * (hMax - hMin)",
+ "heightRef": "metres relative to the 1737.4 km lunar sphere (DTM datum)",
+ "lmHeightDtm": -1923.2968401302874,
+ "lmElevationLroc": -1931,
+ "lmDeltaM": 7.7031598697126356,
+ "validFraction": 0.8485201382780131,
+ "source": {
+  "product": "NAC_DTM_APOLLO15",
+  "productPage": "https://data.lroc.im-ldi.com/lroc/view_rdr_product/NAC_DTM_APOLLO15",
+  "file": "https://pds.mcp.nasa.gov/data/store/img/lunar_reconnaissance_orbiter/pds4/lroc/lro-l-lroc-5-rdr/LROLRC_2001/DATA/SDP/NAC_DTM/APOLLO15/NAC_DTM_APOLLO15.TIF",
+  "crs": "+proj=eqc +lat_ts=26 +lat_0=0 +lon_0=180 +x_0=0 +y_0=0 +R=1737400 +units=m +no_defs=True",
+  "postSpacingM": 2.0000000000006,
+  "rowsRead": [
+   5719,
+   6523
+  ],
+  "bytesRead": 8216880,
+  "accuracy": "tied to LOLA (see the product README)"
+ },
+ "lmLat": 26.13239,
+ "lmLon": 3.6333
+}

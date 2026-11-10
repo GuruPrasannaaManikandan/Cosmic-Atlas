@@ -8,6 +8,7 @@ import { VALID_FROM, VALID_TO, isModelRange, planetRootPos } from '../astro/ephe
 import { api, HorizonsResult } from './api'
 import { labelState } from '../scene/labelState'
 import { startEvent } from '../events/eventState'
+import { timelineEvents, missionsForBody } from '../missions'
 
 export const CAT_ICON: Record<string, string> = {
   supercluster: '◌',
@@ -520,6 +521,7 @@ export function TimeBar() {
       <button className="btn ghost" onClick={() => setSim(Date.now())}>
         Now
       </button>
+      <MissionEventSelect />
       <span
         className={'pill ' + (inRange ? '' : 'bad')}
         title="Planet positions come from approximate JPL Keplerian elements (1800–2050), not a high-precision numerical integration."
@@ -527,6 +529,40 @@ export function TimeBar() {
         {inRange ? 'Keplerian model (JPL)' : 'Outside model range'}
       </span>
     </div>
+  )
+}
+
+/**
+ * Historical mission milestones from the curated catalogue (src/missions). Picking one moves the simulation clock to
+ * that moment, so the planets, the Moon phase and the surface lighting all show that historical date. Shows the
+ * selected body's missions when it has any, otherwise every mission.
+ */
+export function MissionEventSelect() {
+  const sel = useStore((s) => s.selectedId)
+  const setSim = useStore((s) => s.setSim)
+  const setPlaying = useStore((s) => s.setPlaying)
+  const scoped = sel && missionsForBody(sel).length ? sel : null
+  const events = useMemo(() => timelineEvents(scoped).filter((e) => e.ms >= VALID_FROM && e.ms <= VALID_TO), [scoped])
+  return (
+    <select
+      className="mission-events"
+      value=""
+      aria-label={scoped ? `Mission events at ${BY_ID[scoped]?.name ?? scoped}` : 'Mission events'}
+      title="Jump the simulation clock to a historical mission event (sourced dates; date-only events jump to 00:00 UTC)"
+      onChange={(e) => {
+        const ev = events[+e.target.value]
+        if (!ev) return
+        setPlaying(false)
+        setSim(ev.ms)
+      }}
+    >
+      <option value="">{scoped ? `🛰 ${BY_ID[scoped]?.name ?? scoped} missions…` : '🛰 Mission events…'}</option>
+      {events.map((e, i) => (
+        <option key={i} value={i}>
+          {e.date.slice(0, 10)} · {e.missionName} — {e.title}
+        </option>
+      ))}
+    </select>
   )
 }
 

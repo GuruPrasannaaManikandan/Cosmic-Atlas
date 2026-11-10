@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "events.schema.json",
+  "title": "Mission event records for the Mission Time Machine",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["id", "missionId", "kind", "title", "description", "time", "status", "sources"],
+    "additionalProperties": false,
+    "properties": {
+      "id": { "$ref": "common.schema.json#/$defs/id" },
+      "missionId": { "type": "string" },
+      "kind": {
+        "enum": ["launch", "flyby", "arrival", "orbit-insertion", "landing", "surface-op", "release", "last-contact", "end", "other",
+                 "traverse", "science", "environment", "hardware"]
+      },
+      "title": { "type": "string", "minLength": 1 },
+      "description": { "type": "string", "minLength": 1 },
+      "time": {
+        "type": "object",
+        "required": ["utc", "basis", "sol"],
+        "additionalProperties": false,
+        "properties": {
+          "utc": { "type": ["string", "null"] },
+          "basis": { "enum": ["spacecraft-utc", "earth-received-utc", "utc-unspecified", "date-only", "month-only", "sol-only"] },
+          "sol": { "type": ["integer", "null"], "minimum": 0 },
+          "solSources": { "$ref": "common.schema.json#/$defs/sourceIds" },
+          "note": { "type": "string" }
+        }
+      },
+      "place": {
+        "type": "object",
+        "required": ["frameId", "x", "y"],
+        "additionalProperties": false,
+        "properties": { "frameId": { "type": "string" }, "x": { "type": "number" }, "y": { "type": "number" }, "z": { "type": "number" } }
+      },
+      "status": { "$ref": "common.schema.json#/$defs/verification" },
+      "sources": { "$ref": "common.schema.json#/$defs/sourceIds", "minItems": 1 },
+      "camera": {
+        "type": "object",
+        "required": ["mode", "durationS"],
+        "additionalProperties": false,
+        "properties": {
+          "mode": { "enum": ["orbit-target", "follow", "fixed", "flyover"] },
+          "targetId": { "type": "string" },
+          "durationS": { "type": "number", "minimum": 0 }
+        }
+      }
+    }
+  }
+}

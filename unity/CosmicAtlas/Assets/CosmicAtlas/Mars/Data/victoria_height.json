@@ -1,0 +1,31 @@
+{
+ "source": "HiRISE DTM DTEEC_001414_1780_001612_1780_U01 (MRO-M-HIRISE-5-DTM-V1.0)",
+ "width": 1279,
+ "height": 1694,
+ "rowOrder": "north-to-south",
+ "spacingM": [
+  1.011206615941957,
+  1.0118550737574
+ ],
+ "projectionSpacingM": [
+  1.0118550737574,
+  1.0118550737574
+ ],
+ "originLatLon": [
+  -2.0513630760095034,
+  354.5042359725547
+ ],
+ "originNote": "Victoria crater centre fitted to the DTM rim crest (fit_traverse.py)",
+ "gridEastOfOriginM": -651.8685040554755,
+ "gridNorthOfOriginM": 895.2992953277717,
+ "upMinM": -65.33781621055887,
+ "upMaxM": 14.23054188626482,
+ "quantStepM": 0.0012141538452837258,
+ "nodata": 65535,
+ "elevationReferenceM": -1387.5589599609375,
+ "elevationDatum": "Mars 2000 areoid (label NOTE)",
+ "curvature": "up includes the sphere curvature about the origin (R 3396.19 km)",
+ "planarGridVsEnuMaxM": 0.00719753361365865,
+ "validCells": 1749782,
+ "cells": 2166626
+}

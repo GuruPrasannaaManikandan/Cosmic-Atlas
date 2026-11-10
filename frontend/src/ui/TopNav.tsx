@@ -23,6 +23,7 @@ export interface TopNavActions {
   toggleData(): void
   openHelp(): void
   openAbout(): void
+  openArchive(): void
   dataOpen: boolean
 }
 
@@ -49,6 +50,7 @@ export function TopNav(a: TopNavActions) {
     { key: 'data', icon: '⌬', label: 'Data Intelligence', title: 'Ingest and map unfamiliar astronomy datasets', run: a.toggleData, pressed: a.dataOpen },
     { key: 'help', icon: '?', label: 'Help', title: 'Keyboard & navigation controls', run: a.openHelp },
     { key: 'notes', icon: 'ⓘ', label: 'Notes', title: 'Scientific notes & data integrity', run: a.openAbout },
+    { key: 'archive', icon: '🛰', label: 'Spacecraft', title: 'Spacecraft archive: official NASA 3D models, validated against sourced dimensions', run: a.openArchive },
   ]
 
   // close on outside click / Escape; focus the first item on open and return focus to the button on close
