@@ -1,0 +1,29 @@
+/* Contextual Controls panel (Gameplay Controls directive, Part 21) and the flight piloting switch (Part 16.3). */
+.controls-panel { display: grid; gap: 12px; color: var(--txt); font-size: 13px; }
+.controls-title { margin: 0; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--cy); }
+.controls-list { display: grid; gap: 6px; margin: 0; }
+.controls-row { display: grid; grid-template-columns: minmax(96px, max-content) 1fr; gap: 12px; align-items: center; }
+.controls-row dt { display: flex; flex-wrap: wrap; gap: 4px; margin: 0; }
+.controls-row dd { margin: 0; color: var(--txt-dim); }
+.controls-row kbd {
+  font-family: var(--font-mono); font-size: 11.5px; line-height: 1; padding: 4px 7px; border-radius: 6px;
+  border: 1px solid var(--line-hi); background: rgba(103, 232, 249, 0.08); color: var(--txt); white-space: nowrap;
+}
+.controls-settings { display: grid; gap: 8px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 10px 12px; margin: 0; }
+.controls-settings legend { padding: 0 6px; font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--mut); }
+.controls-settings label { display: flex; align-items: center; gap: 8px; color: var(--txt-dim); }
+.controls-settings input[type='range'] { flex: 1; min-width: 120px; accent-color: var(--cy); }
+.controls-settings input[type='checkbox'] { accent-color: var(--cy); }
+@media (max-width: 520px) {
+  .controls-row { grid-template-columns: 1fr; gap: 2px; }
+}
+
+/* flight: automatic / manual piloting switch */
+.pilot-switch { display: inline-flex; border: 1px solid var(--line-hi); border-radius: 999px; overflow: hidden; }
+.pilot-switch button {
+  appearance: none; border: 0; background: transparent; color: var(--txt-dim); font: 600 11px/1 var(--font);
+  letter-spacing: 0.06em; text-transform: uppercase; padding: 7px 12px; cursor: pointer;
+}
+.pilot-switch button[aria-pressed='true'] { background: rgba(103, 232, 249, 0.18); color: var(--txt); }
+.pilot-switch button:focus-visible { outline: 2px solid var(--cy); outline-offset: -2px; }
+.pilot-hint { font-size: 11.5px; color: var(--mut); }
