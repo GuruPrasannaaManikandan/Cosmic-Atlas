@@ -113,13 +113,13 @@
      "a11-lrrr",
      "a11-easep-pse"
     ],
-    "prompt": "E\nInspect\nLaser Ranging Retroreflector\nInspect"
+    "prompt": "E\nInspect Laser Ranging Retroreflector\nInspect"
    }
   },
   {
    "check": "D3 E opens the record of the right object (Apollo 11 LRRR)",
    "pass": true,
-   "detail": "NASA HARDWARE\nLaser Ranging Retroreflector\n\nApollo 11 \u00b7 retroreflector\n\n\u2715\nInspect\nHistorical Story\nTechnical Specificati"
+   "detail": "NASA HARDWARE\nLaser Ranging Retroreflector\n\nApollo 11 \u00b7 retroreflector\n\n\u25be\n\u2715\nInspect\nStory\nSpecifications\nTimeline\nScienc"
   },
   {
    "check": "D4 inspecting a component focuses it",
@@ -134,7 +134,7 @@
   {
    "check": "D5 specifications show the sourced LRO position and verification badges",
    "pass": true,
-   "detail": "NASA HARDWARE\nLaser Ranging Retroreflector\n\nApollo 11 \u00b7 retroreflector\n\n\u2715\nInspect\nHistorical Story\nTechnical Specifications\nMission Timeline\nScience\nBuilt by\nNA"
+   "detail": "NASA HARDWARE\nLaser Ranging Retroreflector\n\nApollo 11 \u00b7 retroreflector\n\n\u25be\n\u2715\nInspect\nStory\nSpecifications\nTimeline\nScience\nBuilt by\nNASA (PI: C. O. Alley, Univer"
   },
   {
    "check": "D6 story tab: short story from the catalogue with a full scientific version",
@@ -175,7 +175,7 @@
    "check": "P1 surface frame rate (headless Chrome, balanced quality)",
    "pass": true,
    "detail": {
-    "fps": 60.2
+    "fps": 60.1
    }
   },
   {
@@ -227,7 +227,7 @@
  ],
  "errors": [],
  "metrics": {
-  "surfaceFps": 60.2
+  "surfaceFps": 60.1
  },
  "browser": "chrome 157.0.8103.39"
 }

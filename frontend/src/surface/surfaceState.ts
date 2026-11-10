@@ -17,6 +17,8 @@ export interface SurfaceUI {
   /** object within interaction range */
   nearbyId: string | null
   panel: { objectId: string; tab: PanelTab } | null
+  /** inspector minimised to give the 3-D view back (side rail on wide screens, header-only sheet on narrow) */
+  panelCollapsed: boolean
   /** focused component while inspecting */
   component: string | null
   waypointId: string | null
@@ -38,6 +40,7 @@ const initial = {
   banner: null,
   nearbyId: null,
   panel: null,
+  panelCollapsed: false,
   component: null,
   waypointId: null,
   lmModel: 'nasa' as 'nasa' | 'reconstruction',
@@ -52,5 +55,5 @@ export const useSurface = create<SurfaceUI>((set) => ({
 }))
 
 /** test/automation handle (read + a few safe actions), same pattern as window.__store / __nav */
-export const surfaceDebug: { teleport?: (x: number, z: number) => void; character?: () => unknown; camera?: () => unknown; terrain?: () => unknown; guide?: () => unknown } = {}
+export const surfaceDebug: { teleport?: (x: number, z: number) => void; character?: () => unknown; camera?: () => unknown; terrain?: () => unknown; guide?: () => unknown; inspectFrame?: () => unknown } = {}
 if (typeof window !== 'undefined') (window as any).__surface = { state: () => useSurface.getState(), debug: surfaceDebug }

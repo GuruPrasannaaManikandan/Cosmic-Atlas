@@ -7,12 +7,13 @@ import { useStore } from '../store/store'
 import { useSurface, PanelTab } from './surfaceState'
 import { VALID_FROM, VALID_TO } from '../astro/ephemeris'
 
-const TABS: { id: PanelTab; label: string }[] = [
-  { id: 'inspect', label: 'Inspect' },
-  { id: 'story', label: 'Historical Story' },
-  { id: 'specs', label: 'Technical Specifications' },
-  { id: 'timeline', label: 'Mission Timeline' },
-  { id: 'science', label: 'Science' },
+/** short visible labels; the accessible name always contains the visible label (WCAG 2.5.3) */
+const TABS: { id: PanelTab; label: string; name: string }[] = [
+  { id: 'inspect', label: 'Inspect', name: 'Inspect' },
+  { id: 'story', label: 'Story', name: 'Historical Story' },
+  { id: 'specs', label: 'Specifications', name: 'Technical Specifications' },
+  { id: 'timeline', label: 'Timeline', name: 'Mission Timeline' },
+  { id: 'science', label: 'Science', name: 'Science' },
 ]
 
 function Badge({ f }: { f: Fact<unknown> }) {
@@ -127,25 +128,66 @@ export function DiscoveryPanel() {
     }
   }
   const compParts = component ? partsForComponent(obj.id, component) : []
+  const collapsed = useSurface((s) => s.panelCollapsed)
+  const close = () => {
+    narrator.stop()
+    set({ panel: null, component: null, panelCollapsed: false })
+  }
+  // tablist keyboard model: arrows move between tabs (with wrap), Home / End jump; focus follows selection
+  const onTabKey = (e: React.KeyboardEvent) => {
+    const i = TABS.findIndex((t) => t.id === tab)
+    const to = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? (i + 1) % TABS.length : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? (i - 1 + TABS.length) % TABS.length : e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1 : -1
+    if (to < 0) return
+    e.preventDefault()
+    set({ panel: { ...panel, tab: TABS[to].id } })
+    requestAnimationFrame(() => document.getElementById(`dtab-${TABS[to].id}`)?.focus())
+  }
   const tab = panel.tab
   const loc = obj.location.value
 
   return (
-    <div className="discovery glass" role="dialog" aria-label={`${obj.name} details`}>
-      <header>
-        <span className="eyebrow">{obj.nasaHardware ? 'NASA HARDWARE' : `${obj.builtBy} HARDWARE — NOT NASA`}</span>
-        <h2>{obj.name}</h2>
-        <p className="muted">{mission.name} · {obj.category.replace(/-/g, ' ')}</p>
-        <button className="discovery-close" onClick={() => { narrator.stop(); set({ panel: null, component: null }) }} aria-label="Return to exploration">✕</button>
+    <aside className="discovery" aria-label={`${obj.name} record`} data-collapsed={collapsed ? 'true' : undefined}>
+      <header className="discovery-head">
+        <div className="discovery-title">
+          <span className="eyebrow">{obj.nasaHardware ? 'NASA HARDWARE' : `${obj.builtBy} HARDWARE — NOT NASA`}</span>
+          <h2>{obj.name}</h2>
+          <p className="discovery-meta">{mission.name} · {obj.category.replace(/-/g, ' ')}</p>
+        </div>
+        <div className="discovery-head-actions">
+          <button
+            className="discovery-icon"
+            onClick={() => set({ panelCollapsed: !collapsed })}
+            aria-expanded={!collapsed}
+            aria-controls="discovery-content"
+            aria-label={collapsed ? 'Show the record' : 'Hide the record to see the 3-D view'}
+            title={collapsed ? 'Show the record' : 'Hide the record (more 3-D view)'}
+          >
+            {collapsed ? '▸' : '▾'}
+          </button>
+          <button className="discovery-icon discovery-close" onClick={close} aria-label="Return to exploration" title="Return to exploration (Esc)">
+            ✕
+          </button>
+        </div>
       </header>
-      <nav className="discovery-tabs" role="tablist">
+      <div id="discovery-content" className="discovery-content" hidden={collapsed}>
+      <div className="discovery-tabs" role="tablist" aria-label="Record sections" onKeyDown={onTabKey}>
         {TABS.map((t) => (
-          <button key={t.id} role="tab" aria-selected={tab === t.id} className={tab === t.id ? 'on' : ''} onClick={() => set({ panel: { ...panel, tab: t.id } })}>
+          <button
+            key={t.id}
+            id={`dtab-${t.id}`}
+            role="tab"
+            aria-selected={tab === t.id}
+            aria-controls="discovery-body"
+            aria-label={t.name}
+            tabIndex={tab === t.id ? 0 : -1}
+            className={tab === t.id ? 'on' : ''}
+            onClick={() => set({ panel: { ...panel, tab: t.id } })}
+          >
             {t.label}
           </button>
         ))}
-      </nav>
-      <div className="discovery-body">
+      </div>
+      <div className="discovery-body" id="discovery-body" role="tabpanel" aria-labelledby={`dtab-${tab}`} tabIndex={0}>
         {tab === 'inspect' && (
           <>
             <p className="muted">Drag to orbit, scroll to zoom. Pick a part to look at it up close.</p>
@@ -244,9 +286,10 @@ export function DiscoveryPanel() {
           </>
         )}
       </div>
-      <footer>
-        <button className="btn" onClick={() => { narrator.stop(); set({ panel: null, component: null }) }}>Return to Exploration</button>
+      <footer className="discovery-foot">
+        <button className="btn" onClick={close}>Return to Exploration</button>
       </footer>
-    </div>
+      </div>
+    </aside>
   )
 }

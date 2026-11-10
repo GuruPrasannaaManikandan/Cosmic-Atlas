@@ -1,0 +1,1576 @@
+{
+ "checks": [
+  {
+   "check": "[1920x1080] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1920x1080] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1920x1080] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": true,
+   "detail": {
+    "clipped": [],
+    "scrollbar": false
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": true,
+   "detail": {
+    "canvasRight": 1500,
+    "panelLeft": 1500,
+    "canvasW": 1500
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting: no HUD element hidden under the panel",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1920x1080] inspecting: whole object framed inside the 3-D viewport",
+   "pass": true,
+   "detail": {
+    "inside": true,
+    "ndc": [
+     -0.55,
+     -0.75,
+     0.59,
+     0.33
+    ],
+    "widthFraction": 0.57,
+    "heightFraction": 0.54
+   }
+  },
+  {
+   "check": "[1920x1080] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Story",
+    "Specifications",
+    "Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1920x1080] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1920x1080] collapsing the record returns the 3-D space; expanding restores the panel",
+   "pass": true,
+   "detail": {
+    "canvas": [
+     1868,
+     1080
+    ],
+    "vw": 1920,
+    "vh": 1080
+   }
+  },
+  {
+   "check": "[1600x900] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1600x900] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1600x900] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1600x900] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1600x900] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": true,
+   "detail": {
+    "clipped": [],
+    "scrollbar": false
+   }
+  },
+  {
+   "check": "[1600x900] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": true,
+   "detail": {
+    "canvasRight": 1184,
+    "panelLeft": 1184,
+    "canvasW": 1184
+   }
+  },
+  {
+   "check": "[1600x900] inspecting: no HUD element hidden under the panel",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1600x900] inspecting: whole object framed inside the 3-D viewport",
+   "pass": true,
+   "detail": {
+    "inside": true,
+    "ndc": [
+     -0.58,
+     -0.75,
+     0.62,
+     0.33
+    ],
+    "widthFraction": 0.6,
+    "heightFraction": 0.54
+   }
+  },
+  {
+   "check": "[1600x900] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Story",
+    "Specifications",
+    "Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1600x900] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1600x900] collapsing the record returns the 3-D space; expanding restores the panel",
+   "pass": true,
+   "detail": {
+    "canvas": [
+     1548,
+     900
+    ],
+    "vw": 1600,
+    "vh": 900
+   }
+  },
+  {
+   "check": "[1366x768] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1366x768] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1366x768] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1366x768] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1366x768] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": true,
+   "detail": {
+    "clipped": [],
+    "scrollbar": false
+   }
+  },
+  {
+   "check": "[1366x768] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": true,
+   "detail": {
+    "canvasRight": 1011,
+    "panelLeft": 1011,
+    "canvasW": 1011
+   }
+  },
+  {
+   "check": "[1366x768] inspecting: no HUD element hidden under the panel",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1366x768] inspecting: whole object framed inside the 3-D viewport",
+   "pass": true,
+   "detail": {
+    "inside": true,
+    "ndc": [
+     -0.58,
+     -0.75,
+     0.62,
+     0.33
+    ],
+    "widthFraction": 0.6,
+    "heightFraction": 0.54
+   }
+  },
+  {
+   "check": "[1366x768] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Story",
+    "Specifications",
+    "Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1366x768] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1366x768] collapsing the record returns the 3-D space; expanding restores the panel",
+   "pass": true,
+   "detail": {
+    "canvas": [
+     1314,
+     768
+    ],
+    "vw": 1366,
+    "vh": 768
+   }
+  },
+  {
+   "check": "[1280x720] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1280x720] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1280x720] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1280x720] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1280x720] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": true,
+   "detail": {
+    "clipped": [],
+    "scrollbar": false
+   }
+  },
+  {
+   "check": "[1280x720] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": true,
+   "detail": {
+    "canvasRight": 940,
+    "panelLeft": 940,
+    "canvasW": 940
+   }
+  },
+  {
+   "check": "[1280x720] inspecting: no HUD element hidden under the panel",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1280x720] inspecting: whole object framed inside the 3-D viewport",
+   "pass": true,
+   "detail": {
+    "inside": true,
+    "ndc": [
+     -0.59,
+     -0.75,
+     0.62,
+     0.33
+    ],
+    "widthFraction": 0.61,
+    "heightFraction": 0.54
+   }
+  },
+  {
+   "check": "[1280x720] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Story",
+    "Specifications",
+    "Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1280x720] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1280x720] collapsing the record returns the 3-D space; expanding restores the panel",
+   "pass": true,
+   "detail": {
+    "canvas": [
+     1228,
+     720
+    ],
+    "vw": 1280,
+    "vh": 720
+   }
+  },
+  {
+   "check": "[1024x768] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1024x768] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1024x768] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[1024x768] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[1024x768] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": true,
+   "detail": {
+    "clipped": [],
+    "scrollbar": false
+   }
+  },
+  {
+   "check": "[1024x768] inspecting (side panel): the 3-D viewport ends where the panel begins",
+   "pass": true,
+   "detail": {
+    "canvasRight": 684,
+    "panelLeft": 684,
+    "canvasW": 684
+   }
+  },
+  {
+   "check": "[1024x768] inspecting: no HUD element hidden under the panel",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[1024x768] inspecting: whole object framed inside the 3-D viewport",
+   "pass": true,
+   "detail": {
+    "inside": true,
+    "ndc": [
+     -0.79,
+     -0.65,
+     0.83,
+     0.31
+    ],
+    "widthFraction": 0.81,
+    "heightFraction": 0.48
+   }
+  },
+  {
+   "check": "[1024x768] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Story",
+    "Specifications",
+    "Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[1024x768] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[1024x768] collapsing the record returns the 3-D space; expanding restores the panel",
+   "pass": true,
+   "detail": {
+    "canvas": [
+     972,
+     768
+    ],
+    "vw": 1024,
+    "vh": 768
+   }
+  },
+  {
+   "check": "[768x1024] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[768x1024] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[768x1024] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[768x1024] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[768x1024] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": true,
+   "detail": {
+    "clipped": [],
+    "scrollbar": false
+   }
+  },
+  {
+   "check": "[768x1024] inspecting (bottom sheet): the 3-D viewport keeps the top of the screen",
+   "pass": true,
+   "detail": {
+    "canvasBottom": 613,
+    "sheetTop": 613
+   }
+  },
+  {
+   "check": "[768x1024] inspecting: no HUD element hidden under the panel",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[768x1024] inspecting: whole object framed inside the 3-D viewport",
+   "pass": true,
+   "detail": {
+    "inside": true,
+    "ndc": [
+     -0.61,
+     -0.75,
+     0.65,
+     0.33
+    ],
+    "widthFraction": 0.63,
+    "heightFraction": 0.54
+   }
+  },
+  {
+   "check": "[768x1024] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Story",
+    "Specifications",
+    "Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[768x1024] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[768x1024] collapsing the record returns the 3-D space; expanding restores the panel",
+   "pass": true,
+   "detail": {
+    "canvas": [
+     768,
+     969
+    ],
+    "vw": 768,
+    "vh": 1024
+   }
+  },
+  {
+   "check": "[390x844] exploring: no overlapping HUD elements (incl. nothing under the header)",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[390x844] exploring: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[390x844] inspecting: the guide bubble never renders under the panel",
+   "pass": true,
+   "detail": {
+    "overlap_px2": 0
+   }
+  },
+  {
+   "check": "[390x844] inspecting: close button visible and clickable",
+   "pass": true,
+   "detail": {
+    "inView": true,
+    "clickable": true
+   }
+  },
+  {
+   "check": "[390x844] inspecting: all 5 tabs fully visible, no visible tab scrollbar",
+   "pass": true,
+   "detail": {
+    "clipped": [],
+    "scrollbar": false
+   }
+  },
+  {
+   "check": "[390x844] inspecting (bottom sheet): the 3-D viewport keeps the top of the screen",
+   "pass": true,
+   "detail": {
+    "canvasBottom": 321,
+    "sheetTop": 321
+   }
+  },
+  {
+   "check": "[390x844] inspecting: no HUD element hidden under the panel",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "[390x844] inspecting: whole object framed inside the 3-D viewport",
+   "pass": true,
+   "detail": {
+    "inside": true,
+    "ndc": [
+     -0.63,
+     -0.75,
+     0.67,
+     0.33
+    ],
+    "widthFraction": 0.65,
+    "heightFraction": 0.54
+   }
+  },
+  {
+   "check": "[390x844] inspecting: every tab can be selected",
+   "pass": true,
+   "detail": [
+    "Inspect",
+    "Story",
+    "Specifications",
+    "Timeline",
+    "Science"
+   ]
+  },
+  {
+   "check": "[390x844] inspecting: no horizontal page overflow",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "[390x844] collapsing the record returns the 3-D space; expanding restores the panel",
+   "pass": true,
+   "detail": {
+    "canvas": [
+     390,
+     789
+    ],
+    "vw": 390,
+    "vh": 844
+   }
+  },
+  {
+   "check": "Z1 no page errors",
+   "pass": true,
+   "detail": []
+  }
+ ],
+ "viewports": {
+  "1920x1080": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1896,
+      "h": 74
+     },
+     "compass": {
+      "x": 700,
+      "y": 94,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 678.28125,
+      "y": 132,
+      "w": 563.4375,
+      "h": 49
+     },
+     "prompt": {
+      "x": 727.921875,
+      "y": 844,
+      "w": 464.140625,
+      "h": 40
+     },
+     "minimap": {
+      "x": 12,
+      "y": 892,
+      "w": 176,
+      "h": 176
+     },
+     "keys": {
+      "x": 1568,
+      "y": 1022.40625,
+      "w": 340,
+      "h": 45.59375
+     },
+     "bubble": {
+      "x": 770,
+      "y": 304,
+      "w": 380,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1920,
+     "h": 1080
+    },
+    "overflowX": false,
+    "vw": 1920,
+    "vh": 1080
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1476,
+      "h": 74
+     },
+     "compass": null,
+     "waypoint": null,
+     "night": null,
+     "banner": null,
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 44,
+      "y": 627,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 1500,
+     "y": 0,
+     "w": 420,
+     "h": 1080
+    },
+    "tabInfo": {
+     "scrollbar": false,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Story",
+       "clipped": false
+      },
+      {
+       "label": "Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": false
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1500,
+     "h": 1080
+    },
+    "overflowX": false,
+    "vw": 1920,
+    "vh": 1080
+   }
+  },
+  "1600x900": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1576,
+      "h": 74
+     },
+     "compass": {
+      "x": 540,
+      "y": 94,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 518.28125,
+      "y": 132,
+      "w": 563.4375,
+      "h": 49
+     },
+     "prompt": {
+      "x": 567.921875,
+      "y": 664,
+      "w": 464.140625,
+      "h": 40
+     },
+     "minimap": {
+      "x": 12,
+      "y": 712,
+      "w": 176,
+      "h": 176
+     },
+     "keys": {
+      "x": 1248,
+      "y": 842.40625,
+      "w": 340,
+      "h": 45.59375
+     },
+     "bubble": {
+      "x": 610,
+      "y": 234,
+      "w": 380,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1600,
+     "h": 900
+    },
+    "overflowX": false,
+    "vw": 1600,
+    "vh": 900
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1160,
+      "h": 74
+     },
+     "compass": null,
+     "waypoint": null,
+     "night": null,
+     "banner": null,
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 8,
+      "y": 507,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 1184,
+     "y": 0,
+     "w": 416,
+     "h": 900
+    },
+    "tabInfo": {
+     "scrollbar": false,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Story",
+       "clipped": false
+      },
+      {
+       "label": "Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": false
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1184,
+     "h": 900
+    },
+    "overflowX": false,
+    "vw": 1600,
+    "vh": 900
+   }
+  },
+  "1366x768": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1342,
+      "h": 74
+     },
+     "compass": {
+      "x": 423,
+      "y": 94,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 401.28125,
+      "y": 132,
+      "w": 563.4375,
+      "h": 49
+     },
+     "prompt": {
+      "x": 450.921875,
+      "y": 544.09375,
+      "w": 464.140625,
+      "h": 40
+     },
+     "minimap": {
+      "x": 12,
+      "y": 592.09375,
+      "w": 163.90625,
+      "h": 163.90625
+     },
+     "keys": {
+      "x": 1014,
+      "y": 710.40625,
+      "w": 340,
+      "h": 45.59375
+     },
+     "bubble": {
+      "x": 493,
+      "y": 435,
+      "w": 472.609375,
+      "h": 80.296875
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1366,
+     "h": 768
+    },
+    "overflowX": false,
+    "vw": 1366,
+    "vh": 768
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 986.84375,
+      "h": 74
+     },
+     "compass": null,
+     "waypoint": null,
+     "night": null,
+     "banner": null,
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 8,
+      "y": 420,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 1010.84375,
+     "y": 0,
+     "w": 355.15625,
+     "h": 768
+    },
+    "tabInfo": {
+     "scrollbar": false,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Story",
+       "clipped": false
+      },
+      {
+       "label": "Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": false
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1010.84375,
+     "h": 768
+    },
+    "overflowX": false,
+    "vw": 1366,
+    "vh": 768
+   }
+  },
+  "1280x720": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1256,
+      "h": 74
+     },
+     "compass": {
+      "x": 380,
+      "y": 94,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 358.28125,
+      "y": 132,
+      "w": 563.4375,
+      "h": 49
+     },
+     "prompt": {
+      "x": 407.921875,
+      "y": 506.40625,
+      "w": 464.140625,
+      "h": 40
+     },
+     "minimap": {
+      "x": 12,
+      "y": 554.40625,
+      "w": 153.59375,
+      "h": 153.59375
+     },
+     "keys": {
+      "x": 928,
+      "y": 662.40625,
+      "w": 340,
+      "h": 45.59375
+     },
+     "bubble": {
+      "x": 404,
+      "y": 418,
+      "w": 472.609375,
+      "h": 80.296875
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1280,
+     "h": 720
+    },
+    "overflowX": false,
+    "vw": 1280,
+    "vh": 720
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 916,
+      "h": 74
+     },
+     "compass": null,
+     "waypoint": null,
+     "night": null,
+     "banner": null,
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 8,
+      "y": 388,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 940,
+     "y": 0,
+     "w": 340,
+     "h": 720
+    },
+    "tabInfo": {
+     "scrollbar": false,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Story",
+       "clipped": false
+      },
+      {
+       "label": "Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": false
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 940,
+     "h": 720
+    },
+    "overflowX": false,
+    "vw": 1280,
+    "vh": 720
+   }
+  },
+  "1024x768": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 1000,
+      "h": 74
+     },
+     "compass": {
+      "x": 252,
+      "y": 94,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 247.640625,
+      "y": 132,
+      "w": 528.71875,
+      "h": 47
+     },
+     "prompt": {
+      "x": 279.921875,
+      "y": 585.125,
+      "w": 464.140625,
+      "h": 40
+     },
+     "minimap": {
+      "x": 12,
+      "y": 633.125,
+      "w": 122.875,
+      "h": 122.875
+     },
+     "keys": {
+      "x": 782,
+      "y": 687.609375,
+      "w": 230,
+      "h": 68.390625
+     },
+     "bubble": {
+      "x": 322,
+      "y": 476,
+      "w": 472.609375,
+      "h": 80.296875
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 1024,
+     "h": 768
+    },
+    "overflowX": false,
+    "vw": 1024,
+    "vh": 768
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 660,
+      "h": 116
+     },
+     "compass": null,
+     "waypoint": null,
+     "night": null,
+     "banner": null,
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 8,
+      "y": 400,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 684,
+     "y": 0,
+     "w": 340,
+     "h": 768
+    },
+    "tabInfo": {
+     "scrollbar": false,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Story",
+       "clipped": false
+      },
+      {
+       "label": "Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": false
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 684,
+     "h": 768
+    },
+    "overflowX": false,
+    "vw": 1024,
+    "vh": 768
+   }
+  },
+  "768x1024": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 744,
+      "h": 116
+     },
+     "compass": {
+      "x": 124,
+      "y": 136,
+      "w": 520,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 185.734375,
+      "y": 174,
+      "w": 396.53125,
+      "h": 39
+     },
+     "prompt": {
+      "x": 151.921875,
+      "y": 844,
+      "w": 464.140625,
+      "h": 40
+     },
+     "minimap": {
+      "x": 12,
+      "y": 892,
+      "w": 120,
+      "h": 120
+     },
+     "keys": {
+      "x": 526,
+      "y": 943.609375,
+      "w": 230,
+      "h": 68.390625
+     },
+     "bubble": {
+      "x": 194,
+      "y": 282,
+      "w": 380,
+      "h": 100.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 768,
+     "h": 1024
+    },
+    "overflowX": false,
+    "vw": 768,
+    "vh": 1024
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 12,
+      "y": 12,
+      "w": 744,
+      "h": 116
+     },
+     "compass": null,
+     "waypoint": null,
+     "night": null,
+     "banner": null,
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 8,
+      "y": 317,
+      "w": 380,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 0,
+     "y": 612.78125,
+     "w": 768,
+     "h": 411.21875
+    },
+    "tabInfo": {
+     "scrollbar": false,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Story",
+       "clipped": false
+      },
+      {
+       "label": "Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": false
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 768,
+     "h": 612.78125
+    },
+    "overflowX": false,
+    "vw": 768,
+    "vh": 1024
+   }
+  },
+  "390x844": {
+   "explore": {
+    "hud": {
+     "header": {
+      "x": 8,
+      "y": 8,
+      "w": 374,
+      "h": 111
+     },
+     "compass": {
+      "x": 8,
+      "y": 127,
+      "w": 374,
+      "h": 30
+     },
+     "waypoint": null,
+     "night": null,
+     "banner": {
+      "x": 8,
+      "y": 165,
+      "w": 374,
+      "h": 59
+     },
+     "prompt": {
+      "x": 8,
+      "y": 650,
+      "w": 374,
+      "h": 40
+     },
+     "minimap": {
+      "x": 175,
+      "y": 744,
+      "w": 92,
+      "h": 92
+     },
+     "keys": null,
+     "bubble": {
+      "x": 8,
+      "y": 541,
+      "w": 374,
+      "h": 100.59375
+     },
+     "touch": {
+      "x": 8,
+      "y": 720,
+      "w": 116,
+      "h": 116
+     },
+     "touchBtns": {
+      "x": 318,
+      "y": 698,
+      "w": 64,
+      "h": 138
+     }
+    },
+    "panel": null,
+    "tabInfo": null,
+    "close": null,
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 390,
+     "h": 844
+    },
+    "overflowX": false,
+    "vw": 390,
+    "vh": 844
+   },
+   "inspect": {
+    "hud": {
+     "header": {
+      "x": 8,
+      "y": 8,
+      "w": 374,
+      "h": 111
+     },
+     "compass": null,
+     "waypoint": null,
+     "night": null,
+     "banner": null,
+     "prompt": null,
+     "minimap": null,
+     "keys": null,
+     "bubble": {
+      "x": 8,
+      "y": 235,
+      "w": 374,
+      "h": 77.59375
+     },
+     "touch": null,
+     "touchBtns": null
+    },
+    "panel": {
+     "x": 0,
+     "y": 320.734375,
+     "w": 390,
+     "h": 523.265625
+    },
+    "tabInfo": {
+     "scrollbar": false,
+     "tabs": [
+      {
+       "label": "Inspect",
+       "clipped": false
+      },
+      {
+       "label": "Story",
+       "clipped": false
+      },
+      {
+       "label": "Specifications",
+       "clipped": false
+      },
+      {
+       "label": "Timeline",
+       "clipped": false
+      },
+      {
+       "label": "Science",
+       "clipped": false
+      }
+     ]
+    },
+    "close": {
+     "inView": true,
+     "clickable": true
+    },
+    "canvas": {
+     "x": 0,
+     "y": 0,
+     "w": 390,
+     "h": 320.734375
+    },
+    "overflowX": false,
+    "vw": 390,
+    "vh": 844
+   }
+  }
+ },
+ "errors": []
+}

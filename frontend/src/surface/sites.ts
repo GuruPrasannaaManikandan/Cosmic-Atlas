@@ -1,21 +1,10 @@
-import { MISSION_BY_ID, OBJECT_BY_ID, Fact, dateMs } from '../missions'
-import { v } from '../missions/catalog/facts'
+import { MISSION_BY_ID, OBJECT_BY_ID, dateMs } from '../missions'
+import { PLANETS, PlanetEnvironment, isExplorable } from './planets'
 import { GeoOrigin, toLocal } from './geo'
 
-export interface SurfaceBody {
-  id: string
-  name: string
-  /** volumetric mean radius (m) */
-  radiusM: number
-  gravity: Fact<number>
-  /** sidereal rotation period (h) */
-  rotationHours: number
-}
-
-export const SURFACE_BODIES: Record<string, SurfaceBody> = {
-  moon: { id: 'moon', name: 'Moon', radiusM: 1737.4e3, gravity: v(1.62, ['nssdca-moon-fact']), rotationHours: 655.72 },
-  mars: { id: 'mars', name: 'Mars', radiusM: 3389.5e3, gravity: v(3.73, ['nssdca-mars-fact'], 'mean surface gravity'), rotationHours: 24.6229 },
-}
+/** worlds that can host surface sites: the planet environment table is the single source */
+export type SurfaceBody = PlanetEnvironment
+export const SURFACE_BODIES: Record<string, PlanetEnvironment> = PLANETS
 
 export interface PlacedObject {
   objectId: string
@@ -126,4 +115,5 @@ export function catalogueSitesFor(bodyId: string) {
 }
 
 export const SITE_BY_ID: Record<string, SurfaceSite> = Object.fromEntries(SURFACE_SITES.map((s) => [s.id, s]))
-export const sitesForBody = (bodyId: string) => SURFACE_SITES.filter((s) => s.bodyId === bodyId)
+/** explorable sites only: a site exists only when its world's environment is implemented */
+export const sitesForBody = (bodyId: string) => SURFACE_SITES.filter((s) => s.bodyId === bodyId && isExplorable(bodyId))

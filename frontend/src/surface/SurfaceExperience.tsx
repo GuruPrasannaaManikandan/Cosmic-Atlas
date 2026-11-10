@@ -1,20 +1,21 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useStore } from '../store/store'
-import { OBJECT_BY_ID, MISSION_BY_ID, dateMs } from '../missions'
-import { SITE_BY_ID, SURFACE_BODIES } from './sites'
+import { OBJECT_BY_ID, MISSION_BY_ID } from '../missions'
+import { SITE_BY_ID } from './sites'
+import { planetFor, EARTH_G } from './planets'
+import { hudEls } from './hudLayout'
 import { useSurface } from './surfaceState'
 import { SurfaceScene, DtmData } from './SurfaceScene'
 import { loadDtm, loadHorizon } from './terrain'
-import { TouchControls, useTouchDevice } from './TouchControls'
+import { TouchStick, TouchButtons, useTouchDevice } from './TouchControls'
 import { GuideBubble } from './GuideBubble'
 import { useGuide } from './guide'
 import { useNarrator } from './narrator'
 import { MiniMap, SurfaceMap } from './SurfaceMap'
 import { DiscoveryPanel } from './DiscoveryPanel'
-import { sunDirectionAtLunarSite, elevationDeg, azimuthDeg } from './lighting'
+import { elevationDeg, azimuthDeg } from './lighting'
 import { bearingDeg } from './geo'
 import { preloadNasaModel } from './models/NasaModel'
-
 
 function Compass() {
   const site = SITE_BY_ID[useSurface((s) => s.siteId)!]
@@ -45,66 +46,110 @@ function Compass() {
   )
 }
 
-function Hud() {
+/** registers a HUD region element for the safe-area measurement */
+function useHudEl(key: keyof typeof hudEls) {
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    hudEls[key] = ref.current
+    return () => {
+      if (hudEls[key] === ref.current) hudEls[key] = null
+    }
+  })
+  return ref
+}
+
+/**
+ * Shared exploration HUD (any world): an in-flow grid inside the 3-D viewport —
+ *   header · status (compass, waypoint, night) · centre (banner on top, prompt at the bottom) · bottom row.
+ * Nothing is placed with fixed offsets, so a wrapping header or an open inspector never pushes things underneath.
+ * While inspecting, only the header (with Return to orbit) stays; the inspector and the guide take over.
+ */
+function Hud({ touch }: { touch: boolean }) {
   const S = useSurface()
   const site = SITE_BY_ID[S.siteId!]
-  const body = SURFACE_BODIES[site.bodyId]
+  const planet = planetFor(site.bodyId)
   const simMs = useStore((s) => s.simMs)
-  const sun = useMemo(() => sunDirectionAtLunarSite(simMs, site.origin.latDeg, site.origin.lonEastDeg), [simMs, site])
+  const sun = useMemo(() => planet.sunDirection!(simMs, site.origin.latDeg, site.origin.lonEastDeg), [simMs, site, planet])
   const sunEl = elevationDeg(sun)
   const wp = site.objects.find((o) => o.objectId === S.waypointId)
   const wpDist = wp ? Math.hypot(wp.x - S.player.x, wp.z - S.player.z) : 0
   const near = S.nearbyId ? OBJECT_BY_ID[S.nearbyId] : null
+  const inspecting = !!S.panel
+  const headerRef = useHudEl('header')
+  const statusRef = useHudEl('status')
+  const bottomRef = useHudEl('bottom')
+  const promptRef = useHudEl('prompt')
+  const bannerRef = useHudEl('banner')
 
   return (
-    <>
-      <div className="surf-top glass">
-        <div>
-          <span className="eyebrow">{body.name.toUpperCase()} SURFACE · {MISSION_BY_ID[site.missionIds[0]].name.toUpperCase()}</span>
-          <b>{site.name}</b>
-          <span className="muted small">
-            g = {body.gravity.value} m/s² · {new Date(simMs).toISOString().slice(0, 16).replace('T', ' ')} UTC · Sun {sunEl.toFixed(1)}° {sunEl > 0 ? `at ${azimuthDeg(sun).toFixed(0)}°` : '(below horizon)'}
+    <div className="surf-hud" data-inspecting={inspecting ? 'on' : undefined}>
+      <header className="surf-top" ref={headerRef}>
+        <div className="surf-top-info">
+          <span className="eyebrow">{planet.name.toUpperCase()} SURFACE · {MISSION_BY_ID[site.missionIds[0]].name.toUpperCase()}</span>
+          <b className="surf-top-title">{site.name}</b>
+          <span className="surf-top-meta">
+            g = {planet.gravity.value} m/s² · {new Date(simMs).toISOString().slice(0, 16).replace('T', ' ')} UTC · Sun {sunEl.toFixed(1)}° {sunEl > 0 ? `at ${azimuthDeg(sun).toFixed(0)}°` : '(below horizon)'}
           </span>
         </div>
-        <div className="surf-top-actions">
-          <button className="btn ghost" onClick={() => S.set({ mapOpen: true })}>🗺 Map (M)</button>
-          <button className="btn ghost" onClick={() => S.set({ camMode: S.camMode === 'third' ? 'first' : 'third' })}>{S.camMode === 'third' ? '👁 First person (V)' : '🧑‍🚀 Third person (V)'}</button>
-          <button className="btn ghost" onClick={() => S.set({ helpOpen: true })} aria-label="Controls help">? (H)</button>
+        <nav className="surf-top-actions" aria-label="Surface actions">
+          <button className="btn ghost" onClick={() => S.set({ mapOpen: true })}>🗺 Map <kbd>M</kbd></button>
+          <button className="btn ghost" onClick={() => S.set({ camMode: S.camMode === 'third' ? 'first' : 'third' })}>
+            {S.camMode === 'third' ? '👁 First person' : '🧑‍🚀 Third person'} <kbd>V</kbd>
+          </button>
+          <button className="btn ghost" onClick={() => S.set({ helpOpen: true })} aria-label="Controls help">? <kbd>H</kbd></button>
           <button className="btn" onClick={() => useStore.getState().exitSurface()}>⤴ Return to orbit</button>
-        </div>
+        </nav>
+      </header>
+      <div className="surf-status" ref={statusRef}>
+        {!inspecting && <Compass />}
+        {sunEl <= 0 && (
+          <div className="surf-chip surf-night" role="status">
+            <span><b>{planet.words.night}</b> The Sun is {Math.abs(sunEl).toFixed(0)}° below the horizon; {planet.words.nightLight}.</span>
+            <button className="btn small" onClick={() => useStore.getState().setSim(site.daylight.ms)}>☀ Go to {site.daylight.label} ({new Date(site.daylight.ms).toUTCString().slice(5, 16)})</button>
+          </div>
+        )}
+        {wp && !inspecting && (
+          <div className="surf-chip surf-waypoint">
+            ◎ {OBJECT_BY_ID[wp.objectId].name.replace(/^Apollo \d+ /, '')} · <b>{wpDist.toFixed(0)} m</b> · bearing {bearingDeg(S.player.x, S.player.z, wp.x, wp.z).toFixed(0)}°
+          </div>
+        )}
       </div>
-      <Compass />
-      {sunEl <= 0 && (
-        <div className="surf-night glass" role="status">
-          <b>Lunar night at this date.</b> The Sun is {Math.abs(sunEl).toFixed(0)}° below the horizon; only earthshine lights the ground.
-          <button className="btn small" onClick={() => useStore.getState().setSim(site.daylight.ms)}>☀ Go to {site.daylight.label} ({new Date(site.daylight.ms).toUTCString().slice(5, 16)})</button>
+      <div className="surf-center">
+        {S.banner && !inspecting && (
+          <div className="surf-banner" role="status" aria-live="assertive" ref={bannerRef}>
+            <span>DISCOVERED</span>
+            <b>{OBJECT_BY_ID[S.banner].name}</b>
+          </div>
+        )}
+        {near && !inspecting && !S.mapOpen && (
+          <div className="surf-prompt" ref={promptRef}>
+            {!touch && <kbd>E</kbd>} <span className="surf-prompt-text">Inspect <b>{near.name}</b></span>
+            <button className="btn small" onClick={() => S.set({ panel: { objectId: near.id, tab: 'inspect' }, component: null, banner: null })}>Inspect</button>
+          </div>
+        )}
+      </div>
+      {!inspecting && (
+        <div className="surf-bottom" ref={bottomRef}>
+          <div className="surf-bottom-left">{touch ? <TouchStick /> : <MiniMap site={site} />}</div>
+          {touch ? (
+            <div className="surf-bottom-mid">
+              <MiniMap site={site} />
+            </div>
+          ) : (
+            <p className="surf-provenance">{site.terrainProvenance}</p>
+          )}
+          <div className="surf-bottom-right">
+            {touch ? (
+              <TouchButtons />
+            ) : (
+              <div className="surf-keys">
+                <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk · <kbd>Shift</kbd> lope · <kbd>Space</kbd> hop · mouse look · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> pause
+              </div>
+            )}
+          </div>
         </div>
       )}
-      {S.banner && (
-        <div className="surf-banner" role="status" aria-live="assertive">
-          <span>DISCOVERED</span>
-          <b>{OBJECT_BY_ID[S.banner].name}</b>
-        </div>
-      )}
-      {near && !S.panel && !S.mapOpen && (
-        <div className="surf-prompt">
-          <kbd>E</kbd> Inspect <b>{near.name}</b>
-          <button className="btn small" onClick={() => S.set({ panel: { objectId: near.id, tab: 'inspect' }, component: null, banner: null })}>Inspect</button>
-        </div>
-      )}
-      {wp && !S.panel && (
-        <div className="surf-waypoint glass">
-          ◎ {OBJECT_BY_ID[wp.objectId].name.replace(/^Apollo 11 /, '')} · <b>{wpDist.toFixed(0)} m</b> · bearing {bearingDeg(S.player.x, S.player.z, wp.x, wp.z).toFixed(0)}°
-        </div>
-      )}
-      {!S.panel && <MiniMap site={site} />}
-      {!S.panel && (
-        <div className="surf-keys muted small">
-          <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk · <kbd>Shift</kbd> lope · <kbd>Space</kbd> hop · mouse look (click to capture) · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> pause
-        </div>
-      )}
-      <p className="surf-provenance muted small">{site.terrainProvenance}</p>
-    </>
+    </div>
   )
 }
 
@@ -126,7 +171,8 @@ function PauseMenu() {
 function Help() {
   const set = useSurface((s) => s.set)
   const site = SITE_BY_ID[useSurface((s) => s.siteId)!]
-  const g = SURFACE_BODIES[site.bodyId].gravity
+  const planet = planetFor(site.bodyId)
+  const g = planet.gravity
   return (
     <div className="surf-overlay" role="dialog" aria-label="Controls">
       <div className="surf-pause glass surf-help">
@@ -138,7 +184,7 @@ function Help() {
           <li><kbd>E</kbd> inspect nearby hardware · <kbd>M</kbd> surface map · <kbd>V</kbd> first / third person · <kbd>Esc</kbd> pause / close</li>
         </ul>
         <p className="muted small">
-          Gravity here is {g.value} m/s² (NASA NSSDCA fact sheet), about one sixth of Earth's: the same push carries you about six times higher than on Earth. Walking speeds are gameplay tuning, not measured astronaut data.
+          Gravity on the {planet.name} is {g.value} m/s² (NASA NSSDCA fact sheet): Earth's {EARTH_G} m/s² is about {(EARTH_G / (g.value ?? EARTH_G)).toFixed(1)} times stronger, so the same push carries you about that many times higher. Walking speeds are gameplay tuning, not measured astronaut data.
         </p>
         <button className="btn" onClick={() => set({ helpOpen: false })}>Close</button>
       </div>
@@ -184,23 +230,31 @@ export default function SurfaceExperience() {
       </div>
     )
   return (
-    <div className="surface-root" data-testid="surface-root" data-touch={touch ? 'on' : undefined} data-panel={S.panel ? 'on' : undefined}>
-      <SurfaceScene site={site} dtm={dtm.data} />
-      {dtm.error && <p className="surf-terrain-error" role="status">Measured terrain could not be loaded ({dtm.error}); showing illustrative terrain instead.</p>}
-      {S.intro ? (
-        <div className="surf-intro" role="status">
-          <span className="eyebrow">DESCENT</span>
-          <b>{site.name}</b>
-          <span className="muted">{SURFACE_BODIES[site.bodyId].name} · {Math.abs(site.origin.latDeg).toFixed(4)}°{site.origin.latDeg >= 0 ? 'N' : 'S'}, {site.origin.lonEastDeg.toFixed(4)}°E</span>
-          <button className="btn ghost small" onClick={() => S.set({ intro: false })}>Skip</button>
+    <div
+      className="surface-root"
+      data-testid="surface-root"
+      data-touch={touch ? 'on' : undefined}
+      data-panel={S.panel ? (S.panelCollapsed ? 'collapsed' : 'on') : undefined}
+    >
+      <div className="surf-viewport">
+        <div className="surf-canvas">
+          <SurfaceScene site={site} dtm={dtm.data} />
         </div>
-      ) : (
-        <Hud />
-      )}
-      {!S.intro && <GuideBubble />}
-      {touch && !S.intro && <TouchControls />}
-      {S.mapOpen && <SurfaceMap site={site} />}
+        {dtm.error && <p className="surf-terrain-error" role="status">Measured terrain could not be loaded ({dtm.error}); showing illustrative terrain instead.</p>}
+        {S.intro ? (
+          <div className="surf-intro" role="status">
+            <span className="eyebrow">DESCENT</span>
+            <b>{site.name}</b>
+            <span className="muted">{planetFor(site.bodyId).name} · {Math.abs(site.origin.latDeg).toFixed(4)}°{site.origin.latDeg >= 0 ? 'N' : 'S'}, {site.origin.lonEastDeg.toFixed(4)}°E</span>
+            <button className="btn ghost small" onClick={() => S.set({ intro: false })}>Skip</button>
+          </div>
+        ) : (
+          <Hud touch={touch} />
+        )}
+        {!S.intro && <GuideBubble />}
+      </div>
       {S.panel && <DiscoveryPanel />}
+      {S.mapOpen && <SurfaceMap site={site} />}
       {S.paused && !S.helpOpen && <PauseMenu />}
       {S.helpOpen && <Help />}
     </div>

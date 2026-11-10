@@ -6,7 +6,9 @@ import { OBJECT_BY_ID } from '../missions'
 import { SurfaceSite, SURFACE_BODIES } from './sites'
 import { Terrain, DtmTerrain, SiteTerrain, Collider, mulberry32, DtmMeta, HorizonGrid } from './terrain'
 import { stepCharacter, newCharacter, paramsForGravity, gaitPose, CharacterState, forwardOf } from './controller'
-import { sunDirectionAtLunarSite, meanEarthDirectionAtLunarSite, elevationDeg, azimuthDeg } from './lighting'
+import { elevationDeg, azimuthDeg } from './lighting'
+import { planetFor, PlanetEnvironment } from './planets'
+import { measureSafeArea, placeBubble, SafeArea } from './hudLayout'
 import { useSurface, surfaceDebug } from './surfaceState'
 import { useGuide, announceOnce, approachLine, discoverLine, inspectHint } from './guide'
 import { useNarrator } from './narrator'
@@ -31,6 +33,9 @@ export const bubbleAnchor: { el: HTMLElement | null } = { el: null }
 /** state of the guide's body language, for tests */
 export const guidePose = { pointing: false, headYaw: 0, lookTarget: null as string | null, facingObject: false, visibleWhileInspecting: false }
 
+/** rendered hardware groups by object id: the inspection camera frames their real bounds */
+export const hardwareGroups = new Map<string, THREE.Group>()
+
 /** keyboard state, owned by the scene */
 const keys = new Set<string>()
 /** on-screen (touch) input, merged with the keyboard every frame */
@@ -42,7 +47,9 @@ export interface SceneEnv {
   colliders: Collider[]
   placed: { id: string; modelId: string | null; x: number; y: number; z: number; rotY: number; tilt?: number }[]
   sunDir: THREE.Vector3
-  earthDir: THREE.Vector3
+  /** Earth's direction in the sky (worlds that show it), else null */
+  earthDir: THREE.Vector3 | null
+  planet: PlanetEnvironment
   sunUp: boolean
 }
 
@@ -59,14 +66,18 @@ function useEnv(site: SurfaceSite, simMs: number, lmModel: 'nasa' | 'reconstruct
     }
     return new Terrain({ seed: site.terrain.seed, halfExtentM: Math.min(site.halfExtentM, 400), anchors })
   }, [site, dtm])
-  const earthDir = useMemo(() => new THREE.Vector3(...meanEarthDirectionAtLunarSite(site.origin.latDeg, site.origin.lonEastDeg)), [site])
+  const planet = planetFor(site.bodyId)
+  const earthDir = useMemo(() => {
+    const e = planet.skyBodies.find((b) => b.id === 'earth')
+    return e ? new THREE.Vector3(...e.direction(site.origin.latDeg, site.origin.lonEastDeg)) : null
+  }, [site, planet])
   const placed = useMemo(
     () =>
       site.objects.map((o) => {
         const obj = OBJECT_BY_ID[o.objectId]
         let rotY = -o.headingDeg * D2R
         let tilt: number | undefined
-        if (obj.model.id === 'lrrr') {
+        if (obj.model.id === 'lrrr' && earthDir) {
           // aimed at Earth (its purpose) — Earth's mean azimuth/elevation here; not a measured heading
           rotY = -azimuthDeg([earthDir.x, earthDir.y, earthDir.z]) * D2R
           tilt = (90 - elevationDeg([earthDir.x, earthDir.y, earthDir.z])) * D2R
@@ -85,8 +96,8 @@ function useEnv(site: SurfaceSite, simMs: number, lmModel: 'nasa' | 'reconstruct
     }
     return cs
   }, [terrain, placed, lmModel])
-  const sun = useMemo(() => sunDirectionAtLunarSite(simMs, site.origin.latDeg, site.origin.lonEastDeg), [simMs, site])
-  return { site, terrain, colliders, placed, sunDir: new THREE.Vector3(...sun), earthDir, sunUp: sun[1] > 0 }
+  const sun = useMemo(() => planet.sunDirection!(simMs, site.origin.latDeg, site.origin.lonEastDeg), [simMs, site, planet])
+  return { site, terrain, colliders, placed, sunDir: new THREE.Vector3(...sun), earthDir, sunUp: sun[1] > 0, planet }
 }
 
 function TerrainMesh({ env, segments }: { env: SceneEnv; segments: number }) {
@@ -121,14 +132,14 @@ function TerrainMesh({ env, segments }: { env: SceneEnv; segments: number }) {
     return { geo: g, far: fg }
   }, [env.terrain, env.site, segments])
   const mat = useMemo(() => {
-    const m = new THREE.MeshStandardMaterial({ color: '#9b9993', roughness: 0.98, metalness: 0, map: regolithMap(), bumpMap: regolithBump(), bumpScale: 1.2 })
+    const m = new THREE.MeshStandardMaterial({ color: env.planet.ground.color, roughness: 0.98, metalness: 0, map: regolithMap(), bumpMap: regolithBump(), bumpScale: 1.2 })
     m.map!.repeat.set(90, 90)
     m.bumpMap!.repeat.set(260, 260)
     withPatchCutout(m)
     return m
-  }, [])
+  }, [env.planet])
   // matched to the near ground's effective albedo (base colour x average regolith texture) so there is no bright seam
-  const farMat = useMemo(() => new THREE.MeshStandardMaterial({ color: '#5c5a55', roughness: 1, metalness: 0 }), [])
+  const farMat = useMemo(() => new THREE.MeshStandardMaterial({ color: env.planet.ground.farColor, roughness: 1, metalness: 0 }), [env.planet])
   return (
     <>
       <mesh geometry={geo} material={mat} receiveShadow />
@@ -152,7 +163,7 @@ function withPatchCutout(m: THREE.MeshStandardMaterial) {
   m.customProgramCacheKey = () => 'patch-cutout'
 }
 
-export function DetailPatch({ terrain, follow }: { terrain: SiteTerrain; follow: { current: { x: number; z: number } } }) {
+export function DetailPatch({ terrain, follow, color }: { terrain: SiteTerrain; follow: { current: { x: number; z: number } }; color: string }) {
   const mesh = useRef<THREE.Mesh>(null)
   const geo = useMemo(() => {
     const g = new THREE.PlaneGeometry(PATCH.half * 2, PATCH.half * 2, PATCH.seg, PATCH.seg)
@@ -160,9 +171,9 @@ export function DetailPatch({ terrain, follow }: { terrain: SiteTerrain; follow:
     return g
   }, [])
   const mat = useMemo(() => {
-    const m = new THREE.MeshStandardMaterial({ color: '#9b9993', roughness: 0.98, metalness: 0, map: regolithMap(), bumpMap: regolithBump(), bumpScale: 1.2 })
+    const m = new THREE.MeshStandardMaterial({ color, roughness: 0.98, metalness: 0, map: regolithMap(), bumpMap: regolithBump(), bumpScale: 1.2 })
     return m
-  }, [])
+  }, [color])
   const rebuild = (cx: number, cz: number) => {
     const pos = geo.attributes.position as THREE.BufferAttribute
     const n = PATCH.seg + 1
@@ -198,7 +209,7 @@ export function DetailPatch({ terrain, follow }: { terrain: SiteTerrain; follow:
   return <mesh ref={mesh} geometry={geo} material={mat} receiveShadow />
 }
 
-function Rocks({ terrain }: { terrain: SiteTerrain }) {
+function Rocks({ terrain, color }: { terrain: SiteTerrain; color: string }) {
   const { geos, mat, groups } = useMemo(() => {
     const geos = [0, 1, 2].map((v) => {
       const g = new THREE.IcosahedronGeometry(1, 2)
@@ -214,11 +225,11 @@ function Rocks({ terrain }: { terrain: SiteTerrain }) {
       g.computeVertexNormals()
       return g
     })
-    const mat = new THREE.MeshStandardMaterial({ color: '#7b7974', roughness: 0.96, flatShading: true })
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.96, flatShading: true })
     const groups: SiteTerrain['rocks'][] = [[], [], []]
     terrain.rocks.forEach((rk) => groups[rk.seed % 3].push(rk))
     return { geos, mat, groups }
-  }, [terrain])
+  }, [terrain, color])
   return (
     <>
       {groups.map((list, gi) => (
@@ -264,7 +275,7 @@ function Sky({ env }: { env: SceneEnv }) {
     t.colorSpace = THREE.SRGBColorSpace
     return t
   }, [])
-  const ep = env.earthDir.clone().multiplyScalar(SKY_R * 0.96)
+  const ep = env.earthDir ? env.earthDir.clone().multiplyScalar(SKY_R * 0.96) : null
   const sp = env.sunDir.clone().multiplyScalar(SKY_R * 0.98)
   // Earth's angular diameter from the Moon ≈ 2 × atan(6371 / 384400) ≈ 1.9°
   const earthR = SKY_R * 0.96 * Math.tan(((6371 / 384400) as number))
@@ -272,12 +283,14 @@ function Sky({ env }: { env: SceneEnv }) {
     <group>
       {/* daylight on the surface overwhelms faint stars (as in the Apollo photographs); they appear at night */}
       <points geometry={stars}>
-        <pointsMaterial color="#ffffff" size={1.6} sizeAttenuation={false} transparent opacity={env.sunUp ? 0.1 : 0.9} depthWrite={false} />
+        <pointsMaterial color="#ffffff" size={1.6} sizeAttenuation={false} transparent opacity={env.sunUp ? env.planet.sky.starOpacityDay : env.planet.sky.starOpacityNight} depthWrite={false} />
       </points>
-      <mesh position={ep} rotation={[0.4, 2.2, 0]}>
-        <sphereGeometry args={[earthR, 48, 32]} />
-        <meshStandardMaterial map={earthTex} roughness={0.8} metalness={0} />
-      </mesh>
+      {ep && (
+        <mesh position={ep} rotation={[0.4, 2.2, 0]}>
+          <sphereGeometry args={[earthR, 48, 32]} />
+          <meshStandardMaterial map={earthTex} roughness={0.8} metalness={0} />
+        </mesh>
+      )}
       {env.sunUp && (
         <mesh position={sp}>
           <sphereGeometry args={[SKY_R * 0.98 * Math.tan(0.267 * D2R), 24, 16]} />
@@ -340,7 +353,10 @@ function Player({ env }: { env: SceneEnv }) {
   const ch = useRef<CharacterState>(newCharacter(start.x, start.z, ground, Math.atan2(-(lm.x - start.x), -(lm.z - start.z))))
   const c0x = () => ch.current.pos[0]
   const c0z = () => ch.current.pos[2]
-  const look = useRef({ yaw: ch.current.yaw, pitch: -0.22, dist: 4.4, inspYaw: 0.6, inspPitch: -0.35, inspDist: 7 })
+  const frame = useRef({ id: '', t: 0, sphere: new THREE.Sphere(), box: new THREE.Box3() })
+  const safe = useRef<SafeArea>({ top: 0, bottom: 0 })
+  const safeT = useRef(0)
+  const look = useRef({ inspZoom: 1, yaw: ch.current.yaw, pitch: -0.22, dist: 4.4, inspYaw: 0.6, inspPitch: -0.35, inspDist: 7 })
   const camPos = useRef(new THREE.Vector3())
   const camTarget = useRef(new THREE.Vector3())
   const t0 = useRef(performance.now())
@@ -365,12 +381,25 @@ function Player({ env }: { env: SceneEnv }) {
     surfaceDebug.character = () => ({ ...ch.current, camYaw: look.current.yaw, camPitch: look.current.pitch })
     surfaceDebug.camera = () => ({ pos: camera.position.toArray(), mode: useSurface.getState().camMode })
     surfaceDebug.guide = () => ({ ...guidePose, bubbleDocked: bubbleAnchor.el?.dataset.docked ?? null })
+    surfaceDebug.inspectFrame = () => {
+      const S = useSurface.getState()
+      if (!S.panel || S.component || frame.current.id !== S.panel.objectId) return null
+      const b = frame.current.box
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity
+      for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) {
+        const v = new THREE.Vector3(x, y, z).project(camera)
+        x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y)
+      }
+      const r = (n: number) => Math.round(n * 100) / 100
+      return { inside: x0 >= -1.02 && x1 <= 1.02 && y0 >= -1.02 && y1 <= 1.02, ndc: [r(x0), r(y0), r(x1), r(y1)], widthFraction: r((x1 - x0) / 2), heightFraction: r((y1 - y0) / 2) }
+    }
     surfaceDebug.terrain = () => ({ daylightMs: env.site.daylight.ms, kind: ground.kind, product: ground.kind === 'dtm' ? (ground as DtmTerrain).meta.source.product : null, horizonReliefM: ground.kind === 'dtm' ? (ground as DtmTerrain).horizon?.meta.reliefM ?? null : null, objects: env.placed.map((p) => ({ id: p.id, x: p.x, z: p.z, y: p.y, model: p.modelId })) })
     return () => {
       surfaceDebug.teleport = undefined
       surfaceDebug.character = undefined
       surfaceDebug.camera = undefined
       surfaceDebug.guide = undefined
+      surfaceDebug.inspectFrame = undefined
       surfaceDebug.terrain = undefined
     }
   }, [ground, camera, env.placed])
@@ -386,7 +415,7 @@ function Player({ env }: { env: SceneEnv }) {
       if (typing(e)) return
       const S = useSurface.getState()
       if (e.code === 'Escape') {
-        if (S.panel) S.set({ panel: null, component: null })
+        if (S.panel) S.set({ panel: null, component: null, panelCollapsed: false })
         else if (S.mapOpen) S.set({ mapOpen: false })
         else if (S.helpOpen) S.set({ helpOpen: false })
         else S.set({ paused: !S.paused })
@@ -446,7 +475,7 @@ function Player({ env }: { env: SceneEnv }) {
     const wh = (e: WheelEvent) => {
       e.preventDefault()
       const L = look.current
-      if (useSurface.getState().panel) L.inspDist = THREE.MathUtils.clamp(L.inspDist * (1 + Math.sign(e.deltaY) * 0.1), 2, 22)
+      if (useSurface.getState().panel) L.inspZoom = THREE.MathUtils.clamp(L.inspZoom * (1 + Math.sign(e.deltaY) * 0.1), 0.45, 2.5)
       else L.dist = THREE.MathUtils.clamp(L.dist * (1 + Math.sign(e.deltaY) * 0.1), 2.2, 12)
     }
     window.addEventListener('keydown', kd)
@@ -499,6 +528,9 @@ function Player({ env }: { env: SceneEnv }) {
         // camera behind and beside the astronaut, looking past them at the object: the astronaut is the guide
         L.inspYaw = Math.atan2(c0x() - p.x, c0z() - p.z) + 0.5
         L.inspPitch = p.modelId === 'lrrr' ? -0.55 : -0.32
+        L.inspZoom = 1
+        frame.current.id = ''
+        if (S.panelCollapsed) S.set({ panelCollapsed: false })
         useGuide.getState().say(inspectHint(p.id))
         useNarrator.getState().load(p.id, 'short')
       } else if (was) useNarrator.getState().stop()
@@ -582,13 +614,39 @@ function Player({ env }: { env: SceneEnv }) {
     if (S.panel) {
       const p = env.placed.find((x) => x.id === S.panel!.objectId)!
       const anchors = COMPONENT_ANCHORS[modelKey(p.modelId, S.lmModel)] ?? {}
-      const local = S.component && anchors[S.component] ? anchors[S.component] : [0, p.modelId === 'lm-descent-stage' ? 2 : 0.5, 0]
-      const v = new THREE.Vector3(...local).applyAxisAngle(new THREE.Vector3(0, 1, 0), p.rotY)
-      target.set(p.x + v.x, p.y + v.y, p.z + v.z)
-      const big = p.modelId === 'lm-descent-stage' ? 1.5 : p.modelId === 'lrv' ? 0.95 : 0.45
-      const guideDist = Math.hypot(c.pos[0] - p.x, c.pos[2] - p.z) + 2.6
-      const dist = S.component ? Math.min(L.inspDist, p.modelId === 'lm-descent-stage' ? 5 : p.modelId === 'lrv' ? 3 : 2.2) : Math.max(L.inspDist * big, guideDist)
+      // real bounds of the rendered object (re-measured ~3x/s: the NASA model may still be loading)
+      const grp = hardwareGroups.get(p.id)
+      const tnow = performance.now()
+      if (grp && (frame.current.id !== p.id || tnow - frame.current.t > 300)) {
+        const box = new THREE.Box3().setFromObject(grp)
+        if (!box.isEmpty()) {
+          frame.current.box.copy(box)
+          box.getBoundingSphere(frame.current.sphere)
+          frame.current.id = p.id
+          frame.current.t = tnow
+        }
+      }
+      const pc = camera as THREE.PerspectiveCamera
+      let dist: number
+      if (S.component && anchors[S.component]) {
+        const v = new THREE.Vector3(...anchors[S.component]).applyAxisAngle(new THREE.Vector3(0, 1, 0), p.rotY)
+        target.set(p.x + v.x, p.y + v.y, p.z + v.z)
+        // part close-ups keep their established distances, scaled by the zoom factor
+        dist = (p.modelId === 'lm-descent-stage' ? 5 : p.modelId === 'lrv' ? 3 : 2.2) * L.inspZoom
+      } else {
+        const sph = frame.current.id === p.id ? frame.current.sphere : new THREE.Sphere(new THREE.Vector3(p.x, p.y + 1, p.z), 2)
+        target.copy(sph.center)
+        // whole object: fit the bounding sphere into the narrower of the vertical / horizontal FOV of the VISIBLE viewport
+        const vfov = pc.fov * D2R
+        const hfov = 2 * Math.atan(Math.tan(vfov / 2) * pc.aspect)
+        const fit = (sph.radius / Math.sin(Math.min(vfov, hfov) / 2)) * 1.08
+        // stay behind the guide when that keeps the object a sensible size
+        const guideDist = Math.hypot(c.pos[0] - p.x, c.pos[2] - p.z) + 2.6
+        dist = Math.max(fit, Math.min(guideDist, fit * 1.3)) * L.inspZoom
+      }
       desired.set(target.x + Math.sin(L.inspYaw) * Math.cos(L.inspPitch) * dist, target.y - Math.sin(L.inspPitch) * dist, target.z + Math.cos(L.inspYaw) * Math.cos(L.inspPitch) * dist)
+      const gyi = ground.heightAt(desired.x, desired.z) + 0.4
+      if (desired.y < gyi) desired.y = gyi
     } else if (S.camMode === 'first') {
       const fwd = forwardOf(L.yaw)
       target.set(c.pos[0] + fwd[0] * 10 * Math.cos(L.pitch), c.pos[1] + 1.65 + Math.sin(L.pitch) * 10, c.pos[2] + fwd[1] * 10 * Math.cos(L.pitch))
@@ -617,13 +675,17 @@ function Player({ env }: { env: SceneEnv }) {
     const bub = bubbleAnchor.el
     if (bub) {
       camera.updateMatrixWorld()
+      const r = gl_.domElement.getBoundingClientRect()
+      const tb = performance.now()
+      if (tb - safeT.current > 200) {
+        safe.current = measureSafeArea(r)
+        safeT.current = tb
+      }
       const hp = new THREE.Vector3(c.pos[0], c.pos[1] + 2.1, c.pos[2]).project(camera)
-      const onScreen = S.camMode !== 'first' && hp.z < 1 && Math.abs(hp.x) < 0.92 && hp.y < 0.9 && hp.y > -0.6
-      if (onScreen) {
-        const r = gl_.domElement.getBoundingClientRect()
-        bub.style.transform = `translate(${((hp.x + 1) / 2) * r.width}px, ${((1 - hp.y) / 2) * r.height}px) translate(-50%, -100%)`
-        bub.dataset.docked = 'false'
-      } else bub.dataset.docked = 'true'
+      const pinned = S.camMode !== 'first' && hp.z < 1 && Math.abs(hp.x) <= 1 && Math.abs(hp.y) <= 1
+      const pl = placeBubble(((hp.x + 1) / 2) * r.width, ((1 - hp.y) / 2) * r.height, bub.offsetWidth, bub.offsetHeight, r.width, r.height, safe.current, pinned)
+      bub.style.transform = `translate(${Math.round(pl.x)}px, ${Math.round(pl.y)}px)`
+      bub.dataset.docked = pl.docked ? 'true' : 'false'
     }
     if (inspectLight.current) {
       inspectLight.current.position.copy(camPos.current)
@@ -683,7 +745,7 @@ function Player({ env }: { env: SceneEnv }) {
         shadow-normalBias={0.04}
       />
       <pointLight ref={inspectLight} intensity={0} distance={30} decay={1.2} color="#e8eeff" />
-      <DetailPatch terrain={env.terrain} follow={followRef} />
+      <DetailPatch terrain={env.terrain} follow={followRef} color={env.planet.ground.color} />
       <Astronaut ref={astro} visibleBody={useSurface((s) => s.camMode) !== 'first'} />
       <instancedMesh ref={prints} args={[printGeo, printMat, 500]} receiveShadow frustumCulled={false} />
       <points geometry={dust.geo} frustumCulled={false}>
@@ -700,7 +762,15 @@ function Hardware({ env }: { env: SceneEnv }) {
   return (
     <>
       {env.placed.map((p) => (
-        <group key={p.id} position={[p.x, p.y, p.z]} rotation={[0, p.rotY, 0]}>
+        <group
+          key={p.id}
+          position={[p.x, p.y, p.z]}
+          rotation={[0, p.rotY, 0]}
+          ref={(g) => {
+            if (g) hardwareGroups.set(p.id, g)
+            else hardwareGroups.delete(p.id)
+          }}
+        >
           {p.modelId ? <HardwareModel modelId={p.modelId} highlight={panel?.objectId === p.id ? comp : null} tilt={p.tilt} variant={lmModel} /> : <PositionMarker />}
         </group>
       ))}
@@ -735,14 +805,16 @@ export function SurfaceScene({ site, dtm }: { site: SurfaceSite; dtm: DtmData })
       camera={{ fov: 62, near: 0.05, far: 60000, position: [0, 200, 200] }}
       data-testid="surface-canvas"
     >
-      <color attach="background" args={['#000000']} />
+      <color attach="background" args={[env.planet.sky.background]} />
       {/* no sky light on an airless body: only a faint bounce from the grey regolith fills the shadows */}
-      <hemisphereLight args={['#000000', '#8d8a83', env.sunUp ? 0.95 : 0.03]} />
-      {!env.sunUp && <directionalLight position={env.earthDir.clone().multiplyScalar(100)} intensity={0.22} color="#9fb4ff" />}
+      <hemisphereLight args={['#000000', env.planet.ground.bounce, env.sunUp ? 0.95 : 0.03]} />
+      {!env.sunUp && env.planet.nightFill.kind === 'earthshine' && env.earthDir && (
+        <directionalLight position={env.earthDir.clone().multiplyScalar(100)} intensity={env.planet.nightFill.intensity} color={env.planet.nightFill.color} />
+      )}
       <ambientLight intensity={0.03} />
       <Sky env={env} />
       <TerrainMesh env={env} segments={segments} />
-      <Rocks terrain={env.terrain} />
+      <Rocks terrain={env.terrain} color={env.planet.ground.rockColor} />
       <Hardware env={env} />
       <Waypoint env={env} />
       <Player env={env} />

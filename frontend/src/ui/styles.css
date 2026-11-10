@@ -4175,36 +4175,22 @@ option { background: #070d1e; color: #fff; }
 
 /* ===================================================================== planetary surface exploration */
 .app[data-surface='on'] > *:not(.surface-root) { visibility: hidden !important; pointer-events: none !important; }
-.surface-root { position: fixed; inset: 0; z-index: 120; background: #000; visibility: visible !important; pointer-events: auto !important; }
 .surface-root canvas { display: block; }
 .surface-root .small, .site-picker .small, .discovery .small { font-size: 12px; }
 .surface-root kbd { display: inline-block; min-width: 20px; padding: 1px 6px; border: 1px solid var(--line-hi); border-radius: 5px; background: rgba(10, 20, 40, 0.8); font: 600 11px var(--font-mono); color: var(--txt); text-align: center; }
 
-.surf-top { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 14px; flex-wrap: wrap; }
-.surf-top > div:first-child { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.surf-top b { font-size: 16px; }
-.surf-top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-.surf-compass { position: absolute; top: 86px; left: 50%; transform: translateX(-50%); width: min(520px, calc(100vw - 32px)); height: 30px; border-radius: 999px; background: rgba(4, 8, 18, 0.62); border: 1px solid var(--line); overflow: hidden; pointer-events: none; }
 .surf-compass span { position: absolute; top: 7px; transform: translateX(-50%); font: 600 11px var(--font-mono); color: var(--mut); }
 .surf-compass span.major { color: var(--txt); font-size: 12px; }
 .surf-compass i.obj { position: absolute; bottom: 3px; width: 7px; height: 7px; border-radius: 50%; background: var(--warm); transform: translateX(-50%); }
 .surf-compass i.obj.wp { background: #58b6ff; box-shadow: 0 0 8px #58b6ff; width: 9px; height: 9px; }
 .surf-compass .needle { position: absolute; left: 50%; top: -1px; transform: translateX(-50%); font: 700 9px var(--font-mono); color: var(--cy); border-top: 3px solid var(--cy); padding-top: 1px; }
 
-.surf-banner { position: absolute; top: 30%; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; animation: surfBanner 5s ease forwards; }
 .surf-banner span { display: block; font: 800 13px var(--font); letter-spacing: 0.4em; color: var(--warm); text-shadow: 0 0 18px var(--warm-glow); }
 .surf-banner b { display: block; font-size: clamp(20px, 3.4vw, 34px); letter-spacing: 0.06em; text-transform: uppercase; text-shadow: 0 2px 18px #000; }
-@keyframes surfBanner { 0% { opacity: 0; transform: translate(-50%, 8px); } 10%, 80% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .surf-banner { animation: none; } }
 
-.surf-prompt { position: absolute; bottom: 120px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; background: rgba(4, 8, 18, 0.78); border: 1px solid var(--line-hi); white-space: nowrap; max-width: calc(100vw - 32px); overflow: hidden; text-overflow: ellipsis; }
-.surf-waypoint { position: absolute; top: 126px; left: 50%; transform: translateX(-50%); padding: 6px 12px; font-size: 13px; white-space: nowrap; }
-.surf-night { position: absolute; top: 126px; left: 50%; transform: translateX(-50%); padding: 10px 14px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; max-width: calc(100vw - 32px); }
-.surf-keys { position: absolute; right: 16px; bottom: 14px; text-align: right; max-width: 56vw; line-height: 1.9; }
-.surf-provenance { position: absolute; left: 16px; right: 16px; bottom: 2px; margin: 0; text-align: center; opacity: 0.6; pointer-events: none; font-size: 10px !important; }
 
-.surf-minimap { position: absolute; left: 16px; bottom: 24px; width: 200px; height: 200px; padding: 0; border-radius: 50%; overflow: hidden; border: 2px solid var(--line-hi); background: #05070b; cursor: pointer; box-shadow: var(--shadow); }
 .surf-minimap canvas { width: 100%; height: 100%; display: block; }
 .surf-minimap-n { position: absolute; top: 4px; left: 50%; transform: translateX(-50%); font: 800 11px var(--font); color: var(--warm); }
 
@@ -4236,19 +4222,8 @@ option { background: #070d1e; color: #fff; }
 @media (max-width: 760px) {
   .surf-map-body { flex-direction: column; }
   .surf-map-list { width: auto; border-left: 0; border-top: 1px solid var(--line); max-height: 38%; }
-  .surf-minimap { width: 130px; height: 130px; }
-  .surf-keys { display: none; }
 }
 
-.discovery { position: absolute; top: 12px; right: 12px; bottom: 12px; width: min(460px, calc(100vw - 24px)); display: flex; flex-direction: column; overflow: hidden; z-index: 4; }
-.discovery header { position: relative; padding: 14px 44px 10px 16px; border-bottom: 1px solid var(--line); }
-.discovery h2 { margin: 4px 0 2px; font-size: 20px; }
-.discovery-close { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--txt); cursor: pointer; }
-.discovery-tabs { display: flex; gap: 4px; padding: 8px 10px; overflow-x: auto; border-bottom: 1px solid var(--line); }
-.discovery-tabs button, .comp-list button, .story-len button { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--txt-dim); cursor: pointer; white-space: nowrap; font-size: 12px; }
-.discovery-tabs button.on, .comp-list button.on, .story-len button.on { background: rgba(103, 232, 249, 0.14); border-color: var(--line-hi); color: var(--txt); }
-.discovery-body { flex: 1; overflow: auto; padding: 12px 16px; line-height: 1.55; font-size: 14px; }
-.discovery footer { padding: 10px 16px; border-top: 1px solid var(--line); }
 .comp-list { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
 .story-len { display: inline-flex; gap: 4px; margin-bottom: 8px; }
 .provenance { font-size: 12px; color: var(--mut); border-left: 2px solid var(--warm); padding-left: 8px; }
@@ -4285,17 +4260,6 @@ option { background: #070d1e; color: #fff; }
 .site-list .non-nasa { color: var(--warm); font-style: normal; }
 @media (max-width: 600px) { .site-list li { flex-direction: column; align-items: stretch; } }
 
-/* surface HUD on narrow screens: stack the compass and guidance under the (taller) top bar, keep the prompt above the minimap */
-@media (max-width: 760px) {
-  .surf-top { gap: 6px; padding: 8px 10px; }
-  .surf-top-actions .btn { padding: 4px 8px; font-size: 12px; }
-  .surf-compass { top: 176px; }
-  .surf-prompt kbd { display: none; }
-  .surf-waypoint, .surf-night { top: 214px; font-size: 12px; white-space: normal; text-align: center; }
-  .surf-prompt { bottom: 176px; }
-  .surf-minimap { left: 12px; bottom: 30px; }
-  .surf-provenance { display: none; }
-}
 
 /* ===================================================================== spacecraft archive (official NASA models) */
 .archive-backdrop { position: fixed; inset: 0; z-index: 95; display: grid; place-items: center; background: rgba(0, 0, 0, 0.6); padding: 16px; }
@@ -4335,21 +4299,8 @@ option { background: #070d1e; color: #fff; }
 .archive-info .fidelity.medium b { color: var(--warm); }
 .archive-info .fidelity.low b { color: var(--err); }
 
-/* touch controls (phones / tablets) */
-.touch-controls { position: absolute; inset: auto 0 0 0; height: 0; pointer-events: none; }
-.touch-stick { position: absolute; left: 22px; bottom: 34px; width: 128px; height: 128px; border-radius: 50%; background: rgba(8, 14, 30, 0.45); border: 2px solid var(--line-hi); pointer-events: auto; touch-action: none; }
-.touch-knob { position: absolute; left: 39px; top: 39px; width: 50px; height: 50px; border-radius: 50%; background: rgba(103, 232, 249, 0.55); border: 2px solid #fff; }
-.touch-buttons { position: absolute; right: 18px; bottom: 40px; display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
-.touch-btn { width: 72px; height: 72px; border-radius: 50%; border: 2px solid var(--line-hi); background: rgba(8, 14, 30, 0.6); color: var(--txt); font-weight: 700; touch-action: manipulation; }
-.touch-btn.on { background: rgba(103, 232, 249, 0.3); }
-.surface-root[data-touch='on'] .surf-minimap { left: auto; right: 16px; top: 214px; bottom: auto; width: 110px; height: 110px; }
-.surface-root[data-touch='on'] .surf-keys { display: none; }
-.surf-terrain-error { position: absolute; left: 50%; top: 96px; transform: translateX(-50%); margin: 0; padding: 6px 12px; border-radius: 8px; background: rgba(60, 20, 10, 0.85); color: #fdd; font-size: 12px; }
 
 /* ===================================================================== astronaut guide: speech bubble + narration */
-.guide-bubble { position: absolute; left: 0; top: 0; z-index: 3; max-width: min(380px, 70vw); padding: 10px 12px 8px; border-radius: 14px; background: rgba(6, 12, 26, 0.88); border: 1px solid var(--line-hi); box-shadow: var(--shadow); pointer-events: auto; will-change: transform; }
-.guide-bubble[data-docked='false']::after { content: ""; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); border: 9px solid transparent; border-bottom: 0; border-top-color: var(--line-hi); }
-.guide-bubble[data-docked='true'] { left: 50%; top: auto; bottom: 150px; transform: translateX(-50%) !important; max-width: min(640px, calc(100vw - 32px)); }
 .guide-bubble.kind-story { border-color: var(--warm); }
 .guide-who { display: block; font: 700 10px var(--font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cy); margin-bottom: 3px; }
 .guide-bubble.kind-story .guide-who { color: var(--warm); }
@@ -4370,11 +4321,111 @@ mark.spoken-word { background: rgba(251, 191, 36, 0.35); color: inherit; border-
 .comp-story h3 { margin: 0 0 6px; font-size: 12px; color: var(--mut); text-transform: uppercase; letter-spacing: 0.1em; }
 .comp-story-part { margin-bottom: 8px; line-height: 1.5; }
 .comp-story-part .btn { margin-top: 4px; display: inline-block; }
-@media (max-width: 760px) { .guide-bubble { max-width: 80vw; font-size: 13px; } .guide-bubble[data-docked='true'] { bottom: 200px; } }
 @media (prefers-reduced-motion: reduce) { .guide-bubble { transition: none; } }
 
-/* guide bubble vs. other HUD: banner above it, docked bubble centred in the space left of the record panel */
-.surf-banner { top: 128px; }
-.surf-banner b { font-size: clamp(18px, 2.4vw, 26px); }
-.surface-root[data-panel='on'] .guide-bubble[data-docked='true'] { left: calc((100vw - 484px) / 2); max-width: min(560px, calc(100vw - 520px)); }
-@media (max-width: 760px) { .surface-root[data-panel='on'] .guide-bubble { display: none; } }
+/* ===================================================================== surface layout (shared by every world)
+   One layout architecture instead of fixed offsets:
+   .surface-root  = grid: [viewport | inspector] on wide landscape screens, [viewport / bottom sheet] otherwise.
+   .surf-viewport = the only place the 3-D canvas lives, so an open inspector RESIZES the view instead of covering it.
+   .surf-hud      = in-flow grid inside the viewport: header / status / centre / bottom. No magic offsets. */
+.surface-root {
+  position: fixed; inset: 0; z-index: 120; background: #000; visibility: visible !important; pointer-events: auto !important;
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr);
+  --surf-pad: 12px; --insp-w: clamp(340px, 26vw, 420px);
+}
+.surf-viewport { position: relative; grid-row: 1; grid-column: 1; min-width: 0; min-height: 0; overflow: hidden; }
+.surf-canvas { position: absolute; inset: 0; }
+.surf-terrain-error { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; padding: 6px 12px; border-radius: 8px; background: rgba(60, 20, 10, 0.85); color: #fdd; font-size: 12px; }
+
+/* ---- HUD regions */
+.surf-hud { position: absolute; inset: 0; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: 8px; padding: var(--surf-pad); pointer-events: none; }
+.surf-hud > * { min-width: 0; }
+.surf-top { pointer-events: auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 16px; padding: 9px 14px; border-radius: var(--r); background: rgba(6, 10, 20, 0.74); border: 1px solid var(--line); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+.surf-top-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1 1 260px; }
+.surf-top-title { font-size: 16px; line-height: 1.25; }
+.surf-top-meta { font-size: 12px; color: var(--mut); }
+.surf-top-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; }
+.surf-top-actions .btn kbd { margin-left: 4px; padding: 0 4px; font-size: 10px; }
+.surf-status { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.surf-compass { position: relative; width: min(520px, 100%); height: 30px; border-radius: 999px; background: rgba(4, 8, 18, 0.62); border: 1px solid var(--line); overflow: hidden; pointer-events: none; }
+.surf-chip { pointer-events: auto; max-width: 100%; padding: 6px 12px; border-radius: 999px; background: rgba(4, 8, 18, 0.8); border: 1px solid var(--line); font-size: 13px; text-align: center; }
+.surf-night { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; border-radius: var(--r); }
+.surf-center { position: relative; display: flex; flex-direction: column; align-items: center; min-height: 0; }
+.surf-banner { text-align: center; pointer-events: none; animation: surfBanner 5s ease forwards; }
+.surf-banner b { font-size: clamp(16px, 2.2vw, 24px); }
+@keyframes surfBanner { 0% { opacity: 0; transform: translateY(6px); } 10%, 80% { opacity: 1; transform: none; } 100% { opacity: 0; } }
+.surf-prompt { pointer-events: auto; margin-top: auto; display: flex; align-items: center; gap: 8px; max-width: 100%; padding: 6px 8px 6px 14px; border-radius: 999px; background: rgba(4, 8, 18, 0.82); border: 1px solid var(--line-hi); }
+.surf-prompt-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.surf-bottom-mid { justify-self: center; pointer-events: auto; }
+.surf-bottom-mid .surf-minimap { width: 92px; }
+.surf-bottom { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: end; gap: 12px; }
+.surf-bottom-left, .surf-bottom-right { pointer-events: auto; }
+.surf-minimap { position: relative; display: block; width: clamp(120px, 12vw, 176px); aspect-ratio: 1; padding: 0; border-radius: 50%; overflow: hidden; border: 1px solid var(--line-hi); background: #05070b; cursor: pointer; }
+.surf-provenance { margin: 0; align-self: end; font-size: 10px; line-height: 1.35; color: var(--mut); opacity: 0.8; text-align: center; pointer-events: none; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.surf-keys { max-width: 340px; font-size: 12px; line-height: 1.9; color: var(--mut); text-align: right; }
+
+/* ---- touch controls live in the bottom row */
+.touch-stick { position: relative; width: 116px; height: 116px; border-radius: 50%; background: rgba(8, 14, 30, 0.45); border: 1px solid var(--line-hi); touch-action: none; }
+.touch-knob { position: absolute; left: 33px; top: 33px; width: 50px; height: 50px; border-radius: 50%; background: rgba(103, 232, 249, 0.5); border: 2px solid #fff; }
+.touch-buttons { display: flex; flex-direction: column; gap: 10px; }
+.touch-btn { width: 64px; height: 64px; border-radius: 50%; border: 1px solid var(--line-hi); background: rgba(8, 14, 30, 0.62); color: var(--txt); font-weight: 700; touch-action: manipulation; }
+.touch-btn.on { background: rgba(103, 232, 249, 0.28); }
+
+/* ---- guide speech bubble: positioned by the scene inside the viewport's measured safe area */
+.guide-bubble { position: absolute; left: 0; top: 0; max-width: min(380px, calc(100% - 16px)); padding: 10px 12px 8px; border-radius: 12px; background: rgba(6, 12, 26, 0.9); border: 1px solid var(--line-hi); box-shadow: var(--shadow-sm); pointer-events: auto; will-change: transform; }
+.guide-bubble[data-docked='false']::after { content: ""; position: absolute; left: 50%; bottom: -8px; transform: translateX(-50%); border: 8px solid transparent; border-bottom: 0; border-top-color: var(--line-hi); }
+.guide-bubble[data-docked='true'] { max-width: min(600px, calc(100% - 16px)); }
+
+/* ---- inspector (record panel): a docked column, not a floating card */
+.discovery { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: rgba(5, 9, 19, 0.94); border-left: 1px solid var(--line); }
+.discovery-head { flex: none; display: flex; align-items: flex-start; gap: 10px; padding: 14px 12px 10px 16px; border-bottom: 1px solid var(--line); }
+.discovery-title { flex: 1; min-width: 0; }
+.discovery-title h2 { margin: 4px 0 2px; font-size: 19px; line-height: 1.25; overflow-wrap: anywhere; }
+.discovery-meta { margin: 0; font-size: 13px; color: var(--mut); }
+.discovery-head-actions { flex: none; display: flex; gap: 6px; }
+.discovery-icon { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 8px; border: 1px solid var(--line); background: transparent; color: var(--txt); cursor: pointer; font-size: 14px; }
+.discovery-icon:hover { border-color: var(--line-hi); }
+.discovery-content { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.discovery-content[hidden] { display: none; }
+.discovery-tabs { flex: none; display: flex; flex-wrap: wrap; gap: 0 2px; padding: 4px 10px 0; border-bottom: 1px solid var(--line); }
+.discovery-tabs [role='tab'] { appearance: none; border: 0; border-bottom: 2px solid transparent; border-radius: 6px 6px 0 0; background: transparent; color: var(--txt-dim); font: 600 13px var(--font); padding: 9px 10px 8px; white-space: nowrap; cursor: pointer; }
+.discovery-tabs [role='tab']:hover { color: var(--txt); }
+.discovery-tabs [role='tab'][aria-selected='true'] { color: var(--txt); border-bottom-color: var(--cy); background: rgba(103, 232, 249, 0.07); }
+.discovery-tabs [role='tab']:focus-visible { outline: 2px solid var(--cy); outline-offset: -2px; }
+.discovery-body { flex: 1; min-height: 0; overflow: auto; overscroll-behavior: contain; padding: 12px 16px; font-size: 14px; line-height: 1.55; }
+.discovery-body:focus-visible { outline: 2px solid var(--line-hi); outline-offset: -2px; }
+.discovery-foot { flex: none; padding: 10px 16px; border-top: 1px solid var(--line); }
+.comp-list button, .story-len button { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--line); background: transparent; color: var(--txt-dim); cursor: pointer; font-size: 12px; }
+.comp-list button.on, .story-len button.on { background: rgba(103, 232, 249, 0.14); border-color: var(--line-hi); color: var(--txt); }
+
+/* wide landscape: inspector column beside the viewport (collapses to a 52 px rail) */
+@media (min-width: 900px) and (orientation: landscape) {
+  .surface-root[data-panel='on'] { grid-template-columns: minmax(0, 1fr) var(--insp-w); }
+  .surface-root[data-panel='collapsed'] { grid-template-columns: minmax(0, 1fr) 52px; }
+  .surface-root[data-panel] .discovery { grid-row: 1; grid-column: 2; }
+  .discovery[data-collapsed] .discovery-head { flex-direction: column; align-items: center; padding: 12px 0; border-bottom: 0; }
+  .discovery[data-collapsed] .discovery-title { display: none; }
+  .discovery[data-collapsed] .discovery-head-actions { flex-direction: column; }
+}
+/* narrow or portrait: bottom sheet under the viewport; the 3-D view keeps at least a third of the height */
+@media not all and (min-width: 900px) and (orientation: landscape) {
+  .surface-root[data-panel='on'] { grid-template-rows: minmax(34dvh, 1fr) minmax(0, auto); }
+  .surface-root[data-panel='collapsed'] { grid-template-rows: minmax(0, 1fr) auto; }
+  .surface-root[data-panel] .discovery { grid-row: 2; grid-column: 1; max-height: 62dvh; border-left: 0; border-top: 1px solid var(--line-hi); border-radius: 14px 14px 0 0; }
+  .discovery[data-collapsed] .discovery-head { align-items: center; padding: 10px 12px 10px 16px; border-bottom: 0; }
+  .discovery[data-collapsed] .eyebrow, .discovery[data-collapsed] .discovery-meta { display: none; }
+  .discovery[data-collapsed] .discovery-title h2 { margin: 0; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+}
+@media (max-width: 1100px) { .surf-keys { max-width: 230px; } }
+@media (max-width: 760px) {
+  .surface-root { --surf-pad: 8px; }
+  .surf-top { padding: 8px 10px; gap: 6px 10px; }
+  .surf-top-info { flex-basis: 100%; }
+  .surf-top-meta { font-size: 11px; }
+  .surf-top-actions { justify-content: flex-start; }
+  .surf-top-actions .btn { padding: 4px 9px; font-size: 12px; }
+  .surf-top-actions .btn kbd { display: none; }
+  .surf-provenance { display: none; }
+  .discovery-title h2 { font-size: 17px; }
+}
+@media (prefers-reduced-motion: reduce) { .surf-banner { animation: none; } .guide-bubble { transition: none; } }
