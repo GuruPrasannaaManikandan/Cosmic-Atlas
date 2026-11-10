@@ -2,10 +2,16 @@ import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
 import { nav, interrupt } from '../store/nav'
 import { useStore } from '../store/store'
+import { input as keyboard } from '../input/appInput'
+import type { Action } from '../input/inputManager'
 
 const input = { yaw: 0, pitch: 0, panX: 0, panY: 0, dolly: 0 }
 
-/** Mouse/touch/keyboard controls. Any input interrupts an active flight (free exploration always wins). */
+/**
+ * Mouse / touch controls for the orbital (free) view. The KEYBOARD is owned by the central input manager (mode
+ * MAIN_MENU): W A S D fly, arrows turn the view, Space / C rise / sink, Shift faster. Any input interrupts an active
+ * flight (free exploration always wins).
+ */
 function ControlsComponent() {
   const { gl } = useThree()
   useEffect(() => {
@@ -46,28 +52,19 @@ function ControlsComponent() {
       input.dolly += -Math.sign(e.deltaY) * Math.min(3, Math.abs(e.deltaY) / 100 + 0.4)
     }
     const ctx = (e: Event) => e.preventDefault()
-    const kd = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || e.ctrlKey || e.metaKey || e.altKey) return
-      const k = e.key.toLowerCase()
-      if ('wasdqe cshift arrowup arrowdown arrowleft arrowright'.split(' ').includes(k) || k === ' ') {
-        if (k === ' ') e.preventDefault()
-        nav.keys.add(k)
-        interrupt()
-        if (useStore.getState().phase === 'intro') useStore.getState().setPhase('explore')
-      }
+    // a fresh key press (movement OR view) takes over from an automatic flight / the intro drift
+    const takeOver = () => {
+      interrupt()
+      if (useStore.getState().phase === 'intro') useStore.getState().setPhase('explore')
     }
-    const ku = (e: KeyboardEvent) => { nav.keys.delete(e.key.toLowerCase()) }
-    const blur = () => nav.keys.clear()
+    const offs = (['moveForward', 'moveBack', 'moveLeft', 'moveRight', 'lookUp', 'lookDown', 'lookLeft', 'lookRight', 'ascend', 'descend'] as Action[])
+      .map((a) => keyboard.on(a, takeOver, 'MAIN_MENU'))
     el.addEventListener('pointerdown', down)
     el.addEventListener('pointermove', move)
     el.addEventListener('pointerup', up)
     el.addEventListener('pointercancel', up)
     el.addEventListener('wheel', wheel, { passive: false })
     el.addEventListener('contextmenu', ctx)
-    window.addEventListener('keydown', kd)
-    window.addEventListener('keyup', ku)
-    window.addEventListener('blur', blur)
     el.style.touchAction = 'none'
     return () => {
       el.removeEventListener('pointerdown', down)
@@ -76,12 +73,25 @@ function ControlsComponent() {
       el.removeEventListener('pointercancel', up)
       el.removeEventListener('wheel', wheel)
       el.removeEventListener('contextmenu', ctx)
-      window.removeEventListener('keydown', kd)
-      window.removeEventListener('keyup', ku)
-      window.removeEventListener('blur', blur)
+      offs.forEach((off) => off())
     }
   }, [gl])
   return null
+}
+
+/**
+ * Keyboard → orbital camera, once per frame. Arrow keys TURN the view (same sense as dragging: right = turn right,
+ * up = look up) at the user's turn speed; they never move the camera. Returns the translation request for
+ * stepNavigation: x right, y up, z forward (|xz| ≤ 1), plus the Shift boost.
+ */
+export function pollOrbitalKeys(dt: number): { x: number; y: number; z: number; boost: boolean } {
+  if (keyboard.refresh() !== 'MAIN_MENU') return { x: 0, y: 0, z: 0, boost: false }
+  const l = keyboard.look()
+  const rate = keyboard.settings.lookSpeed * 0.6 // the orbital view turns gentler than a walking camera
+  input.yaw += l.x * rate * dt
+  input.pitch -= l.y * rate * dt // stepNavigation: +pitch = look down
+  const m = keyboard.move()
+  return { x: m.x, y: keyboard.axis('ascend', 'descend'), z: m.y, boost: keyboard.isHeld('sprint') }
 }
 
 export const Controls = { input, Component: ControlsComponent }

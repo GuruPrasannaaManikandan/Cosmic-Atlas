@@ -66,7 +66,7 @@ export const DEFAULT_BINDINGS: Record<InputMode, Binding[]> = {
     { action: 'sprint', codes: ['ShiftLeft', 'ShiftRight'], label: 'Lope (run) while held', held: true },
     { action: 'jump', codes: ['Space'], label: 'Hop', held: true },
     { action: 'interact', codes: ['KeyE'], label: 'Inspect nearby hardware' },
-    { action: 'board', codes: ['KeyR'], label: 'Board the rover (when beside it)' },
+    // (no 'board' binding yet: rover driving is not implemented, and the panel must only list working controls)
     { action: 'camera', codes: ['KeyC', 'KeyV'], label: 'First / third person' },
     { action: 'map', codes: ['KeyM'], label: 'Site map' },
     { action: 'help', codes: ['KeyH'], label: 'Controls' },
@@ -111,7 +111,8 @@ export const DEFAULT_BINDINGS: Record<InputMode, Binding[]> = {
     { action: 'nextEvent', codes: ['BracketRight'], label: 'Next event' },
     { action: 'back', codes: ['Escape'], label: 'Return to the present' },
   ],
-  UI_INTERACTION: [],
+  // menus, maps, pause: only Esc reaches the app (to close / resume); dialogs handle everything else themselves
+  UI_INTERACTION: [{ action: 'back', codes: ['Escape'], label: 'Close / resume' }],
 }
 
 export interface InputSettings {
@@ -222,14 +223,15 @@ export function createInputManager(resolveMode: () => InputMode, storage?: { get
     handleKeyDown(e) {
       if (isTypingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return
       const m = refresh()
-      if (m === 'UI_INTERACTION') return // dialogs own the keyboard
+      // UI_INTERACTION has only Esc bound (dialogs own the rest of the keyboard)
       const bs = find(e.code)
       if (!bs.length) return
       // gameplay keys must not scroll the page or move focus
       if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault()
       for (const b of bs) {
         if (b.held) held.add(e.code)
-        if (!b.held || !e.repeat) {
+        // a handler fires once per physical press: auto-repeat must not re-toggle the map, the camera, the pilot mode…
+        if (!e.repeat) {
           for (const h of handlers) if (h.action === b.action && (!h.mode || h.mode === m)) h.fn(b.action, e)
         }
       }

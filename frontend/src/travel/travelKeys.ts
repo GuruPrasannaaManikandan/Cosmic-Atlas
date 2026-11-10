@@ -1,20 +1,22 @@
-import { ship, cycleCameraView, toggleStabilization, setFlightModel, setGear, cancelAutopilot, FlightInput } from './shipState'
+import * as THREE from 'three'
+import { ship, cycleCameraView, toggleStabilization, setFlightModel, setGear, cancelAutopilot, engageAutopilot, flightEvent, FlightInput } from './shipState'
 import { useStore } from '../store/store'
+import { input } from '../input/appInput'
+import type { Action } from '../input/inputManager'
 
 /**
- * Travel Mode input.
+ * Travel Mode input, read from the central input manager (mode SPACECRAFT_FLIGHT, see input/inputManager.ts).
  *
- * Control scheme (physical key positions via KeyboardEvent.code, so it works with Shift held and on any layout):
- *   W / S        throttle up / down; holding S at zero throttle thrusts backward
- *   A / D        thrust left / right            Space / C   thrust up / down
- *   ← / →        yaw left / right               ↑ / ↓       pitch up / down          Q / E   roll left / right
- *   Shift        boost (×3) while held          B           brake
- *   Mouse drag   look (cockpit & chase) / orbit the camera (external)
- *   Mouse wheel  throttle (cockpit) / camera distance (chase & external)
- *   V camera · M nav map · F flight model · X stabilisation · 1–4 gear · Esc close map / exit Travel Mode
+ * THE RULE: W A S D translate the spacecraft, the ARROW KEYS AIM THE CAMERA. Never the other way round.
+ *   W / S        thrust forward / reverse thrust (S at zero throttle thrusts backward)
+ *   A / D        thrust left / right          Space / Z   thrust up / down          Q / E   roll
+ *   ↑ ↓ ← →      turn the camera / view ONLY. In MANUAL piloting, while thrusting, the ship turns toward where the
+ *                camera looks (assisted flight), so "W goes where you look", exactly like walking on a surface.
+ *   Shift boost · B brake · P automatic / manual piloting · C / V camera · F flight model · X stabilisation
+ *   1–4 speed range · M navigation map · Esc leave Travel Mode
  *
- * Axes are recomputed from the set of HELD keys on every key event, so releasing one key of an opposing pair never
- * cancels the other, and every key is released when the window loses focus (no stuck throttle after Alt-Tab).
+ * The AUTOPILOT IS NEVER CANCELLED BY A FLIGHT KEY OR A MOUSE DRAG. While it flies, movement keys do nothing except
+ * remind the pilot that P takes manual control; the arrows still look around. Only P (or the HUD button) disengages it.
  */
 export const travelInput: Required<FlightInput> = {
   yaw: 0,
@@ -30,93 +32,148 @@ export const travelInput: Required<FlightInput> = {
   lookPitch: 0,
 }
 
-/** UI state the key handler must respect (set by TravelHUD). */
-export const travelUi = { helpOpen: false }
+/** UI state the key handler must respect (set by TravelHUD). One shared object, in its own module (no import cycle). */
+export { travelUi } from './travelUi'
 
-const held = new Set<string>()
+/**
+ * Camera view direction RELATIVE TO THE SHIP for the cockpit and chase cameras (rad): yaw > 0 looks right, pitch > 0
+ * looks up. The external camera keeps its own orbit angles (ship.orbitAngle).
+ */
+export const travelView = { yaw: 0, pitch: 0 }
+if (typeof window !== 'undefined') (window as unknown as { __travelView?: typeof travelView }).__travelView = travelView
+const VIEW_PITCH_LIMIT = 1.2
+/** proportional steering gain: offset (rad) → turn command (−1..1) in manual piloting */
+const STEER_GAIN = 2.5
+const STEER_DEADZONE = 0.004
 
-const CODE_ALIASES: Record<string, string> = { ShiftLeft: 'Shift', ShiftRight: 'Shift' }
-const FLIGHT_CODES = new Set([
-  'KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyQ', 'KeyE', 'KeyC', 'Space', 'KeyB', 'Shift',
-  'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight',
-])
-/** Inputs that take the ship out of autopilot (manual override). */
-const OVERRIDE_CODES = new Set(['KeyW', 'KeyS', 'KeyA', 'KeyD', 'KeyQ', 'KeyE', 'KeyC', 'Space', 'KeyB', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'])
-
-const axis = (pos: string, neg: string) => (held.has(pos) ? 1 : 0) - (held.has(neg) ? 1 : 0)
-
-/** Recompute every axis from the held-key set. Exported for unit tests. */
-export function recomputeAxes() {
-  travelInput.thrustDelta = axis('KeyW', 'KeyS')
-  travelInput.reverse = held.has('KeyS') && !held.has('KeyW')
-  travelInput.strafeX = axis('KeyD', 'KeyA')
-  travelInput.strafeY = axis('Space', 'KeyC')
-  travelInput.yaw = axis('ArrowRight', 'ArrowLeft')
-  travelInput.pitch = axis('ArrowDown', 'ArrowUp') // physics: +1 = nose down (same sense as dragging the mouse down)
-  travelInput.roll = axis('KeyE', 'KeyQ')
-  travelInput.boost = held.has('Shift')
-  travelInput.brake = held.has('KeyB')
+function zeroAxes() {
+  travelInput.thrustDelta = 0
+  travelInput.reverse = false
+  travelInput.strafeX = 0
+  travelInput.strafeY = 0
+  travelInput.roll = 0
+  travelInput.boost = false
+  travelInput.brake = false
+  travelInput.yaw = 0
+  travelInput.pitch = 0
 }
 
 /** Release everything (focus loss, tab hidden, leaving Travel Mode). */
 export function releaseAllTravelInput() {
-  held.clear()
+  input.releaseAll()
   travelInput.lookYaw = 0
   travelInput.lookPitch = 0
-  recomputeAxes()
+  zeroAxes()
 }
 
-export function isTypingTarget(t: EventTarget | null): boolean {
-  const el = t as HTMLElement | null
-  if (!el || !el.tagName) return false
-  return el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable
-}
+const wrapPi = (a: number) => Math.atan2(Math.sin(a), Math.cos(a))
+let lastAutoHintAt = -Infinity
 
-const codeOf = (e: KeyboardEvent) => CODE_ALIASES[e.code] ?? e.code
+/**
+ * Read the keyboard once per frame (before stepShipPhysics). Fills travelInput from the held keys and turns the camera
+ * from the arrow keys. Exported for tests.
+ */
+export function pollTravelInput(dt: number, now: number = performance.now()) {
+  zeroAxes()
+  if (input.refresh() !== 'SPACECRAFT_FLIGHT') return
+  const auto = ship.autopilot.active
 
-export function handleTravelKeyDown(e: KeyboardEvent) {
-  if (isTypingTarget(e.target) || e.ctrlKey || e.metaKey || e.altKey) return
-  const st = useStore.getState()
-  const code = codeOf(e)
+  // arrows → camera only
+  const l = input.look()
+  const rate = input.settings.lookSpeed * dt
+  if (l.x || l.y) {
+    if (ship.cameraView === 'external') {
+      ship.orbitAngle.yaw -= l.x * rate
+      ship.orbitAngle.pitch = Math.max(-1.4, Math.min(1.4, ship.orbitAngle.pitch - l.y * rate))
+    } else {
+      travelView.yaw = wrapPi(travelView.yaw + l.x * rate)
+      travelView.pitch = Math.max(-VIEW_PITCH_LIMIT, Math.min(VIEW_PITCH_LIMIT, travelView.pitch + l.y * rate))
+    }
+  }
 
-  if (code === 'Escape') {
-    if (travelUi.helpOpen) return // the help dialog closes itself
-    if (st.navMapOpen) return // the nav map closes itself
-    e.preventDefault()
-    releaseAllTravelInput()
-    st.exitTravelMode()
+  const fwd = input.axis('moveForward', 'moveBack')
+  const side = input.axis('moveRight', 'moveLeft')
+  const vert = input.axis('ascend', 'descend')
+  const roll = input.axis('rollRight', 'rollLeft')
+  if (auto) {
+    // the autopilot keeps flying: a translation key only explains how to take over (at most every 4 s)
+    if ((fwd || side || vert || roll || input.isHeld('brake')) && now - lastAutoHintAt > 4000) {
+      lastAutoHintAt = now
+      flightEvent('Autopilot is flying — press P for manual piloting')
+    }
     return
   }
-  if (st.navMapOpen || travelUi.helpOpen) return // dialogs own the keyboard
+  travelInput.thrustDelta = fwd
+  travelInput.reverse = input.isHeld('moveBack') && !input.isHeld('moveForward')
+  travelInput.strafeX = side
+  travelInput.strafeY = vert
+  travelInput.roll = roll
+  travelInput.boost = input.isHeld('sprint')
+  travelInput.brake = input.isHeld('brake')
 
-  if (FLIGHT_CODES.has(code)) {
-    if (code === 'Space' || code.startsWith('Arrow')) e.preventDefault()
-    if (OVERRIDE_CODES.has(code) && ship.autopilot.active) cancelAutopilot('Autopilot disengaged — manual override')
-    held.add(code)
-    recomputeAxes()
-    return
-  }
-  if (e.repeat) return
-  switch (code) {
-    case 'KeyX': toggleStabilization(); break
-    case 'KeyF': setFlightModel(ship.flightModel === 'assisted' ? 'inertial' : 'assisted'); break
-    case 'KeyV': cycleCameraView(); break
-    case 'Digit1': setGear(1); break
-    case 'Digit2': setGear(2); break
-    case 'Digit3': setGear(3); break
-    case 'Digit4': setGear(4); break
-    case 'KeyM': st.set({ navMapOpen: true }); releaseAllTravelInput(); break
+  // manual piloting: WHILE THRUSTING the ship turns its nose toward the camera's view (cockpit / chase), the way the
+  // astronaut turns to face where it walks. The arrows alone never rotate the ship. Physics: yaw +1 = right, +1 pitch = nose down
+  if (ship.cameraView !== 'external' && (fwd || side || vert)) {
+    if (Math.abs(travelView.yaw) > STEER_DEADZONE) travelInput.yaw = Math.max(-1, Math.min(1, travelView.yaw * STEER_GAIN))
+    if (Math.abs(travelView.pitch) > STEER_DEADZONE) travelInput.pitch = Math.max(-1, Math.min(1, -travelView.pitch * STEER_GAIN))
   }
 }
 
-export function handleTravelKeyUp(e: KeyboardEvent) {
-  // always processed, even inside inputs, so a key can never stay "held"
-  const code = codeOf(e)
-  if (code === 'Shift') {
-    held.delete('Shift')
-  } else {
-    held.delete(code)
-  }
-  recomputeAxes()
+/** unit view direction in the ship frame for a (yaw, pitch) offset */
+export function viewDirLocal(yaw: number, pitch: number): THREE.Vector3 {
+  return new THREE.Vector3(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), -Math.cos(yaw) * Math.cos(pitch))
 }
 
+/**
+ * After the physics step: keep the camera's WORLD view direction where the pilot aimed it while the ship turns
+ * toward it (manual piloting only), so the offset shrinks to zero as the ship lines up. Under the autopilot the
+ * camera simply rides with the ship.
+ */
+export function settleTravelView(before: THREE.Quaternion, after: THREE.Quaternion) {
+  if (ship.autopilot.active || ship.cameraView === 'external') return
+  const world = viewDirLocal(travelView.yaw, travelView.pitch).applyQuaternion(before)
+  const local = world.applyQuaternion(after.clone().invert())
+  travelView.pitch = Math.asin(Math.max(-1, Math.min(1, local.y)))
+  travelView.yaw = Math.atan2(local.x, -local.z)
+}
+
+/** P (and the HUD switch): automatic ↔ manual piloting. Automatic needs a locked destination. */
+export function togglePilotMode(simMs: number = useStore.getState().simMs) {
+  if (ship.autopilot.active) {
+    cancelAutopilot('Manual piloting — W A S D thrust, arrows aim the camera')
+    return 'manual' as const
+  }
+  const target = ship.targetId && ship.targetId !== ship.arrivedId ? ship.targetId : null
+  if (target && engageAutopilot(target, simMs)) return 'automatic' as const
+  flightEvent('Choose a destination on the navigation map (M) to engage the autopilot')
+  return 'manual' as const
+}
+
+/** Discrete flight actions (one per key press). Returns an uninstaller. */
+export function installTravelActions(): () => void {
+  const M = 'SPACECRAFT_FLIGHT' as const
+  const on = (a: Action, fn: () => void) => input.on(a, fn, M)
+  const offs = [
+    on('back', () => {
+      releaseAllTravelInput()
+      useStore.getState().exitTravelMode()
+    }),
+    on('pilotMode', () => { togglePilotMode() }),
+    on('camera', () => {
+      cycleCameraView()
+      travelView.yaw = 0
+      travelView.pitch = 0
+    }),
+    on('stabilisation', () => toggleStabilization()),
+    on('flightModel', () => setFlightModel(ship.flightModel === 'assisted' ? 'inertial' : 'assisted')),
+    on('gear1', () => setGear(1)),
+    on('gear2', () => setGear(2)),
+    on('gear3', () => setGear(3)),
+    on('gear4', () => setGear(4)),
+    on('map', () => {
+      useStore.getState().set({ navMapOpen: true })
+      releaseAllTravelInput()
+    }),
+  ]
+  return () => offs.forEach((off) => off())
+}

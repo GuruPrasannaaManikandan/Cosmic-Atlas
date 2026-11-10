@@ -7,8 +7,9 @@ import * as THREE from 'three'
 import { BY_ID, positionOf } from '../data/catalog'
 import { len, sub, add, toThree, scale } from '../astro/coords'
 import { heliocentricKm, relativeKm } from '../astro/heliocentric'
-import { ship, initShipNear, stepShipPhysics, engageAutopilot, setCameraView, KM_TO_LY, C_LY_S, FlightInput } from './shipState'
-import { travelInput, travelUi, handleTravelKeyDown, handleTravelKeyUp, releaseAllTravelInput } from './travelKeys'
+import { ship, initShipNear, stepShipPhysics, engageAutopilot, cancelAutopilot, setCameraView, KM_TO_LY, C_LY_S, FlightInput } from './shipState'
+import { travelInput, travelUi, travelView, releaseAllTravelInput, pollTravelInput, settleTravelView, installTravelActions, viewDirLocal } from './travelKeys'
+import { input } from '../input/appInput'
 import { useStore } from '../store/store'
 
 const T0 = Date.UTC(2026, 10, 8, 12)
@@ -17,8 +18,10 @@ const MS_PER_DAY = 86400000
 type FakeKey = { code: string; key: string; target: unknown; repeat: boolean; ctrlKey: boolean; metaKey: boolean; altKey: boolean; preventDefault: () => void }
 const key = (code: string, extra: Partial<FakeKey> = {}): KeyboardEvent =>
   ({ code, key: code, target: { tagName: 'CANVAS' }, repeat: false, ctrlKey: false, metaKey: false, altKey: false, preventDefault() {}, ...extra }) as unknown as KeyboardEvent
-const down = (code: string, extra: Partial<FakeKey> = {}) => handleTravelKeyDown(key(code, extra))
-const up = (code: string) => handleTravelKeyUp(key(code))
+const down = (code: string, extra: Partial<FakeKey> = {}) => input.handleKeyDown(key(code, extra))
+const up = (code: string) => input.handleKeyUp(key(code))
+/** one frame of keyboard polling (Scene.tsx does this before every physics step) */
+const poll = (dt = 0.016, now?: number) => pollTravelInput(dt, now)
 
 const idle = (): FlightInput => ({ yaw: 0, pitch: 0, roll: 0, thrustDelta: 0, reverse: false, boost: false, strafeX: 0, strafeY: 0, brake: false })
 
@@ -33,61 +36,112 @@ function axes() {
 /** exact displacement (three axes, km) from the ship's local offset */
 const localThree = () => new THREE.Vector3(...toThree(ship.localKm!))
 
-describe('Travel Mode keyboard mapping (travelKeys)', () => {
+describe('Travel Mode keyboard mapping (central input manager → travelKeys)', () => {
+  let uninstall: () => void = () => {}
   beforeEach(() => {
     useStore.setState({ phase: 'travel', navMapOpen: false })
     travelUi.helpOpen = false
     releaseAllTravelInput()
     initShipNear('earth', T0)
+    cancelAutopilot()
+    setCameraView('chase')
+    travelView.yaw = 0
+    travelView.pitch = 0
+    uninstall()
+    uninstall = installTravelActions()
   })
 
-  it('maps W/S, A/D, Space/C, arrows, Q/E, Shift and B to the documented axes', () => {
-    down('KeyW'); expect(travelInput.thrustDelta).toBe(1); up('KeyW')
-    down('KeyS'); expect(travelInput.thrustDelta).toBe(-1); expect(travelInput.reverse).toBe(true); up('KeyS')
-    down('KeyA'); expect(travelInput.strafeX).toBe(-1); up('KeyA')
-    down('KeyD'); expect(travelInput.strafeX).toBe(1); up('KeyD')
-    down('Space'); expect(travelInput.strafeY).toBe(1); up('Space')
-    down('KeyC'); expect(travelInput.strafeY).toBe(-1); up('KeyC')
-    down('ArrowLeft'); expect(travelInput.yaw).toBe(-1); up('ArrowLeft')
-    down('ArrowUp'); expect(travelInput.pitch).toBe(-1); up('ArrowUp')
-    down('KeyE'); expect(travelInput.roll).toBe(1); up('KeyE')
-    down('ShiftLeft'); expect(travelInput.boost).toBe(true); up('ShiftLeft'); expect(travelInput.boost).toBe(false)
-    down('KeyB'); expect(travelInput.brake).toBe(true); up('KeyB')
+  it('maps W/S, A/D, Space/Z, Q/E, Shift and B to translation, roll, boost and brake', () => {
+    const check = (code: string, f: () => void) => { down(code); poll(); f(); up(code); poll() }
+    check('KeyW', () => expect(travelInput.thrustDelta).toBe(1))
+    check('KeyS', () => { expect(travelInput.thrustDelta).toBe(-1); expect(travelInput.reverse).toBe(true) })
+    check('KeyA', () => expect(travelInput.strafeX).toBe(-1))
+    check('KeyD', () => expect(travelInput.strafeX).toBe(1))
+    check('Space', () => expect(travelInput.strafeY).toBe(1))
+    check('KeyZ', () => expect(travelInput.strafeY).toBe(-1))
+    check('KeyE', () => expect(travelInput.roll).toBe(1))
+    check('ShiftLeft', () => expect(travelInput.boost).toBe(true))
+    check('KeyB', () => expect(travelInput.brake).toBe(true))
     expect(travelInput).toMatchObject({ thrustDelta: 0, strafeX: 0, strafeY: 0, yaw: 0, pitch: 0, roll: 0, boost: false, brake: false })
   })
 
+  it('WASD never turns the camera; the arrows never translate the ship', () => {
+    for (const c of ['KeyW', 'KeyA', 'KeyS', 'KeyD']) {
+      down(c); poll(0.5); up(c)
+      expect(travelView).toEqual({ yaw: 0, pitch: 0 })
+    }
+    for (const c of ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']) {
+      down(c); poll(0.1)
+      expect(travelInput).toMatchObject({ thrustDelta: 0, strafeX: 0, strafeY: 0, reverse: false })
+      up(c)
+    }
+  })
+
+  it('arrows aim the camera: right = look right, up = look up', () => {
+    down('ArrowRight'); poll(0.2); up('ArrowRight')
+    expect(travelView.yaw).toBeGreaterThan(0)
+    down('ArrowUp'); poll(0.2); up('ArrowUp')
+    expect(travelView.pitch).toBeGreaterThan(0)
+  })
+
+  const frames = (n: number) => {
+    for (let i = 0; i < n; i++) {
+      poll(0.016)
+      const before = ship.quat.clone()
+      stepShipPhysics(0.016, T0, travelInput)
+      settleTravelView(before, ship.quat)
+    }
+  }
+
+  it('the arrows alone never rotate the ship (they only aim the camera)', () => {
+    const q0 = ship.quat.clone()
+    down('ArrowRight'); frames(30); up('ArrowRight')
+    down('ArrowUp'); frames(30); up('ArrowUp')
+    frames(60)
+    expect(Math.abs(ship.quat.dot(q0))).toBeCloseTo(1, 9)
+    expect(travelView.yaw).toBeGreaterThan(0.3)
+  })
+
+  it('in manual piloting, while thrusting, the ship turns toward the aimed view and the offset settles to zero', () => {
+    down('ArrowRight'); poll(0.3); up('ArrowRight')
+    const target = viewDirLocal(travelView.yaw, travelView.pitch).applyQuaternion(ship.quat)
+    down('KeyW'); frames(200); up('KeyW')
+    const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(ship.quat)
+    expect(fwd.dot(target)).toBeGreaterThan(Math.cos(0.02)) // the nose now points where the pilot looked
+    expect(Math.abs(travelView.yaw)).toBeLessThan(0.02)
+  })
+
   it('releasing one key of an opposing pair keeps the other active (was: axis zeroed)', () => {
-    down('KeyW'); down('KeyS')
+    down('KeyW'); down('KeyS'); poll()
     expect(travelInput.thrustDelta).toBe(0)
-    up('KeyS')
+    up('KeyS'); poll()
     expect(travelInput.thrustDelta).toBe(1)
-    down('KeyA'); down('KeyD'); up('KeyA')
-    expect(travelInput.strafeX).toBe(1)
   })
 
   it('works with Shift held (physical key codes, not upper-case key values)', () => {
     down('ShiftLeft')
-    down('KeyW', { key: 'W' })
+    down('KeyW', { key: 'W' }); poll()
     expect(travelInput.thrustDelta).toBe(1)
-    up('KeyW')
+    up('KeyW'); poll()
     expect(travelInput.thrustDelta).toBe(0)
   })
 
   it('releases every key on focus loss (was: stuck throttle after Alt-Tab)', () => {
     down('KeyW'); down('KeyD'); down('ShiftLeft')
-    releaseAllTravelInput()
+    releaseAllTravelInput(); poll()
     expect(travelInput).toMatchObject({ thrustDelta: 0, strafeX: 0, boost: false })
   })
 
   it('ignores flight keys while typing and while a dialog owns the keyboard', () => {
-    down('KeyW', { target: { tagName: 'INPUT' } })
+    down('KeyW', { target: { tagName: 'INPUT' } }); poll()
     expect(travelInput.thrustDelta).toBe(0)
     useStore.setState({ navMapOpen: true })
-    down('KeyW')
+    down('KeyW'); poll()
     expect(travelInput.thrustDelta).toBe(0)
+    up('KeyW')
     useStore.setState({ navMapOpen: false })
     travelUi.helpOpen = true
-    down('KeyW')
+    down('KeyW'); poll()
     expect(travelInput.thrustDelta).toBe(0)
   })
 
@@ -104,12 +158,26 @@ describe('Travel Mode keyboard mapping (travelKeys)', () => {
     expect(useStore.getState().phase).toBe('explore')
   })
 
-  it('any manual flight input disengages the autopilot with a HUD message', () => {
+  it('no flight key or arrow cancels the autopilot; movement keys only show how to take over', () => {
     engageAutopilot('moon', T0)
-    expect(ship.autopilot.active).toBe(true)
-    down('KeyA')
+    for (const c of ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'KeyZ', 'KeyQ', 'KeyE', 'KeyB', 'ArrowUp', 'ArrowLeft']) {
+      down(c); poll(0.05, 1e9); up(c)
+      expect(ship.autopilot.active, c).toBe(true)
+    }
+    expect(travelInput.thrustDelta).toBe(0)
+    expect(ship.event?.text).toMatch(/press P/i)
+  })
+
+  it('P switches to manual piloting and back to the autopilot for the locked destination', () => {
+    engageAutopilot('moon', T0)
+    down('KeyP'); up('KeyP')
     expect(ship.autopilot.active).toBe(false)
-    expect(ship.event?.text).toMatch(/manual override/i)
+    down('KeyW'); poll()
+    expect(travelInput.thrustDelta).toBe(1)
+    up('KeyW')
+    down('KeyP'); up('KeyP')
+    expect(ship.autopilot.active).toBe(true)
+    expect(ship.autopilot.destinationId).toBe('moon')
   })
 })
 

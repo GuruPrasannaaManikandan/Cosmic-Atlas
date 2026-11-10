@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
-import { ship, setFlightModel, setCameraView, cycleCameraView, toggleStabilization, setGear, cancelAutopilot, GEAR_SPEEDS } from './shipState'
-import { travelUi } from './travelControls'
+import { ship, setFlightModel, setCameraView, cycleCameraView, toggleStabilization, setGear, GEAR_SPEEDS } from './shipState'
+import { travelUi, togglePilotMode } from './travelControls'
+import { ControlsPanel } from '../input/ControlsPanel'
+import '../input/controls.css'
 import { BY_ID, positionOf } from '../data/catalog'
 import { useStore } from '../store/store'
 import { sub, len, toThree, formatDistance, LY_PER_AU } from '../astro/coords'
@@ -226,9 +228,9 @@ export function TravelHUD() {
               <button
                 className="btn sm"
                 style={{ width: '100%', height: '26px', fontSize: '11px', borderColor: 'var(--warm)' }}
-                onClick={() => cancelAutopilot('Autopilot disengaged')}
+                onClick={() => togglePilotMode()}
               >
-                Disengage Autopilot (Manual Takeover)
+                Manual Piloting <kbd>P</kbd>
               </button>
             </div>
           )}
@@ -242,6 +244,11 @@ export function TravelHUD() {
 
           {!ship.autopilot.active && (
             <div className="actions" style={{ marginTop: '8px' }}>
+              {ship.targetId !== ship.arrivedId && (
+                <button className="btn sm" style={{ flex: 1, height: '28px', fontSize: '11.5px' }} onClick={() => togglePilotMode()}>
+                  Engage Autopilot <kbd>P</kbd>
+                </button>
+              )}
               <button
                 className="btn primary sm"
                 style={{ flex: 1, height: '28px', fontSize: '11.5px' }}
@@ -261,49 +268,20 @@ export function TravelHUD() {
             <div className="eyebrow">Flight Operations Manual</div>
             <h2>Spacecraft Flight Controls</h2>
 
-            <div className="help-grid">
-              <div className="help-box">
-                <h4>Propulsion & Velocity</h4>
-                <table className="help-table">
-                  <tbody>
-                    <tr><td><kbd>W</kbd></td><td>Throttle up (forward thrust)</td></tr>
-                    <tr><td><kbd>S</kbd></td><td>Throttle down; hold at 0% to thrust backward</td></tr>
-                    <tr><td><kbd>A</kbd> / <kbd>D</kbd></td><td>Thrust left / right</td></tr>
-                    <tr><td><kbd>Space</kbd> / <kbd>C</kbd></td><td>Thrust up / down</td></tr>
-                    <tr><td><kbd>Shift</kbd></td><td>Boost ×3 while held</td></tr>
-                    <tr><td><kbd>B</kbd></td><td>Brake</td></tr>
-                    <tr><td><kbd>1</kbd>–<kbd>4</kbd></td><td>Speed range (sub-light → warp)</td></tr>
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="help-box">
-                <h4>Attitude & Orientation</h4>
-                <table className="help-table">
-                  <tbody>
-                    <tr><td><kbd>Mouse drag</kbd></td><td>Look / steer (cockpit &amp; chase)</td></tr>
-                    <tr><td><kbd>←</kbd> / <kbd>→</kbd></td><td>Yaw left / right</td></tr>
-                    <tr><td><kbd>↑</kbd> / <kbd>↓</kbd></td><td>Pitch up / down</td></tr>
-                    <tr><td><kbd>Q</kbd> / <kbd>E</kbd></td><td>Roll left / right</td></tr>
-                    <tr><td><kbd>F</kbd></td><td>Assisted vs inertial flight</td></tr>
-                    <tr><td><kbd>X</kbd></td><td>Toggle stabilisation (damping)</td></tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
             <div className="help-box">
-              <h4>Astrogation & Camera</h4>
-              <table className="help-table">
-                <tbody>
-                  <tr><td><kbd>V</kbd></td><td>Cycle camera: cockpit / chase / external</td></tr>
-                  <tr><td><kbd>Mouse drag</kbd></td><td>Orbit the camera (external view)</td></tr>
-                  <tr><td><kbd>Mouse wheel</kbd></td><td>Camera distance (chase, external) · throttle (cockpit)</td></tr>
-                  <tr><td><kbd>M</kbd></td><td>Navigation map &amp; autopilot</td></tr>
-                  <tr><td><kbd>Esc</kbd></td><td>Close dialog / exit Travel Mode</td></tr>
-                  <tr><td colSpan={2} style={{ color: 'var(--txt-dim)' }}>Any flight input disengages the autopilot. Speed is limited near bodies so you cannot skip into a planet.</td></tr>
-                </tbody>
-              </table>
+              {/* generated from the input manager's bindings: it can only list controls that work */}
+              <ControlsPanel
+                mode="SPACECRAFT_FLIGHT"
+                extra={[
+                  { keys: 'Mouse drag', label: 'Aim the camera, like the arrow keys (external view: orbit the camera)' },
+                  { keys: 'Mouse wheel', label: 'Camera distance (chase, external) · throttle (cockpit)' },
+                ]}
+              />
+              <p className="muted small" style={{ marginTop: 10 }}>
+                The arrow keys only aim the camera. In manual piloting the ship steers toward where the camera looks, so
+                W flies where you look. The autopilot is never switched off by a flight key: press <kbd>P</kbd> to take
+                manual control. Speed is limited near bodies so you cannot skip into a planet.
+              </p>
             </div>
 
             <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end' }}>

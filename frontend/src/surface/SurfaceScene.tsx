@@ -15,6 +15,8 @@ import { useNarrator } from './narrator'
 import { bearingDeg } from './geo'
 import { Astronaut, AstronautHandle } from './models/Astronaut'
 import { HardwareModel, COLLIDERS, COMPONENT_ANCHORS, PositionMarker } from './models/Hardware'
+import { input } from '../input/appInput'
+import type { InputMode } from '../input/inputManager'
 import { regolithMap, regolithBump } from './models/materials'
 
 const D2R = Math.PI / 180
@@ -36,9 +38,10 @@ export const guidePose = { pointing: false, headYaw: 0, lookTarget: null as stri
 /** rendered hardware groups by object id: the inspection camera frames their real bounds */
 export const hardwareGroups = new Map<string, THREE.Group>()
 
-/** keyboard state, owned by the scene */
-const keys = new Set<string>()
-/** on-screen (touch) input, merged with the keyboard every frame */
+/** arrow-key camera pitch limits (rad), the same range the mouse uses */
+const PITCH_MIN = -1.25
+const PITCH_MAX = 0.75
+/** on-screen (touch) input, merged with the keyboard (central input manager) every frame */
 export const virtualInput = { forward: 0, right: 0, run: false, jump: false }
 
 export interface SceneEnv {
@@ -380,6 +383,21 @@ function Player({ env }: { env: SceneEnv }) {
     }
     surfaceDebug.character = () => ({ ...ch.current, camYaw: look.current.yaw, camPitch: look.current.pitch })
     surfaceDebug.camera = () => ({ pos: camera.position.toArray(), mode: useSurface.getState().camMode })
+    // third-person framing check: the astronaut's projected bounds (NDC) and their share of the screen height
+    surfaceDebug.astronautScreen = () => {
+      const a = astro.current
+      if (!a || !a.root.visible) return { visible: false, heightFrac: 0 }
+      const b = new THREE.Box3().setFromObject(a.root)
+      let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, behind = false
+      for (const x of [b.min.x, b.max.x]) for (const y of [b.min.y, b.max.y]) for (const z of [b.min.z, b.max.z]) {
+        const v = new THREE.Vector3(x, y, z).project(camera)
+        if (v.z > 1) behind = true
+        x0 = Math.min(x0, v.x); x1 = Math.max(x1, v.x); y0 = Math.min(y0, v.y); y1 = Math.max(y1, v.y)
+      }
+      const r = (n: number) => Math.round(n * 1000) / 1000
+      const visible = !behind && x1 > -1 && x0 < 1 && y1 > -1 && y0 < 1
+      return { visible, heightFrac: r((Math.min(y1, 1) - Math.max(y0, -1)) / 2), ndc: [r(x0), r(y0), r(x1), r(y1)] }
+    }
     surfaceDebug.guide = () => ({ ...guidePose, bubbleDocked: bubbleAnchor.el?.dataset.docked ?? null })
     surfaceDebug.inspectFrame = () => {
       const S = useSurface.getState()
@@ -398,53 +416,57 @@ function Player({ env }: { env: SceneEnv }) {
       surfaceDebug.teleport = undefined
       surfaceDebug.character = undefined
       surfaceDebug.camera = undefined
+      surfaceDebug.astronautScreen = undefined
       surfaceDebug.guide = undefined
       surfaceDebug.inspectFrame = undefined
       surfaceDebug.terrain = undefined
     }
   }, [ground, camera, env.placed])
 
-  // input: keyboard, pointer lock / drag look, wheel zoom
+  // input: keyboard actions come from the central input manager (modes PLANETARY_EXPLORATION / HARDWARE_INSPECTION /
+  // UI_INTERACTION); pointer lock / drag look and wheel zoom stay here because they belong to this canvas
   useEffect(() => {
     const el = gl.domElement
-    const typing = (e: KeyboardEvent) => {
-      const t = e.target as HTMLElement | null
-      return !!t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))
-    }
-    const kd = (e: KeyboardEvent) => {
-      if (typing(e)) return
+    const releaseLock = () => { if (document.pointerLockElement) document.exitPointerLock() }
+    const back = () => {
       const S = useSurface.getState()
-      if (e.code === 'Escape') {
-        if (S.panel) S.set({ panel: null, component: null, panelCollapsed: false })
-        else if (S.mapOpen) S.set({ mapOpen: false })
-        else if (S.helpOpen) S.set({ helpOpen: false })
-        else S.set({ paused: !S.paused })
-        return
+      if (S.panel) S.set({ panel: null, component: null, panelCollapsed: false })
+      else if (S.mapOpen) S.set({ mapOpen: false })
+      else if (S.helpOpen) S.set({ helpOpen: false })
+      else {
+        S.set({ paused: !S.paused })
+        releaseLock()
       }
-      if (S.intro || S.paused) return
-      if (e.code === 'KeyM' && !S.panel) {
-        S.set({ mapOpen: !S.mapOpen })
-        if (document.pointerLockElement) document.exitPointerLock()
-        return
-      }
-      if (S.panel || S.mapOpen) return
-      if (e.code === 'KeyE' && S.nearbyId) {
-        if (document.pointerLockElement) document.exitPointerLock()
-        S.set({ panel: { objectId: S.nearbyId, tab: 'inspect' }, component: null, banner: null })
-        return
-      }
-      if (e.code === 'KeyV') S.set({ camMode: S.camMode === 'third' ? 'first' : 'third' })
-      if (e.code === 'KeyH') S.set({ helpOpen: !S.helpOpen })
-      if (e.code === 'Space') e.preventDefault()
-      keys.add(e.code)
     }
-    const ku = (e: KeyboardEvent) => keys.delete(e.code)
-    const blur = () => keys.clear()
+    const WALK: InputMode = 'PLANETARY_EXPLORATION'
+    const offs = [
+      input.on('back', back, WALK),
+      input.on('back', back, 'HARDWARE_INSPECTION'),
+      input.on('back', back, 'UI_INTERACTION'),
+      input.on('map', () => {
+        useSurface.getState().set({ mapOpen: true })
+        releaseLock()
+      }, WALK),
+      input.on('interact', () => {
+        const S = useSurface.getState()
+        if (!S.nearbyId) return
+        releaseLock()
+        S.set({ panel: { objectId: S.nearbyId, tab: 'inspect' }, component: null, banner: null })
+      }, WALK),
+      input.on('camera', () => {
+        const S = useSurface.getState()
+        S.set({ camMode: S.camMode === 'third' ? 'first' : 'third' }) // the astronaut does not move: only the view
+      }, WALK),
+      input.on('help', () => {
+        useSurface.getState().set({ helpOpen: true })
+        releaseLock()
+      }, WALK),
+    ]
     let drag: { x: number; y: number } | null = null
     const pd = (e: PointerEvent) => {
       const S = useSurface.getState()
       drag = { x: e.clientX, y: e.clientY }
-      if (!S.panel && !S.mapOpen && !S.paused && !S.intro && e.pointerType === 'mouse' && !document.pointerLockElement) {
+      if (input.settings.mouseLook && !S.panel && !S.mapOpen && !S.paused && !S.intro && e.pointerType === 'mouse' && !document.pointerLockElement) {
         try {
           const p = el.requestPointerLock() as unknown as Promise<void> | undefined
           p?.catch?.(() => {})
@@ -459,7 +481,7 @@ function Player({ env }: { env: SceneEnv }) {
       if (S.panel) {
         L.inspYaw -= dx * 0.005
         L.inspPitch = THREE.MathUtils.clamp(L.inspPitch - dy * 0.004, -1.2, 0.35)
-      } else {
+      } else if (input.settings.mouseLook) {
         L.yaw -= dx * 0.0024
         L.pitch = THREE.MathUtils.clamp(L.pitch - dy * 0.0022, -1.25, 0.75)
       }
@@ -478,23 +500,18 @@ function Player({ env }: { env: SceneEnv }) {
       if (useSurface.getState().panel) L.inspZoom = THREE.MathUtils.clamp(L.inspZoom * (1 + Math.sign(e.deltaY) * 0.1), 0.45, 2.5)
       else L.dist = THREE.MathUtils.clamp(L.dist * (1 + Math.sign(e.deltaY) * 0.1), 2.2, 12)
     }
-    window.addEventListener('keydown', kd)
-    window.addEventListener('keyup', ku)
-    window.addEventListener('blur', blur)
     el.addEventListener('pointerdown', pd)
     window.addEventListener('pointermove', pm)
     window.addEventListener('pointerup', pu)
     el.addEventListener('wheel', wh, { passive: false })
     return () => {
-      window.removeEventListener('keydown', kd)
-      window.removeEventListener('keyup', ku)
-      window.removeEventListener('blur', blur)
+      offs.forEach((off) => off())
       el.removeEventListener('pointerdown', pd)
       window.removeEventListener('pointermove', pm)
       window.removeEventListener('pointerup', pu)
       el.removeEventListener('wheel', wh)
-      keys.clear()
-      if (document.pointerLockElement) document.exitPointerLock()
+      input.releaseAll()
+      releaseLock()
     }
   }, [gl])
 
@@ -503,13 +520,26 @@ function Player({ env }: { env: SceneEnv }) {
     const S = useSurface.getState()
     const L = look.current
     const frozen = S.paused || S.mapOpen || !!S.panel || S.intro
+    // arrow keys TURN THE CAMERA (never move the astronaut): right = turn right, up = look up, at the user's speed.
+    // While inspecting they orbit the inspection view instead. Mouse look uses the same yaw / pitch and limits.
+    const lk = input.look()
+    const turn = input.settings.lookSpeed * dt
+    if (S.panel) {
+      L.inspYaw -= lk.x * turn
+      L.inspPitch = THREE.MathUtils.clamp(L.inspPitch + lk.y * turn, -1.2, 0.35)
+    } else if (!frozen) {
+      L.yaw -= lk.x * turn
+      L.pitch = THREE.MathUtils.clamp(L.pitch + lk.y * turn, PITCH_MIN, PITCH_MAX)
+    }
+    // W A S D move relative to the camera's horizontal heading (camYaw); the manager normalises diagonals
+    const mv = input.move()
     const inp = frozen
       ? { forward: 0, right: 0, run: false, jump: false, camYaw: L.yaw }
       : {
-          forward: Math.max(-1, Math.min(1, (keys.has('KeyW') || keys.has('ArrowUp') ? 1 : 0) - (keys.has('KeyS') || keys.has('ArrowDown') ? 1 : 0) + virtualInput.forward)),
-          right: Math.max(-1, Math.min(1, (keys.has('KeyD') || keys.has('ArrowRight') ? 1 : 0) - (keys.has('KeyA') || keys.has('ArrowLeft') ? 1 : 0) + virtualInput.right)),
-          run: keys.has('ShiftLeft') || keys.has('ShiftRight') || virtualInput.run,
-          jump: keys.has('Space') || virtualInput.jump,
+          forward: THREE.MathUtils.clamp(mv.y + virtualInput.forward, -1, 1),
+          right: THREE.MathUtils.clamp(mv.x + virtualInput.right, -1, 1),
+          run: input.isHeld('sprint') || virtualInput.run,
+          jump: input.isHeld('jump') || virtualInput.jump,
           camYaw: L.yaw,
         }
     if (!S.paused) ch.current = stepCharacter(ch.current, inp, params, ground, env.colliders, dt)

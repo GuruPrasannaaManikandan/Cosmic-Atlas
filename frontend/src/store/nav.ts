@@ -29,7 +29,6 @@ export const nav = {
   lastFollowPos: null as Vec3 | null,
   orbit: false,
   speedMult: 1,
-  keys: new Set<string>(),
   nearestSurface: 1,
   nearestId: 'sun',
   scale: 1,
@@ -98,7 +97,13 @@ export function flyTo(id: string, ms: number, opts: { onArrive?: () => void; vie
 }
 
 /** Advance navigation; returns nothing. dt in seconds. */
-export function stepNavigation(dt: number, ms: number, input: { yaw: number; pitch: number; panX: number; panY: number; dolly: number; roll?: number }) {
+export function stepNavigation(
+  dt: number,
+  ms: number,
+  input: { yaw: number; pitch: number; panX: number; panY: number; dolly: number; roll?: number },
+  /** keyboard translation from the input manager: x right, y up, z forward; boost = Shift */
+  keys: { x: number; y: number; z: number; boost: boolean } = { x: 0, y: 0, z: 0, boost: false },
+) {
   const f = nav.flight
   if (f) {
     f.t = Math.min(1, f.t + dt / f.dur)
@@ -148,15 +153,9 @@ export function stepNavigation(dt: number, ms: number, input: { yaw: number; pit
   }
 
   // translation: keyboard (ly/s scaled by nearest surface) + pan + dolly
-  let mv = new THREE.Vector3()
-  const k = nav.keys
-  if (k.has('w') || k.has('arrowup')) mv.add(fwd)
-  if (k.has('s') || k.has('arrowdown')) mv.sub(fwd)
-  if (k.has('d') || k.has('arrowright')) mv.add(right)
-  if (k.has('a') || k.has('arrowleft')) mv.sub(right)
-  if (k.has(' ') || k.has('e')) mv.add(new THREE.Vector3(0, 1, 0))
-  if (k.has('c') || k.has('q')) mv.sub(new THREE.Vector3(0, 1, 0))
-  const boost = k.has('shift') ? 6 : 1
+  // W A S D only (arrow keys turn the view, see scene/Controls.tsx pollOrbitalKeys)
+  const mv = fwd.clone().multiplyScalar(keys.z).add(right.clone().multiplyScalar(keys.x)).add(new THREE.Vector3(0, keys.y, 0))
+  const boost = keys.boost ? 6 : 1
   const speed = Math.max(1e-13, s) * 1.2 * nav.speedMult * boost
   if (mv.lengthSq() > 0) {
     mv.normalize().multiplyScalar(speed * dt)

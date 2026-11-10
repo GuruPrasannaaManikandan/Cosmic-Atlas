@@ -57,5 +57,5 @@ export const useSurface = create<SurfaceUI>((set) => ({
 }))
 
 /** test/automation handle (read + a few safe actions), same pattern as window.__store / __nav */
-export const surfaceDebug: { teleport?: (x: number, z: number) => void; character?: () => unknown; camera?: () => unknown; terrain?: () => unknown; guide?: () => unknown; inspectFrame?: () => unknown } = {}
+export const surfaceDebug: { teleport?: (x: number, z: number) => void; character?: () => unknown; camera?: () => unknown; terrain?: () => unknown; guide?: () => unknown; inspectFrame?: () => unknown; astronautScreen?: () => unknown } = {}
 if (typeof window !== 'undefined') (window as any).__surface = { state: () => useSurface.getState(), debug: surfaceDebug }

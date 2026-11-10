@@ -10,9 +10,9 @@ import { orbitPolylineLy, PLANET_ELEMENTS, planetRootPos } from '../astro/epheme
 import * as T from './textures'
 import { buildGalaxy, buildCosmicWeb, buildBackdrop } from './procedural'
 import { labelState } from './labelState'
-import { Controls } from './Controls'
+import { Controls, pollOrbitalKeys } from './Controls'
 import { ship, stepShipPhysics } from '../travel/shipState'
-import { travelInput, TravelControlsComponent } from '../travel/travelControls'
+import { travelInput, travelView, pollTravelInput, settleTravelView, TravelControlsComponent } from '../travel/travelControls'
 import { SpacecraftModel } from '../travel/SpacecraftModel'
 import { WarpEffect } from '../travel/WarpEffect'
 import { eventState, stepEventTime, subscribeEventState } from '../events/eventState'
@@ -1477,22 +1477,27 @@ function Rig() {
       // advanceSim() above already moved the clock: use the CURRENT time, not the snapshot taken before it
       // (a one-frame lag made the ship trail moving bodies by ~43,000 km at 1 day/s).
       const msNow = useStore.getState().simMs
+      // keyboard (central input manager): WASD → thrust, arrows → camera; manual piloting steers toward the view
+      pollTravelInput(dt)
+      const qBefore = ship.quat.clone()
       stepShipPhysics(dt, msNow, travelInput)
-      // mouse-look deltas are per-step impulses: consumed by the physics step above
-      travelInput.lookYaw = 0
-      travelInput.lookPitch = 0
+      settleTravelView(qBefore, ship.quat)
       updateNearest(msNow)
       const S = Math.max(1e-12, adaptiveScale(nav.nearestSurface))
       nav.scale = S
 
       const q = ship.quat
-      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(q)
-      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(q)
+      // cockpit / chase look along the pilot's aimed view (arrow keys / drag), relative to the ship
+      const viewQ = q.clone()
+        .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), -travelView.yaw))
+        .multiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), travelView.pitch))
+      const fwd = new THREE.Vector3(0, 0, -1).applyQuaternion(viewQ)
+      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(viewQ)
 
       if (ship.cameraView === 'cockpit') {
         // Cockpit first-person: camera is positioned at the cockpit
         nav.pos = [...ship.pos]
-        nav.quat.copy(ship.quat)
+        nav.quat.copy(viewQ)
         travelCam.fromShip = [0, 0, 0]
       } else if (ship.cameraView === 'chase') {
         // Chase view: camera follows 14 units behind and 3.5 units above
@@ -1533,7 +1538,7 @@ function Rig() {
         const m = new THREE.Matrix4().lookAt(
           new THREE.Vector3(0, 0, 0),
           new THREE.Vector3(...relToShip).normalize(),
-          up
+          new THREE.Vector3(0, 1, 0).applyQuaternion(q) // the external camera orbits the SHIP's frame (orbitAngle)
         )
         nav.quat.setFromRotationMatrix(m)
       }
@@ -1566,10 +1571,11 @@ function Rig() {
     if (st.phase === 'intro') {
       inp.yaw += dt * 0.025
     }
+    const keys = pollOrbitalKeys(dt) // arrows → view turn (into inp), WASD → translation
     if (travelEngineState.phase === 'traveling') {
       stepTravel(dt, st.simMs)
     } else {
-      stepNavigation(dt, useStore.getState().simMs, inp)
+      stepNavigation(dt, useStore.getState().simMs, inp, keys)
     }
     inp.yaw = 0
     inp.pitch = 0

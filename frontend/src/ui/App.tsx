@@ -23,6 +23,7 @@ import { subscribeTravelEngine, travelEngineState, travelSettings } from '../tra
 import { BY_ID } from '../data/catalog'
 import { ModuleBoundary, ModuleLoader } from './ModuleBoundary'
 import { TopNav } from './TopNav'
+import { installInput } from '../input/appInput'
 
 // Lazy-loaded heavy modules for production bundle optimization and code-splitting
 const DataPanel = lazy(() => import('./DataPanel').then((m) => ({ default: m.DataPanel })))
@@ -277,6 +278,8 @@ function Loader() {
 }
 
 export function App() {
+  // the ONE gameplay keyboard owner: every scene reads its bindings (WASD move, arrows look) from here
+  useEffect(() => installInput(), [])
   const phase = useStore((s) => s.phase)
   const {
     quality,
@@ -517,6 +520,7 @@ export function App() {
             <div><kbd>Right-Drag</kbd> Pan</div>
             <div><kbd>Scroll</kbd> Zoom / Dolly</div>
             <div><kbd>W A S D</kbd> Fly</div>
+            <div><kbd>↑ ↓ ← →</kbd> Turn View</div>
             <div><kbd>Shift</kbd> 6× Warp Boost</div>
           </div>
         </div>

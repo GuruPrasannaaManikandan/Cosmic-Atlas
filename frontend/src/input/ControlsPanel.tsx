@@ -61,7 +61,10 @@ export function ControlsPanel({ mode, extra }: { mode?: InputMode; extra?: { key
             onChange={(e) => update({ lookSpeed: Number(e.target.value) })} />
         </label>
         <label><input type="checkbox" checked={s.invertY} onChange={(e) => update({ invertY: e.target.checked })} /> Invert up / down</label>
-        <label><input type="checkbox" checked={s.mouseLook} onChange={(e) => update({ mouseLook: e.target.checked })} /> Mouse look (drag or click to capture)</label>
+        {/* mouse capture only exists on a planetary surface; elsewhere dragging is the primary camera control */}
+        {m === 'PLANETARY_EXPLORATION' && (
+          <label><input type="checkbox" checked={s.mouseLook} onChange={(e) => update({ mouseLook: e.target.checked })} /> Mouse look (drag or click to capture)</label>
+        )}
       </fieldset>
     </div>
   )

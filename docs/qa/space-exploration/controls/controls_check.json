@@ -1,0 +1,244 @@
+{
+ "checks": [
+  {
+   "check": "T0 orbital view runs in MAIN_MENU mode",
+   "pass": true,
+   "detail": "MAIN_MENU"
+  },
+  {
+   "check": "T0b orbital view: an arrow key turns the view and does not translate it",
+   "pass": true,
+   "detail": {
+    "moved": 0.0,
+    "turned": true
+   }
+  },
+  {
+   "check": "T12 typing in the search field moves and turns nothing; the keys reach the field",
+   "pass": true,
+   "detail": {
+    "typed": "wd"
+   }
+  },
+  {
+   "check": "T0c surface runs in PLANETARY_EXPLORATION mode",
+   "pass": true,
+   "detail": "PLANETARY_EXPLORATION"
+  },
+  {
+   "check": "T1 W moves the astronaut forward along the camera direction; the camera does not turn",
+   "pass": true,
+   "detail": {
+    "dist": 1.46,
+    "cos": 1.0,
+    "cameraTurn": 0.0
+   }
+  },
+  {
+   "check": "T2 S moves the astronaut backward",
+   "pass": true,
+   "detail": {
+    "dist": 1.26,
+    "cos": 1.0,
+    "cameraTurn": 0.0
+   }
+  },
+  {
+   "check": "T3a A moves left; no camera turn",
+   "pass": true,
+   "detail": {
+    "dist": 1.45,
+    "cos": 0.999,
+    "cameraTurn": 0.0
+   }
+  },
+  {
+   "check": "T3b D moves right; no camera turn",
+   "pass": true,
+   "detail": {
+    "dist": 1.26,
+    "cos": 1.0,
+    "cameraTurn": 0.0
+   }
+  },
+  {
+   "check": "T4 ArrowLeft turns only the camera (camYaw +); the astronaut stays put",
+   "pass": true,
+   "detail": {
+    "moved": 0.0181,
+    "delta": 1.08
+   }
+  },
+  {
+   "check": "T4 ArrowRight turns only the camera (camYaw -); the astronaut stays put",
+   "pass": true,
+   "detail": {
+    "moved": 0.0,
+    "delta": -1.111
+   }
+  },
+  {
+   "check": "T4 ArrowUp turns only the camera (camPitch +); the astronaut stays put",
+   "pass": true,
+   "detail": {
+    "moved": 0.0,
+    "delta": 0.97
+   }
+  },
+  {
+   "check": "T4 ArrowDown turns only the camera (camPitch -); the astronaut stays put",
+   "pass": true,
+   "detail": {
+    "moved": 0.0,
+    "delta": -1.11
+   }
+  },
+  {
+   "check": "T5 W+A and W+D are smooth and not faster than W alone",
+   "pass": true,
+   "detail": {
+    "W": 1.12,
+    "W+A": 1.15,
+    "W+D": 1.12
+   }
+  },
+  {
+   "check": "T6 after turning with the arrows, W follows the NEW view direction",
+   "pass": true,
+   "detail": {
+    "dist": 1.46,
+    "cos": 1.0,
+    "cameraTurn": 0.0
+   }
+  },
+  {
+   "check": "T9 with the inspection record open, W does not move the astronaut (HARDWARE_INSPECTION mode)",
+   "pass": true,
+   "detail": {
+    "panel": true,
+    "moved": 0.0
+   }
+  },
+  {
+   "check": "T10a surface \u2194 inspection: held keys are dropped on the mode change and nothing keeps moving",
+   "pass": true,
+   "detail": {
+    "heldWhilePanel": [],
+    "drift": 0.0
+   }
+  },
+  {
+   "check": "T7a-f rover boarding / driving / steering / braking / camera / suspension",
+   "pass": null,
+   "detail": "SKIP: rover driving not implemented yet"
+  },
+  {
+   "check": "T10b leaving the rover with W held",
+   "pass": null,
+   "detail": "SKIP: rover driving not implemented yet"
+  },
+  {
+   "check": "T11 1920x1080: astronaut visible and sensibly sized in third person",
+   "pass": true,
+   "detail": {
+    "visible": true,
+    "heightFrac": 0.358,
+    "ndc": [
+     -0.142,
+     -0.433,
+     0.141,
+     0.284
+    ]
+   }
+  },
+  {
+   "check": "T11 1366x768: astronaut visible and sensibly sized in third person",
+   "pass": true,
+   "detail": {
+    "visible": true,
+    "heightFrac": 0.358,
+    "ndc": [
+     -0.142,
+     -0.433,
+     0.141,
+     0.284
+    ]
+   }
+  },
+  {
+   "check": "T11 1024x768: astronaut visible and sensibly sized in third person",
+   "pass": true,
+   "detail": {
+    "visible": true,
+    "heightFrac": 0.358,
+    "ndc": [
+     -0.189,
+     -0.433,
+     0.187,
+     0.284
+    ]
+   }
+  },
+  {
+   "check": "T11 390x844: astronaut visible and sensibly sized in third person",
+   "pass": true,
+   "detail": {
+    "visible": true,
+    "heightFrac": 0.358,
+    "ndc": [
+     -0.546,
+     -0.433,
+     0.541,
+     0.284
+    ]
+   }
+  },
+  {
+   "check": "T11b the Controls panel lists the current mode's real controls",
+   "pass": true,
+   "detail": "PLANETARY EXPLORATION\nW A S D\nWalk forward \u00b7 Walk backward \u00b7 Walk left \u00b7 Walk right\n\u2191 \u2193 \u2190 \u2192\nTurn the camera / view\nShift\nLope (run) while held\nSpace\nHop\nE\nInspe"
+  },
+  {
+   "check": "T8a travel runs in SPACECRAFT_FLIGHT mode, manual piloting",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "T8b arrow keys turn the view around the spacecraft and do not rotate the ship",
+   "pass": true,
+   "detail": {
+    "shipUnchanged": true,
+    "lookYaw": -1.291
+   }
+  },
+  {
+   "check": "T8c W thrusts forward in manual flight",
+   "pass": true,
+   "detail": {
+    "thrust": [
+     0,
+     1
+    ]
+   }
+  },
+  {
+   "check": "T8d automatic travel stays autonomous: movement keys do not cancel it",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "T8e P switches explicitly to manual piloting",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "T10c leaving Travel Mode with W held: orbital view, nothing stuck",
+   "pass": true,
+   "detail": {
+    "mode": "MAIN_MENU"
+   }
+  }
+ ],
+ "errors": [],
+ "errorsCount": 0
+}

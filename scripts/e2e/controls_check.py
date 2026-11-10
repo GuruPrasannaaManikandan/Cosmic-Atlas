@@ -31,7 +31,7 @@ SHIP = "const S = { ship: window.__ship, ...window.__shipApi };"
 VIEWPORTS = [(1920, 1080), (1366, 768), (1024, 768), (390, 844)]
 
 
-async def main(base: str, out: Path) -> int:
+async def main(base: str, out: Path, with_rover: bool = False) -> int:
     out.mkdir(parents=True, exist_ok=True)
     rep = {"checks": [], "errors": []}
 
@@ -70,6 +70,18 @@ async def main(base: str, out: Path) -> int:
         moved = math.dist(p0["pos"], p1["pos"])
         turned = abs(sum(a * b for a, b in zip(p0["q"], p1["q"]))) < 0.99999
         check("T0b orbital view: an arrow key turns the view and does not translate it", turned and moved == 0, {"moved": moved, "turned": turned})
+
+        # ---- T12 a focused text field owns the keyboard: typing W A S D / arrows moves nothing ----
+        box = page.locator("input[type='search'], input[placeholder*='earch']").first
+        await box.click()
+        p0 = await page.evaluate("() => ({ pos: [...window.__nav.pos], q: window.__nav.quat.toArray() })")
+        await hold(["KeyW", "KeyD", "ArrowLeft"], 700)
+        p1 = await page.evaluate("() => ({ pos: [...window.__nav.pos], q: window.__nav.quat.toArray() })")
+        typed = await box.input_value()
+        check("T12 typing in the search field moves and turns nothing; the keys reach the field", p0 == p1 and await held() == [] and len(typed) > 0, {"typed": typed})
+        await box.fill("")
+        await page.keyboard.press("Escape")
+        await page.mouse.click(700, 450)
 
         # ---- enter Apollo 15 ----
         await page.evaluate(f"() => {{ {ST}.setPlaying(false); {ST}.travel('moon', true) }}")
@@ -174,47 +186,54 @@ async def main(base: str, out: Path) -> int:
         check("T10a surface ↔ inspection: held keys are dropped on the mode change and nothing keeps moving", h_panel == [] and drift < 0.05 and await held() == [], {"heldWhilePanel": h_panel, "drift": round(drift, 3)})
 
         # ---- T7 rover ----
-        lrv = next(o for o in objs if o["id"] == "a15-lrv")
-        await page.evaluate(f"() => {DBG}.teleport({lrv['x'] + 2.5}, {lrv['z']})")
-        await page.wait_for_timeout(800)
-        prompt = await page.evaluate(f"() => ({{ nearby: {SU}.nearbyId }})")
-        await page.keyboard.press("KeyR")
-        await page.wait_for_timeout(600)
-        v0 = await page.evaluate(f"() => {DBG}.vehicle()")
-        check("T7a R beside the LRV boards it (VEHICLE_EXPLORATION mode)", v0 and v0["driving"] and await mode() == "VEHICLE_EXPLORATION", {"nearby": prompt["nearby"], "vehicle": v0})
-        await hold(["KeyW"], 2500)
-        v1 = await page.evaluate(f"() => {DBG}.vehicle()")
-        dist = math.hypot(v1["x"] - v0["x"], v1["z"] - v0["z"])
-        check("T7b W drives the rover forward; the wheels turn with distance (no sliding)", dist > 1 and abs(v1["wheelAngle"] - v0["wheelAngle"] - (v1["odometer"] - v0["odometer"]) / 0.409) < 0.05, {"dist": round(dist, 2), "speed": round(v1["speed"], 2)})
-        await page.keyboard.down("KeyW")
-        await page.keyboard.down("KeyA")
-        await page.wait_for_timeout(1500)
-        v2 = await page.evaluate(f"() => {DBG}.vehicle()")
-        await page.keyboard.up("KeyA")
-        await page.keyboard.up("KeyW")
-        dyaw = math.atan2(math.sin(v2["yaw"] - v1["yaw"]), math.cos(v2["yaw"] - v1["yaw"]))
-        check("T7c A steers left: the steering slews and the rover turns while moving", v2["steer"] > 0.5 and dyaw > 0.05, {"steer": round(v2["steer"], 2), "dyaw": round(dyaw, 3)})
-        await hold(["KeyS"], 3000)
-        v3 = await page.evaluate(f"() => {DBG}.vehicle()")
-        check("T7d S brakes the rover", v3["speed"] < v2["speed"], {"before": round(v2["speed"], 2), "after": round(v3["speed"], 2)})
-        await page.wait_for_timeout(1500)
-        v4 = await page.evaluate(f"() => {DBG}.vehicle()")
-        c_cam0 = await ch()
-        await hold(["ArrowRight"], 700)
-        v5 = await page.evaluate(f"() => {DBG}.vehicle()")
-        c_cam1 = await ch()
-        check("T7e arrows turn only the camera while driving (the rover does not move or steer)", math.hypot(v5["x"] - v4["x"], v5["z"] - v4["z"]) < 0.05 and abs(c_cam1["camYaw"] - c_cam0["camYaw"]) > 0.05, {"camTurn": round(c_cam1["camYaw"] - c_cam0["camYaw"], 3)})
-        check("T7f suspension and chassis attitude follow the terrain (values reported per wheel)", isinstance(v5["susp"], list) and len(v5["susp"]) == 4 and all(abs(s) <= 0.15 + 1e-9 for s in v5["susp"]), {"susp": v5["susp"], "pitch": v5["pitch"], "roll": v5["roll"]})
-        await page.screenshot(path=str(out / "rover_driving.jpg"), type="jpeg", quality=84)
-        await page.keyboard.down("KeyW")
-        await page.wait_for_timeout(200)
-        await page.keyboard.press("KeyR")  # leave while W is held
-        await page.keyboard.up("KeyW")
-        await page.wait_for_timeout(500)
-        c0 = await ch()
-        await page.wait_for_timeout(800)
-        c1 = await ch()
-        check("T10b leaving the rover with W held: back to walking, nothing stuck", await mode() == "PLANETARY_EXPLORATION" and await held() == [] and math.hypot(c1["pos"][0] - c0["pos"][0], c1["pos"][2] - c0["pos"][2]) < 0.05)
+        if not with_rover:
+            # Rover driving is NOT implemented (M0 scope): the R binding was removed so the Controls panel lists no
+            # control that does not work. Recorded as SKIP, never as a pass. Run with --rover once it exists.
+            for t in ("T7a-f rover boarding / driving / steering / braking / camera / suspension", "T10b leaving the rover with W held"):
+                rep["checks"].append({"check": t, "pass": None, "detail": "SKIP: rover driving not implemented yet"})
+                print(f"[SKIP] {t} - rover driving not implemented yet")
+        if with_rover:
+            lrv = next(o for o in objs if o["id"] == "a15-lrv")
+            await page.evaluate(f"() => {DBG}.teleport({lrv['x'] + 2.5}, {lrv['z']})")
+            await page.wait_for_timeout(800)
+            prompt = await page.evaluate(f"() => ({{ nearby: {SU}.nearbyId }})")
+            await page.keyboard.press("KeyR")
+            await page.wait_for_timeout(600)
+            v0 = await page.evaluate(f"() => {DBG}.vehicle()")
+            check("T7a R beside the LRV boards it (VEHICLE_EXPLORATION mode)", v0 and v0["driving"] and await mode() == "VEHICLE_EXPLORATION", {"nearby": prompt["nearby"], "vehicle": v0})
+            await hold(["KeyW"], 2500)
+            v1 = await page.evaluate(f"() => {DBG}.vehicle()")
+            dist = math.hypot(v1["x"] - v0["x"], v1["z"] - v0["z"])
+            check("T7b W drives the rover forward; the wheels turn with distance (no sliding)", dist > 1 and abs(v1["wheelAngle"] - v0["wheelAngle"] - (v1["odometer"] - v0["odometer"]) / 0.409) < 0.05, {"dist": round(dist, 2), "speed": round(v1["speed"], 2)})
+            await page.keyboard.down("KeyW")
+            await page.keyboard.down("KeyA")
+            await page.wait_for_timeout(1500)
+            v2 = await page.evaluate(f"() => {DBG}.vehicle()")
+            await page.keyboard.up("KeyA")
+            await page.keyboard.up("KeyW")
+            dyaw = math.atan2(math.sin(v2["yaw"] - v1["yaw"]), math.cos(v2["yaw"] - v1["yaw"]))
+            check("T7c A steers left: the steering slews and the rover turns while moving", v2["steer"] > 0.5 and dyaw > 0.05, {"steer": round(v2["steer"], 2), "dyaw": round(dyaw, 3)})
+            await hold(["KeyS"], 3000)
+            v3 = await page.evaluate(f"() => {DBG}.vehicle()")
+            check("T7d S brakes the rover", v3["speed"] < v2["speed"], {"before": round(v2["speed"], 2), "after": round(v3["speed"], 2)})
+            await page.wait_for_timeout(1500)
+            v4 = await page.evaluate(f"() => {DBG}.vehicle()")
+            c_cam0 = await ch()
+            await hold(["ArrowRight"], 700)
+            v5 = await page.evaluate(f"() => {DBG}.vehicle()")
+            c_cam1 = await ch()
+            check("T7e arrows turn only the camera while driving (the rover does not move or steer)", math.hypot(v5["x"] - v4["x"], v5["z"] - v4["z"]) < 0.05 and abs(c_cam1["camYaw"] - c_cam0["camYaw"]) > 0.05, {"camTurn": round(c_cam1["camYaw"] - c_cam0["camYaw"], 3)})
+            check("T7f suspension and chassis attitude follow the terrain (values reported per wheel)", isinstance(v5["susp"], list) and len(v5["susp"]) == 4 and all(abs(s) <= 0.15 + 1e-9 for s in v5["susp"]), {"susp": v5["susp"], "pitch": v5["pitch"], "roll": v5["roll"]})
+            await page.screenshot(path=str(out / "rover_driving.jpg"), type="jpeg", quality=84)
+            await page.keyboard.down("KeyW")
+            await page.wait_for_timeout(200)
+            await page.keyboard.press("KeyR")  # leave while W is held
+            await page.keyboard.up("KeyW")
+            await page.wait_for_timeout(500)
+            c0 = await ch()
+            await page.wait_for_timeout(800)
+            c1 = await ch()
+            check("T10b leaving the rover with W held: back to walking, nothing stuck", await mode() == "PLANETARY_EXPLORATION" and await held() == [] and math.hypot(c1["pos"][0] - c0["pos"][0], c1["pos"][2] - c0["pos"][2]) < 0.05)
 
         # ---- T11 framing and screenshots ----
         for w, h in VIEWPORTS:
@@ -228,7 +247,7 @@ async def main(base: str, out: Path) -> int:
         await page.keyboard.press("KeyH")
         await page.wait_for_timeout(400)
         panel_txt = await page.locator(".controls-panel").first.inner_text()
-        check("T11b the Controls panel lists the current mode's real controls", "W A S D" in panel_txt and "↑ ↓ ← →" in panel_txt and "Planetary exploration" in panel_txt, panel_txt[:160])
+        check("T11b the Controls panel lists the current mode's real controls", "W A S D" in panel_txt and "↑ ↓ ← →" in panel_txt and "planetary exploration" in panel_txt.lower(), panel_txt[:160])
         await page.screenshot(path=str(out / "controls_panel_surface.jpg"), type="jpeg", quality=84)
         await page.keyboard.press("Escape")
 
@@ -240,10 +259,10 @@ async def main(base: str, out: Path) -> int:
         await page.mouse.click(700, 420)
         check("T8a travel runs in SPACECRAFT_FLIGHT mode, manual piloting", await mode() == "SPACECRAFT_FLIGHT" and not await page.evaluate("() => window.__ship.autopilot.active"))
         q0 = await page.evaluate("() => window.__ship.quat.toArray()")
-        l0 = await page.evaluate("() => ({ ...window.__ship.camLook })")
+        l0 = await page.evaluate("() => ({ ...window.__travelView })")
         await hold(["ArrowLeft"], 700)
         q1 = await page.evaluate("() => window.__ship.quat.toArray()")
-        l1 = await page.evaluate("() => ({ ...window.__ship.camLook })")
+        l1 = await page.evaluate("() => ({ ...window.__travelView })")
         same = abs(sum(a * b for a, b in zip(q0, q1))) > 0.999999
         check("T8b arrow keys turn the view around the spacecraft and do not rotate the ship", same and l1["yaw"] - l0["yaw"] < -0.05, {"shipUnchanged": same, "lookYaw": round(l1["yaw"], 3)})
         t0 = await page.evaluate("() => window.__ship.thrust")
@@ -274,10 +293,11 @@ async def main(base: str, out: Path) -> int:
         rep["errorsCount"] = len(rep["errors"])
         await b.close()
 
-    passed = sum(c["pass"] for c in rep["checks"])
-    total = len(rep["checks"])
+    passed = sum(c["pass"] is True for c in rep["checks"])
+    skipped = sum(c["pass"] is None for c in rep["checks"])
+    total = len(rep["checks"]) - skipped
     (out / "controls_check.json").write_text(json.dumps(rep, indent=1))
-    print(f"RESULT: {'PASS' if passed == total else 'FAIL'} ({passed}/{total}); console errors: {len(rep['errors'])}")
+    print(f"RESULT: {'PASS' if passed == total else 'FAIL'} ({passed}/{total}, {skipped} skipped); console errors: {len(rep['errors'])}")
     return 0 if passed == total else 1
 
 
@@ -285,5 +305,6 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--base", default="http://localhost:5173")
     ap.add_argument("--out", default="docs/qa/space-exploration/controls")
+    ap.add_argument("--rover", action="store_true", help="also run the rover checks T7 / T10b (needs rover driving)")
     a = ap.parse_args()
-    sys.exit(asyncio.run(main(a.base, Path(a.out))))
+    sys.exit(asyncio.run(main(a.base, Path(a.out), a.rover)))

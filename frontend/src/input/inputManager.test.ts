@@ -86,7 +86,7 @@ describe('context: modes own their keys', () => {
     im.handleKeyDown(key('KeyE', { repeat: true }))
     setMode('SPACECRAFT_FLIGHT')
     im.handleKeyDown(key('KeyE')) // E is "roll right" in flight, not interact
-    expect(got).toEqual(['interact', 'interact'])
+    expect(got).toEqual(['interact']) // the auto-repeat did not fire a second time
     expect(im.axis('rollRight', 'rollLeft')).toBe(1)
   })
   it('a key never has two simultaneous actions within one mode', () => {

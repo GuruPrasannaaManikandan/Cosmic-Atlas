@@ -1,16 +1,15 @@
 import { useEffect } from 'react'
 import { useThree } from '@react-three/fiber'
-import { ship, cancelAutopilot } from './shipState'
-import { travelInput, releaseAllTravelInput, handleTravelKeyDown, handleTravelKeyUp } from './travelKeys'
+import { ship } from './shipState'
+import { travelView, releaseAllTravelInput, installTravelActions } from './travelKeys'
 
-// Keyboard state and handlers live in travelKeys.ts (no React / WebGL dependencies, unit-testable in Node).
-export { travelInput, travelUi, recomputeAxes, releaseAllTravelInput, handleTravelKeyDown, handleTravelKeyUp } from './travelKeys'
+// Keyboard state lives in the central input manager; travelKeys.ts turns it into flight input every frame.
+export { travelInput, travelUi, travelView, releaseAllTravelInput, pollTravelInput, settleTravelView, togglePilotMode } from './travelKeys'
 
-const onBlur = () => releaseAllTravelInput()
-const onVisibility = () => {
-  if (document.visibilityState === 'hidden') releaseAllTravelInput()
-}
-
+/**
+ * Mouse / touch for Travel Mode. Dragging AIMS THE CAMERA, exactly like the arrow keys: it never steers the ship
+ * directly and never cancels the autopilot (in manual piloting the ship then turns toward the view).
+ */
 export function TravelControlsComponent() {
   const { gl } = useThree()
 
@@ -36,10 +35,8 @@ export function TravelControlsComponent() {
         ship.orbitAngle.yaw -= dx * 0.006
         ship.orbitAngle.pitch = Math.max(-1.4, Math.min(1.4, ship.orbitAngle.pitch + dy * 0.006))
       } else {
-        // cockpit & chase: mouse look steers the ship
-        if (ship.autopilot.active && (dx || dy)) cancelAutopilot('Autopilot disengaged — manual override')
-        travelInput.lookYaw += dx * 0.004
-        travelInput.lookPitch += dy * 0.004
+        travelView.yaw = Math.atan2(Math.sin(travelView.yaw + dx * 0.004), Math.cos(travelView.yaw + dx * 0.004))
+        travelView.pitch = Math.max(-1.2, Math.min(1.2, travelView.pitch - dy * 0.004))
       }
     }
     const onPointerUp = () => { dragging = false }
@@ -56,10 +53,9 @@ export function TravelControlsComponent() {
     }
 
     releaseAllTravelInput()
-    window.addEventListener('keydown', handleTravelKeyDown)
-    window.addEventListener('keyup', handleTravelKeyUp)
-    window.addEventListener('blur', onBlur)
-    document.addEventListener('visibilitychange', onVisibility)
+    travelView.yaw = 0
+    travelView.pitch = 0
+    const uninstall = installTravelActions()
     el.addEventListener('pointerdown', onPointerDown)
     el.addEventListener('pointermove', onPointerMove)
     el.addEventListener('pointerup', onPointerUp)
@@ -68,10 +64,7 @@ export function TravelControlsComponent() {
     el.addEventListener('wheel', onWheel, { passive: false })
 
     return () => {
-      window.removeEventListener('keydown', handleTravelKeyDown)
-      window.removeEventListener('keyup', handleTravelKeyUp)
-      window.removeEventListener('blur', onBlur)
-      document.removeEventListener('visibilitychange', onVisibility)
+      uninstall()
       el.removeEventListener('pointerdown', onPointerDown)
       el.removeEventListener('pointermove', onPointerMove)
       el.removeEventListener('pointerup', onPointerUp)

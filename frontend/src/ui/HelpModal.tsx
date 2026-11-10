@@ -1,5 +1,7 @@
 import { useEffect } from 'react'
 import { startTutorial } from '../tutorial/tutorialState'
+import { ControlsPanel } from '../input/ControlsPanel'
+import '../input/controls.css'
 
 export function HelpModal({ onClose }: { onClose: () => void }) {
   useEffect(() => {
@@ -35,19 +37,9 @@ export function HelpModal({ onClose }: { onClose: () => void }) {
           </div>
 
           <div className="help-box">
-            <h4>Keyboard Flight Controls</h4>
-            <table className="help-table">
-              <tbody>
-                <tr><td><kbd>W</kbd> / <kbd>↑</kbd></td><td>Thrust forward</td></tr>
-                <tr><td><kbd>S</kbd> / <kbd>↓</kbd></td><td>Thrust backward</td></tr>
-                <tr><td><kbd>A</kbd> / <kbd>←</kbd></td><td>Strafe left</td></tr>
-                <tr><td><kbd>D</kbd> / <kbd>→</kbd></td><td>Strafe right</td></tr>
-                <tr><td><kbd>Space</kbd> / <kbd>E</kbd></td><td>Ascend vertically</td></tr>
-                <tr><td><kbd>C</kbd> / <kbd>Q</kbd></td><td>Descend vertically</td></tr>
-                <tr><td><kbd>Shift</kbd></td><td>6× Warp thrust booster</td></tr>
-                <tr><td><kbd>/</kbd> or <kbd>Ctrl+K</kbd></td><td>Focus universe search</td></tr>
-              </tbody>
-            </table>
+            <h4>Keyboard</h4>
+            {/* rendered from the input manager's bindings, so it only lists controls that work */}
+            <ControlsPanel mode="MAIN_MENU" extra={[{ keys: '/ / Ctrl+K', label: 'Search the universe' }]} />
           </div>
         </div>
 

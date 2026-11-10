@@ -16,6 +16,8 @@ import { DiscoveryPanel } from './DiscoveryPanel'
 import { elevationDeg, azimuthDeg } from './lighting'
 import { bearingDeg } from './geo'
 import { preloadNasaModel } from './models/NasaModel'
+import { ControlsPanel } from '../input/ControlsPanel'
+import '../input/controls.css'
 
 function Compass() {
   const site = SITE_BY_ID[useSurface((s) => s.siteId)!]
@@ -143,7 +145,7 @@ function Hud({ touch }: { touch: boolean }) {
               <TouchButtons />
             ) : (
               <div className="surf-keys">
-                <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk · <kbd>Shift</kbd> lope · <kbd>Space</kbd> hop · mouse look · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> pause
+                <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> walk · <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> look · <kbd>Shift</kbd> lope · <kbd>Space</kbd> hop · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> pause
               </div>
             )}
           </div>
@@ -177,12 +179,9 @@ function Help() {
     <div className="surf-overlay" role="dialog" aria-label="Controls">
       <div className="surf-pause glass surf-help">
         <h2>Controls</h2>
-        <ul>
-          <li><kbd>W</kbd>/<kbd>S</kbd> forward / back, <kbd>A</kbd>/<kbd>D</kbd> left / right (relative to where you look)</li>
-          <li>Mouse: look around — click the view to capture the mouse, or drag</li>
-          <li><kbd>Shift</kbd> lope (the bounding run used in low gravity) · <kbd>Space</kbd> hop</li>
-          <li><kbd>E</kbd> inspect nearby hardware · <kbd>M</kbd> surface map · <kbd>V</kbd> first / third person · <kbd>Esc</kbd> pause / close</li>
-        </ul>
+        {/* generated from the input manager's bindings: it can only list controls that work */}
+        <ControlsPanel mode="PLANETARY_EXPLORATION" extra={[{ keys: 'Mouse', label: 'Look around: click the view to capture the mouse, or drag' }]} />
+        <p className="muted small">Walking is relative to where the camera looks. The arrow keys only turn the camera; they never move you.</p>
         <p className="muted small">
           Gravity on the {planet.name} is {g.value} m/s² (NASA NSSDCA fact sheet): Earth's {EARTH_G} m/s² is about {(EARTH_G / (g.value ?? EARTH_G)).toFixed(1)} times stronger, so the same push carries you about that many times higher. Walking speeds are gameplay tuning, not measured astronaut data.
         </p>

@@ -7,7 +7,7 @@ Journeys (state captured before departure, during flight and after arrival; scre
      distance, keep the flight HUD compact and off the centre of the view, and hide the large panels in flight.
   C  Mid-flight cancellation with the real Cancel button: position holds; the next flight departs from there.
   T  Travel Mode: entry keeps the exact view; autopilot (via search) accelerates then decelerates and arrives;
-     manual override (W) cancels autopilot; braking (B) reduces the measured speed; V cycles camera modes;
+     W leaves the autopilot engaged and P switches to manual; braking (B) reduces the measured speed; V cycles camera modes;
      nav map opens docked, minimizes, expands, closes.
   P  Contextual panels: default view uncluttered; Catalogue (L), Inspector (chip Details / I), Timeline (T).
   R  Responsive screenshots. Plus: DOM inventory of the Travel HUD controls, console/page errors.
@@ -171,9 +171,15 @@ async def main(base: str, out: Path) -> int:
         # manual override + throttle + braking
         await page.evaluate(f"() => {ST}.travel('mars')")
         await page.wait_for_timeout(1500)
+        # Gameplay Controls rule (16.3): a movement key never cancels automatic travel; P switches explicitly
         await page.keyboard.down("KeyW")
         await page.wait_for_timeout(400)
+        kept = await page.evaluate("() => ({ active: window.__ship.autopilot.active })")
+        await page.keyboard.up("KeyW")
+        await page.keyboard.press("KeyP")
+        await page.wait_for_timeout(300)
         ov = await page.evaluate("() => ({ active: window.__ship.autopilot.active })")
+        await page.keyboard.down("KeyW")
         await page.wait_for_timeout(1600)
         await page.keyboard.up("KeyW")
         v_before = await page.evaluate("() => Math.hypot(...window.__ship.vel)")
@@ -182,7 +188,8 @@ async def main(base: str, out: Path) -> int:
         await page.wait_for_timeout(1500)
         await page.keyboard.up("KeyB")
         v_after = await page.evaluate("() => Math.hypot(...window.__ship.vel)")
-        check("T5 manual input (W) overrides the autopilot", not ov["active"], ov)
+        check("T5a W alone does NOT cancel the autopilot", kept["active"], kept)
+        check("T5 P switches to manual piloting; W then flies the ship", not ov["active"] and v_before > 0, {"afterP": ov, "speed": v_before})
         check("T6 braking (B) reduces the actual velocity", v_after < 0.6 * v_before and v_before > 0, {"before": v_before, "after": v_after})
         # camera modes
         views = []

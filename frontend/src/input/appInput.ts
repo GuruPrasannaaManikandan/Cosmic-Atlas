@@ -5,7 +5,7 @@
 import { createInputManager, type InputMode } from './inputManager'
 import { useStore } from '../store/store'
 import { useSurface } from '../surface/surfaceState'
-import { travelUi } from '../travel/travelKeys'
+import { travelUi } from '../travel/travelUi'
 
 /** any open modal dialog (About, Help, Spacecraft Archive, site picker, nav map, …) owns the keyboard */
 function modalOpen(): boolean {
