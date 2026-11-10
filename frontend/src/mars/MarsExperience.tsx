@@ -21,6 +21,11 @@ const ANCHOR: Record<string, string> = {
   'merb-pancam': 'mast',
   'merb-navcam': 'mast',
   'merb-minites': 'mast',
+  'merb-idd': 'arm',
+  'merb-telecom': 'hga',
+  'merb-web': 'body',
+  'merb-avionics': 'body',
+  'merb-batteries': 'body',
 }
 
 const deg = (r: number) => (r * 180) / Math.PI
@@ -312,7 +317,7 @@ export default function MarsExperience() {
       </div>
       {S.panel && !S.replay && (
         <DiscoveryPanel
-          inspectNote="Solar array, wheels and rocker-bogie are highlighted on the NASA model's own parts; mast instruments are framed by the camera only (the low-poly model has no separate camera parts). Drag the view or use the arrow keys to orbit; wheel to zoom."
+          inspectNote="Each part is highlighted on NASA's articulated MER model (NASA 3D Resources): solar panel sections, wheels and rocker-bogie, the instrument arm with its turret, the Pancam mast, the high-gain antenna and the body. Pancam, Navcam and Mini-TES sit in the mast head, so they share its highlight; batteries and the flight computer are inside the body. Drag the view or use the arrow keys to orbit; wheel to zoom."
           clockButtons={false}
           onRelive={opp && ready ? () => beginMarsReplay(S.panel!.objectId, ready, marsLast.pose) : undefined}
         />

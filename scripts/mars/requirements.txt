@@ -1,0 +1,5 @@
+# Mars terrain and model pipeline (scripts/mars)
+numpy
+rasterio>=1.4
+Pillow>=10
+DracoPy==2.2.0

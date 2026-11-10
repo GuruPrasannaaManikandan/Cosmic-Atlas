@@ -1,0 +1,82 @@
+{
+ "views": [
+  {
+   "view": "01_crater_overview",
+   "file": "after_01_crater_overview.png",
+   "note": "arrival camera ~700 m above the expedition landing point"
+  },
+  {
+   "view": "02_wide_landscape",
+   "file": "after_02_wide_landscape.png",
+   "note": "rim of Victoria, looking across the crater"
+  },
+  {
+   "view": "03_expedition_rover_medium",
+   "file": "after_03_expedition_rover_medium.png",
+   "note": "the illustrative expedition vehicle"
+  },
+  {
+   "view": "04_ground_level",
+   "file": "after_04_ground_level.png",
+   "note": "low camera near the ground"
+  },
+  {
+   "view": "05_opportunity_medium",
+   "file": "after_05_opportunity_medium.png",
+   "note": "inspection camera, component \"whole\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "06_opportunity_closeup_mast",
+   "file": "after_06_opportunity_closeup_mast.png",
+   "note": "inspection camera, component \"mast\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "07_wheels_rocker_bogie",
+   "file": "after_07_wheels_rocker_bogie.png",
+   "note": "inspection camera, component \"mobility\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "08_solar_array",
+   "file": "after_08_solar_array.png",
+   "note": "inspection camera, component \"solar\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "09_instrument_arm",
+   "file": "after_09_instrument_arm.png",
+   "note": "inspection camera, component \"arm\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "10_high_gain_antenna",
+   "file": "after_10_high_gain_antenna.png",
+   "note": "inspection camera, component \"hga\" (highlight pulses on the NASA model part)"
+  }
+ ],
+ "metrics": {
+  "loadToReadySec": 21.92,
+  "roverCalibration": "NASA 3D Resources articulated MER model (40 parts: 6 wheels, rocker-bogie, 5 solar panel sections, 5-joint arm with instrument turret, Pancam mast, high-gain antenna); scale 0.987 so the solar-panel span = 2.25 m (PDS); measured height 1.43 m vs PDS 1.54 m, length 1.65 m vs PDS 1.51 m",
+  "terrainTriangles": 979844,
+  "msP50": 17,
+  "msP95": 26.00000762939453,
+  "drawCalls": 423,
+  "triangles": 6195228,
+  "setPass": 41,
+  "backbuffer": [
+   1366,
+   768
+  ],
+  "profile": "balanced",
+  "look": {
+   "sun": 3.200000047683716,
+   "ambient": 1.25,
+   "exposure": 0.10000000149011612,
+   "saturation": 0,
+   "fogStart": 350,
+   "fogEnd": 6000,
+   "bloom": 1.7999999523162842,
+   "rockInstances": 7734,
+   "rockDrawCalls": 30
+  },
+  "jsHeapMB": 102
+ },
+ "consoleErrors": []
+}

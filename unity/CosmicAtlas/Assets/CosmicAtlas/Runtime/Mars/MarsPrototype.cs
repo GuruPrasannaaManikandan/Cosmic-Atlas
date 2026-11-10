@@ -30,6 +30,10 @@ namespace CosmicAtlas.Rendering.Mars
         public TextAsset heights, heightMeta, heightCheck, roverJson, routeJson, profilesJson;
         [Header("Scene")]
         public Material terrainMaterial, roverTemplate, skyMaterial, lineMaterial, dustMaterial;
+        [Header("Stage 3 visual reconstruction")]
+        public GameObject merModel;               // NASA articulated MER model (FBX); null = the low-poly MER-B mesh
+        public TextAsset rocksBytes, groundMask;   // scripts/mars/victoria_surface.py
+        public Material rockMaterial;
         public Light sun;
         public Camera cam;
         public Volume volume;
@@ -121,7 +125,8 @@ namespace CosmicAtlas.Rendering.Mars
             _roverPos = new Vector3(e[k], 0, n[k]);
             _roverPos.y = SafeHeight(_roverPos.x, _roverPos.z);
             _roverNote = $"rover: drive record starting sol {s0[k]} (traverse, locally registered)";
-            _rover = MarsRover.Build(roverJson, roverTemplate, out _calNote);
+            _rover = merModel ? BuildMer(out _calNote) : MarsRover.Build(roverJson, roverTemplate, out _calNote);
+            if (rocksBytes && rockMaterial) _rocks = new MarsRocks(_terrain, rocksBytes, groundMask, rockMaterial);
             _rover.transform.SetParent(_world, false);
             _rover.transform.localPosition = _roverPos;
             var fwd = new Vector3(e[k2] - e[k], 0, n[k2] - n[k]);
@@ -159,15 +164,31 @@ namespace CosmicAtlas.Rendering.Mars
             float irr = (float)Math.Pow(1.52367934 / t.HelioDistAU, 2); // relative to Mars' mean distance (D-2)
             double m = su > 0.02 ? 1 / su : 50;
             float tr(float k) => (float)Math.Exp(-_tau * m * k);
-            sun.color = new Color(tr(1.0f), tr(1.08f), tr(1.25f)); // ILLUSTRATIVE spectral tilt of dust extinction
-            sun.intensity = 2.2f * irr * Mathf.Clamp01((float)su * 8f);
+            // Direct beam: Beer-Lambert extinction exp(-tau m) with an ILLUSTRATIVE spectral tilt (dust removes blue first).
+            var beam = new Color(tr(1.0f), tr(1.08f), tr(1.25f));
+            float beamLum = beam.r * 0.3f + beam.g * 0.59f + beam.b * 0.11f;
+            float up = Mathf.Clamp01((float)su * 8f);
+            sun.color = new Color(beam.r / beam.maxColorComponent, beam.g / beam.maxColorComponent, beam.b / beam.maxColorComponent);
+            sun.intensity = _look.Sun * irr * up * Mathf.Max(beamLum, 0.02f) / 0.34f; // normalised so tau 0.9 at noon ~ look.Sun
             Shader.SetGlobalVector("_MarsSunDir", dir);
             skyMaterial.SetFloat("_Tau", (float)_tau);
             skyMaterial.SetFloat("_SunIrr", irr);
             RenderSettings.skybox = skyMaterial;
-            RenderSettings.ambientMode = AmbientMode.Flat;
-            float amb = 0.25f * irr * (1 - Mathf.Exp(-(float)_tau)) * Mathf.Clamp01((float)su * 4 + 0.2f);
-            RenderSettings.ambientLight = new Color(amb, amb * 0.8f, amb * 0.62f); // ILLUSTRATIVE dust-sky ambient
+            // Diffuse sky: the light scattered out of the beam mostly reaches the ground on Mars (forward-scattering dust),
+            // so a dusty sky is a strong, warm fill. Fraction 0.75 and the colours are ILLUSTRATIVE (no sourced radiance).
+            float diffuse = irr * Mathf.Clamp01((float)su * 1.2f + 0.08f) * (1 - Mathf.Exp(-(float)(_tau * m))) * 0.75f / 0.66f;
+            float k = _look.Ambient * Mathf.Max(diffuse, 0.04f);
+            RenderSettings.ambientMode = AmbientMode.Trilight;
+            RenderSettings.ambientSkyColor = new Color(0.78f, 0.6f, 0.46f) * k;
+            RenderSettings.ambientEquatorColor = new Color(0.66f, 0.49f, 0.36f) * k;
+            RenderSettings.ambientGroundColor = new Color(0.38f, 0.26f, 0.18f) * k; // light bounced off ~0.2-albedo regolith
+            // distance haze (aerial perspective) in the sky's horizon colour: ILLUSTRATIVE extent
+            RenderSettings.fog = _look.FogEnd > 0;
+            RenderSettings.fogMode = FogMode.Linear;
+            RenderSettings.fogStartDistance = _look.FogStart; RenderSettings.fogEndDistance = _look.FogEnd;
+            RenderSettings.fogColor = new Color(0.74f, 0.58f, 0.45f) * Mathf.Clamp(k * 1.1f, 0.25f, 1.2f);
+            if (volume && volume.profile && volume.profile.TryGet<ColorAdjustments>(out var ca)) { ca.postExposure.Override(_look.Exposure); ca.saturation.Override(_look.Saturation); }
+            if (volume && volume.profile && volume.profile.TryGet<Bloom>(out var bl)) bl.threshold.Override(_look.Bloom);
         }
 
         public void ApplyProfile(string id)
@@ -201,10 +222,10 @@ namespace CosmicAtlas.Rendering.Mars
             go.transform.SetParent(cam.transform, false);
             _dust = go.AddComponent<ParticleSystem>();
             var main = _dust.main;
-            main.loop = true; main.startLifetime = 8; main.startSpeed = 0.4f; main.startSize = 0.03f;
+            main.loop = true; main.startLifetime = 8; main.startSpeed = 0.25f; main.startSize = new ParticleSystem.MinMaxCurve(0.02f, 0.06f); // soft motes, ILLUSTRATIVE
             main.maxParticles = Mathf.RoundToInt(3000 * _profile.DustFraction);
             main.simulationSpace = ParticleSystemSimulationSpace.World;
-            main.startColor = new Color(0.8f, 0.6f, 0.45f, 0.35f);
+            main.startColor = new Color(0.86f, 0.7f, 0.55f, 0.18f);
             var em = _dust.emission; em.rateOverTime = main.maxParticles / 8f;
             var sh = _dust.shape; sh.shapeType = ParticleSystemShapeType.Sphere; sh.radius = 12;
             go.GetComponent<ParticleSystemRenderer>().sharedMaterial = dustMaterial;
@@ -251,6 +272,7 @@ namespace CosmicAtlas.Rendering.Mars
             _world.position = -_origin;
             cam.transform.position = p - _origin;
             cam.transform.rotation = Quaternion.LookRotation((look - p).normalized);
+            _rocks?.Draw(p, _origin, _profile == null || _profile.ShadowDistance > 0);
         }
 
         // ---------------- instrumentation ----------------

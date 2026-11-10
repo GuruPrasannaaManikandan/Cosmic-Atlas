@@ -138,6 +138,7 @@ namespace CosmicAtlas.Rendering.Mars
             for (int j = 0; j < nr - 1; j++) { Skirt(idx[j * nc], idx[(j + 1) * nc]); Skirt(idx[j * nc + nc - 1], idx[(j + 1) * nc + nc - 1]); }
             var m = new Mesh { indexFormat = verts.Count > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16 };
             m.SetVertices(verts); m.SetNormals(norms); m.SetUVs(0, uvs); m.SetTriangles(tris, 0);
+            m.RecalculateTangents(); // the terrain material carries the 1 m DTM normal map (tangent space: u east, v north)
             m.RecalculateBounds();
             return m;
         }

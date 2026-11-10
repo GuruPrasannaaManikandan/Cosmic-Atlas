@@ -1,0 +1,62 @@
+{
+ "source": {
+  "dtm": "DTEEC_001414_1780_001612_1780_U01",
+  "ortho": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/PSP_001414_1780_PSP_001612_1780/PSP_001414_1780_RED_A_01_ORTHO.tif",
+  "stac": "https://stac.astrogeology.usgs.gov (mro_hirise_socet_dtms)"
+ },
+ "registration": {
+  "method": "phase correlation of high-pass relief, existing DTM vs USGS controlled DTM (same stereo pair)",
+  "offsetEastM": -0.5061108831045833,
+  "offsetNorthM": 0.5262119975634989,
+  "peak": 0.41084880382672173,
+  "reliefRmsBeforeM": 0.25593528145569744,
+  "reliefRmsAfterM": 0.11847404233924323
+ },
+ "albedo": {
+  "file": "victoria_albedo_hr.jpg",
+  "metresPerPixel": 0.5,
+  "size": [
+   2558,
+   3388
+  ],
+  "stretch": [
+   51.996469935779416,
+   241.2710505632464
+  ],
+  "colour": "ILLUSTRATIVE ramp: HiRISE RED is a single band"
+ },
+ "normal": {
+  "file": "victoria_normal.png",
+  "size": [
+   1279,
+   1694
+  ],
+  "basis": "tangent space relative to the DTM smoothed over 3 x 3 cells"
+ },
+ "groundMask": {
+  "file": "victoria_ground_mask.bytes",
+  "size": [
+   640,
+   847
+  ],
+  "cellM": 2.022413231883914,
+  "layout": "uint8 brightness (1..255), 0 = no terrain; rows north to south",
+  "use": "runtime clast / pebble scatter near the camera (ILLUSTRATIVE shapes)"
+ },
+ "rocks": {
+  "file": "victoria_rocks.bytes",
+  "layout": "float32 x 6: east, north, up, scale, yawDeg, category",
+  "counts": {
+   "1": 63382,
+   "2": 19919,
+   "3": 5495
+  },
+  "categories": [
+   "clast / pebble",
+   "cobble",
+   "outcrop slab (bright Burns formation)",
+   "boulder (steep slopes)"
+  ],
+  "note": "placements driven by HiRISE brightness and DTM slope; shapes ILLUSTRATIVE"
+ }
+}

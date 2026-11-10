@@ -52,7 +52,7 @@ namespace CosmicAtlas.Rendering.Mars
         const float WheelR = 0.38f;
 
         // camera
-        float _camYaw, _camYawOffset, _camPitch = 0.3f, _camDist = 9f;
+        float _camYaw, _camYawOffset, _camPitch = 0.24f, _camDist = 7.5f;
         Vector3 _camPos, _camLook; bool _camInit;
 
         // arrival
@@ -92,6 +92,15 @@ namespace CosmicAtlas.Rendering.Mars
 
             // anchors on the NASA model (its own mesh groups): mast head = highest vertices; solar array and mobility
             // system = the model's "SolarArrays" and "LightGrayMetal" (y < 0.31 m) material groups
+            if (_merGroups != null) MerAnchors(); else LowPolyAnchors();
+            cam.fieldOfView = 50f;
+
+            // expedition landing point: 110 m outward from the crater centre beyond Opportunity, on valid DTM
+            InitStart();
+        }
+
+        void LowPolyAnchors()
+        {
             var top = Vector3.zero; int tn = 0; var b = new Bounds(); bool first = true;
             foreach (var mf in _rover.GetComponentsInChildren<MeshFilter>())
             {
@@ -105,8 +114,11 @@ namespace CosmicAtlas.Rendering.Mars
                 foreach (var v in mf.sharedMesh.vertices) if (v.y > b.max.y - 0.12f) { top += v; tn++; }
             _anchorMast = tn > 0 ? top / tn : b.center + Vector3.up * b.extents.y;
             _anchorBody = b.center;
+            _anchorArm = _anchorHga = _anchorBody;
+        }
 
-            // expedition landing point: 110 m outward from the crater centre beyond Opportunity, on valid DTM
+        void InitStart()
+        {
             var opp = new Vector2(_roverPos.x, _roverPos.z);
             var outward = opp.sqrMagnitude > 1 ? opp.normalized : Vector2.up;
             _startPos = opp + outward * 110f;
@@ -115,7 +127,7 @@ namespace CosmicAtlas.Rendering.Mars
             _startHeading = Mathf.Atan2(toOpp.x, toOpp.y);
             _pos = _startPos; _heading = _startHeading; _camYaw = _heading;
 
-            _player = BuildExpeditionRover();
+            _player = BuildExpeditionRoverDetailed();
             _player.SetActive(false);
             Contact(_pos, _heading, out _bodyY, out _pitch, out _roll);
 
@@ -405,6 +417,7 @@ namespace CosmicAtlas.Rendering.Mars
             cam.transform.position = _camPos - _origin;
             var d = _camLook - _camPos;
             if (d.sqrMagnitude > 1e-6f) cam.transform.rotation = Quaternion.LookRotation(d.normalized);
+            _rocks?.Draw(_camPos, _origin, true);
         }
 
         Vector3 AnchorLocal()
@@ -414,6 +427,9 @@ namespace CosmicAtlas.Rendering.Mars
                 case "mast": return _anchorMast;
                 case "solar": return _anchorSolar;
                 case "mobility": return _anchorMobility;
+                case "arm": return _anchorArm;
+                case "hga": return _anchorHga;
+                case "body": return _anchorBody;
                 default: return _anchorBody;
             }
         }
@@ -421,6 +437,7 @@ namespace CosmicAtlas.Rendering.Mars
         void PulseHighlight()
         {
             float p = 0.5f + 0.5f * Mathf.Sin(Time.time * 4f);
+            if (_merGroups != null) { MerHighlight(_insAnchor, p); return; }
             var hi = new Color(0.35f, 0.85f, 1f);
             if (_solarMat) _solarMat.SetColor("_BaseColor", _insAnchor == "solar" ? Color.Lerp(_solarCol, hi, 0.25f + 0.45f * p) : _solarCol);
             if (_mobilityMat) _mobilityMat.SetColor("_BaseColor", _insAnchor == "mobility" ? Color.Lerp(_mobilityCol, hi, 0.25f + 0.45f * p) : _mobilityCol);
@@ -428,6 +445,7 @@ namespace CosmicAtlas.Rendering.Mars
 
         void ClearHighlight()
         {
+            if (_merGroups != null) { MerHighlight(null, -1); return; }
             if (_solarMat) _solarMat.SetColor("_BaseColor", _solarCol);
             if (_mobilityMat) _mobilityMat.SetColor("_BaseColor", _mobilityCol);
         }
@@ -447,6 +465,7 @@ namespace CosmicAtlas.Rendering.Mars
             float e = Mathf.Lerp(_routeE[i], _routeE[j], t), nn = Mathf.Lerp(_routeN[i], _routeN[j], t);
             var p = new Vector3(e, SafeHeight(e, nn), nn);
             _rover.transform.localPosition = p;
+            SpinMerWheels(p);
             int a = Mathf.Max(0, i - 1), b = Mathf.Min(n - 1, i + 2);
             var dir = new Vector3(_routeE[b] - _routeE[a], 0, _routeN[b] - _routeN[a]);
             if (dir.sqrMagnitude > 0.04f) _rover.transform.localRotation = Quaternion.Slerp(_rover.transform.localRotation, Quaternion.LookRotation(Vector3.Cross(dir.normalized, Vector3.up)), 0.25f);
@@ -518,11 +537,12 @@ namespace CosmicAtlas.Rendering.Mars
                 {
                     if (c < 0 || r < 0 || c >= _trailW || r >= _trailH) continue;
                     float d = Mathf.Sqrt((c + 0.5f - fc) * (c + 0.5f - fc) + (r + 0.5f - fr) * (r + 0.5f - fr));
-                    float a = Mathf.Clamp01(1.6f - d) * w; if (a <= 0) continue;
+                    float a = Mathf.Clamp01(1.25f - d) * w; if (a <= 0) continue;
                     int y = _trailH - 1 - r; // texture rows run south to north (uv v = 1 - row / (H - 1))
                     int idx = y * _trailW + c;
                     var cur = _trailPx[idx];
-                    byte R = (byte)Mathf.Max(cur.r, Mathf.Lerp(128, 187, a)), Gc = (byte)Mathf.Max(cur.g, Mathf.Lerp(128, 157, a)), B = (byte)Mathf.Min(cur.b, Mathf.Lerp(128, 115, a));
+                    // a subtle navigation aid: about x(1.45, 1.25, 0.85) at the centre of the track
+                    byte R = (byte)Mathf.Max(cur.r, Mathf.Lerp(128, 148, a)), Gc = (byte)Mathf.Max(cur.g, Mathf.Lerp(128, 138, a)), B = (byte)Mathf.Min(cur.b, Mathf.Lerp(128, 119, a));
                     _trailPx[idx] = new Color32(R, Gc, B, 255);
                 }
         }
@@ -655,7 +675,7 @@ namespace CosmicAtlas.Rendering.Mars
         {
             _rover.transform.localPosition = _sceneRoverPos; _rover.transform.localRotation = _sceneRoverRot;
             _utc = MarsTime.UtcForLtst(SceneDate, _siteLon, SceneLtst); _sol = MissionSol(_utc); _replaySunSol = -1; ApplySun();
-            _replayTrail = false; _trailUpTo = _routeE.Length - 1; PaintTrail(present: true);
+            _replayTrail = false; _trailUpTo = _routeE.Length - 1; PaintTrail(present: true); _hasReplayPos = false;
             _player.SetActive(true);
             SetMode(ExplorerMode.Explore);
         }
