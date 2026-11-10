@@ -1,0 +1,124 @@
+{
+ "checks": [
+  {
+   "check": "G1 approaching hardware: the guide points it out (catalogue name + LRO position, sourced) in a bubble over the astronaut",
+   "pass": true,
+   "detail": {
+    "lines": [
+     "Over there: the EASEP passive seismic station, about 25 m to the south-east.",
+     "Over there: the Apollo 11 Lunar Module descent stage, about 45 m to the north-west.",
+     "Over there: the Laser Ranging Retroreflector, about 35 m to the west."
+    ],
+    "docked": "false"
+   }
+  },
+  {
+   "check": "G2 discovery: the guide says the first sentence of the short story, with its sources",
+   "pass": true,
+   "detail": "This is the Laser Ranging Retroreflector: a panel of special glass cubes that bounce light"
+  },
+  {
+   "check": "G3 walking past hardware, the astronaut's helmet turns toward the nearby object (only toward things in front)",
+   "pass": true,
+   "detail": {
+    "nearby": "a11-easep-pse",
+    "lookTarget": "a11-easep-pse",
+    "headYaw": 1.1
+   }
+  },
+  {
+   "check": "I1 inspecting: the astronaut stays in view, faces the object and points at it",
+   "pass": true,
+   "detail": {
+    "pointing": true,
+    "headYaw": 0,
+    "lookTarget": "a11-lm-descent",
+    "facingObject": true,
+    "visibleWhileInspecting": true,
+    "bubbleDocked": "false"
+   }
+  },
+  {
+   "check": "I2 choosing a component: the guide describes it (sourced) and the panel shows the story part about it",
+   "pass": true,
+   "detail": {
+    "bubble": "\ud83e\uddd1\u200d\ud83d\ude80 GUIDE\n\nEgress platform and ladder: Mounted on one landing leg; the astronaut",
+    "part": "IN THE STORY\nThe first steps. At 02:56:15 UT on 21 July Neil Armstrong stepped off this la"
+   }
+  },
+  {
+   "check": "I3 'Hear this from the guide' narrates the story part about the ladder (the first steps)",
+   "pass": true,
+   "detail": {
+    "state": "playing",
+    "part": "events",
+    "comp": "ladder",
+    "bubble": "story"
+   }
+  },
+  {
+   "check": "I4 the camera follows the story: the 'How it is built' part refocuses from the engine to the whole stage",
+   "pass": true,
+   "detail": {
+    "part": "design",
+    "comp": "body"
+   }
+  },
+  {
+   "check": "N1 short story plays in the guide's bubble with a moving word cursor and the transcript in step",
+   "pass": true,
+   "detail": {
+    "progress": "1/3",
+    "char": 9
+   }
+  },
+  {
+   "check": "N2 narration advances by reading time and keeps playing across tab switches",
+   "pass": true,
+   "detail": {
+    "state": "playing",
+    "bubble": true
+   }
+  },
+  {
+   "check": "N3 pause holds the sentence; resume continues",
+   "pass": true,
+   "detail": {
+    "idx": 1,
+    "state": "paused"
+   }
+  },
+  {
+   "check": "N4 full scientific story: sentence-level lines, each with sources; next and progress work",
+   "pass": true,
+   "detail": {
+    "mode": "full",
+    "idx": 1,
+    "n": 21,
+    "src": 2,
+    "prog": "2 / 21"
+   }
+  },
+  {
+   "check": "N5 stop clears the story bubble",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "N6 browser voice on: the story still advances even if the speech engine stays silent (watchdog)",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "N7 leaving the record stops the narration",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "Z1 no console errors",
+   "pass": true,
+   "detail": []
+  }
+ ],
+ "errors": []
+}

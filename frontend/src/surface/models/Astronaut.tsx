@@ -12,7 +12,11 @@ import type { GaitPose } from '../controller'
 export interface AstronautHandle {
   root: THREE.Group
   head: THREE.Group
-  pose: (p: GaitPose, headPitch: number) => void
+  /**
+   * extra (optional): headYaw (rad, + = left) turns the helmet toward something; pointPitch (rad above horizontal)
+   * raises the right arm straight out to point; talk (0..1) adds a small speaking nod
+   */
+  pose: (p: GaitPose, headPitch: number, extra?: { headYaw?: number; pointPitch?: number | null; talk?: number }) => void
 }
 
 function Capsule({ r, len, mat, y = 0 }: { r: number; len: number; mat: THREE.Material; y?: number }) {
@@ -49,7 +53,7 @@ export const Astronaut = forwardRef<AstronautHandle, { visibleBody?: boolean }>(
   useImperativeHandle(ref, () => ({
     get root() { return root.current },
     get head() { return head.current },
-    pose(p, headPitch) {
+    pose(p, headPitch, extra) {
       hips.current.position.y = 0.98 + p.bob
       torso.current.rotation.x = -p.lean
       hipL.current.rotation.x = p.hipL
@@ -60,7 +64,14 @@ export const Astronaut = forwardRef<AstronautHandle, { visibleBody?: boolean }>(
       shR.current.rotation.x = p.shoulderR
       elL.current.rotation.x = p.elbow
       elR.current.rotation.x = p.elbow
-      head.current.rotation.x = THREE.MathUtils.clamp(headPitch, -0.5, 0.45)
+      const nod = extra?.talk ? Math.sin(performance.now() / 160) * 0.035 * extra.talk : 0
+      head.current.rotation.x = THREE.MathUtils.clamp(headPitch + nod, -0.5, 0.45)
+      head.current.rotation.y = THREE.MathUtils.clamp(extra?.headYaw ?? 0, -1.1, 1.1)
+      if (extra?.pointPitch !== undefined && extra.pointPitch !== null) {
+        // arm straight out toward the target: 0 = hanging, +π/2 = horizontal forward
+        shR.current.rotation.x = Math.PI / 2 + THREE.MathUtils.clamp(extra.pointPitch, -0.9, 1.0)
+        elR.current.rotation.x = 0.05
+      }
     },
   }))
 

@@ -8,6 +8,9 @@ import { Terrain, DtmTerrain, SiteTerrain, Collider, mulberry32, DtmMeta, Horizo
 import { stepCharacter, newCharacter, paramsForGravity, gaitPose, CharacterState, forwardOf } from './controller'
 import { sunDirectionAtLunarSite, meanEarthDirectionAtLunarSite, elevationDeg, azimuthDeg } from './lighting'
 import { useSurface, surfaceDebug } from './surfaceState'
+import { useGuide, announceOnce, approachLine, discoverLine, inspectHint } from './guide'
+import { useNarrator } from './narrator'
+import { bearingDeg } from './geo'
 import { Astronaut, AstronautHandle } from './models/Astronaut'
 import { HardwareModel, COLLIDERS, COMPONENT_ANCHORS, PositionMarker } from './models/Hardware'
 import { regolithMap, regolithBump } from './models/materials'
@@ -22,6 +25,11 @@ export type DtmData = { meta: DtmMeta; heights: Float32Array; horizon?: HorizonG
 
 /** distance (m) at which the sky (stars, Earth, Sun) is drawn: beyond the farthest horizon terrain */
 const SKY_R = 52000
+
+/** the guide's speech bubble element (GuideBubble registers it); the scene pins it above the helmet every frame */
+export const bubbleAnchor: { el: HTMLElement | null } = { el: null }
+/** state of the guide's body language, for tests */
+export const guidePose = { pointing: false, headYaw: 0, lookTarget: null as string | null, facingObject: false, visibleWhileInspecting: false }
 
 /** keyboard state, owned by the scene */
 const keys = new Set<string>()
@@ -320,6 +328,7 @@ class DustSystem {
 
 function Player({ env }: { env: SceneEnv }) {
   const { camera, gl } = useThree()
+  const gl_ = gl
   const quality = useStore((s) => s.quality)
   const astro = useRef<AstronautHandle>(null)
   const g = SURFACE_BODIES[env.site.bodyId].gravity.value!
@@ -329,6 +338,8 @@ function Player({ env }: { env: SceneEnv }) {
   const followRef = useRef({ x: 0, z: 0 })
   const start = useMemo(() => ({ x: lm.x - 14, z: lm.z + 10 }), [lm])
   const ch = useRef<CharacterState>(newCharacter(start.x, start.z, ground, Math.atan2(-(lm.x - start.x), -(lm.z - start.z))))
+  const c0x = () => ch.current.pos[0]
+  const c0z = () => ch.current.pos[2]
   const look = useRef({ yaw: ch.current.yaw, pitch: -0.22, dist: 4.4, inspYaw: 0.6, inspPitch: -0.35, inspDist: 7 })
   const camPos = useRef(new THREE.Vector3())
   const camTarget = useRef(new THREE.Vector3())
@@ -353,11 +364,13 @@ function Player({ env }: { env: SceneEnv }) {
     }
     surfaceDebug.character = () => ({ ...ch.current, camYaw: look.current.yaw, camPitch: look.current.pitch })
     surfaceDebug.camera = () => ({ pos: camera.position.toArray(), mode: useSurface.getState().camMode })
+    surfaceDebug.guide = () => ({ ...guidePose, bubbleDocked: bubbleAnchor.el?.dataset.docked ?? null })
     surfaceDebug.terrain = () => ({ daylightMs: env.site.daylight.ms, kind: ground.kind, product: ground.kind === 'dtm' ? (ground as DtmTerrain).meta.source.product : null, horizonReliefM: ground.kind === 'dtm' ? (ground as DtmTerrain).horizon?.meta.reliefM ?? null : null, objects: env.placed.map((p) => ({ id: p.id, x: p.x, z: p.z, y: p.y, model: p.modelId })) })
     return () => {
       surfaceDebug.teleport = undefined
       surfaceDebug.character = undefined
       surfaceDebug.camera = undefined
+      surfaceDebug.guide = undefined
       surfaceDebug.terrain = undefined
     }
   }, [ground, camera, env.placed])
@@ -479,21 +492,59 @@ function Player({ env }: { env: SceneEnv }) {
     // inspection opens on the object's front (LRRR: its Earth-facing array; LM: the ladder side)
     const pid = S.panel?.objectId ?? null
     if (pid !== lastPanel.current) {
+      const was = lastPanel.current
       lastPanel.current = pid
       const p = env.placed.find((x) => x.id === pid)
       if (p) {
-        L.inspYaw = p.rotY + (p.modelId === 'lrrr' ? Math.PI : p.modelId === 'lm-descent-stage' ? 0.55 : 0.8)
-        L.inspPitch = p.modelId === 'lrrr' ? -0.6 : -0.35
-      }
+        // camera behind and beside the astronaut, looking past them at the object: the astronaut is the guide
+        L.inspYaw = Math.atan2(c0x() - p.x, c0z() - p.z) + 0.5
+        L.inspPitch = p.modelId === 'lrrr' ? -0.55 : -0.32
+        useGuide.getState().say(inspectHint(p.id))
+        useNarrator.getState().load(p.id, 'short')
+      } else if (was) useNarrator.getState().stop()
     }
 
-    // astronaut pose (hidden while the inspection camera orbits an object)
+    // astronaut pose: during inspection the astronaut stays in view, faces the object and points at the focused part
     const a = astro.current
+    const gl = useGuide.getState().line
+    const talking = gl && gl.kind !== 'hint' ? 1 : 0
+    let headYaw = 0
+    let pointPitch: number | null = null
+    if (S.panel) {
+      const p = env.placed.find((x) => x.id === S.panel!.objectId)
+      if (p) {
+        const want = Math.atan2(-(p.x - c.pos[0]), -(p.z - c.pos[2]))
+        const dyaw = Math.atan2(Math.sin(want - c.yaw), Math.cos(want - c.yaw))
+        ch.current = { ...ch.current, yaw: c.yaw + Math.sign(dyaw) * Math.min(Math.abs(dyaw), 4 * dt) }
+        const anchors = COMPONENT_ANCHORS[modelKey(p.modelId, S.lmModel)] ?? {}
+        const local = S.component && anchors[S.component] ? anchors[S.component] : [0, p.modelId === 'lm-descent-stage' ? 1.6 : 0.5, 0]
+        const v = new THREE.Vector3(...(local as [number, number, number])).applyAxisAngle(new THREE.Vector3(0, 1, 0), p.rotY)
+        const tx = p.x + v.x, ty = p.y + v.y, tz = p.z + v.z
+        pointPitch = Math.atan2(ty - (c.pos[1] + 1.45), Math.hypot(tx - c.pos[0], tz - c.pos[2]))
+      }
+    } else if (S.nearbyId) {
+      // walking past hardware: the helmet turns toward it
+      const o = env.placed.find((x) => x.id === S.nearbyId)
+      if (o) {
+        const want = Math.atan2(-(o.x - c.pos[0]), -(o.z - c.pos[2]))
+        const rel = Math.atan2(Math.sin(want - c.yaw), Math.cos(want - c.yaw))
+        // only glance at things roughly in front (a suited astronaut can't look over the shoulder)
+        if (Math.abs(rel) < 1.7) {
+          headYaw = THREE.MathUtils.clamp(rel, -1.1, 1.1)
+          guidePose.lookTarget = o.id
+        } else guidePose.lookTarget = null
+      }
+    } else guidePose.lookTarget = null
+    if (S.panel) guidePose.lookTarget = S.panel.objectId
+    guidePose.pointing = pointPitch !== null
+    guidePose.headYaw = headYaw
+    guidePose.facingObject = !!S.panel
     if (a) {
-      a.root.visible = !S.panel
+      a.root.visible = true
+      guidePose.visibleWhileInspecting = !!S.panel && a.root.visible
       a.root.position.set(c.pos[0], c.pos[1], c.pos[2])
       a.root.rotation.y = c.yaw
-      a.pose(gaitPose(c.odometer, speed, g, !c.grounded), S.camMode === 'first' ? L.pitch * 0.6 : 0)
+      a.pose(gaitPose(c.odometer, speed, g, !c.grounded), S.camMode === 'first' ? L.pitch * 0.6 : pointPitch !== null ? pointPitch * 0.6 : 0, { headYaw, pointPitch, talk: talking })
     }
 
     // footprints + dust at each foot plant (gait half-cycle)
@@ -535,7 +586,8 @@ function Player({ env }: { env: SceneEnv }) {
       const v = new THREE.Vector3(...local).applyAxisAngle(new THREE.Vector3(0, 1, 0), p.rotY)
       target.set(p.x + v.x, p.y + v.y, p.z + v.z)
       const big = p.modelId === 'lm-descent-stage' ? 1.5 : p.modelId === 'lrv' ? 0.95 : 0.45
-      const dist = S.component ? Math.min(L.inspDist, p.modelId === 'lm-descent-stage' ? 5 : p.modelId === 'lrv' ? 3 : 2.2) : L.inspDist * big
+      const guideDist = Math.hypot(c.pos[0] - p.x, c.pos[2] - p.z) + 2.6
+      const dist = S.component ? Math.min(L.inspDist, p.modelId === 'lm-descent-stage' ? 5 : p.modelId === 'lrv' ? 3 : 2.2) : Math.max(L.inspDist * big, guideDist)
       desired.set(target.x + Math.sin(L.inspYaw) * Math.cos(L.inspPitch) * dist, target.y - Math.sin(L.inspPitch) * dist, target.z + Math.cos(L.inspYaw) * Math.cos(L.inspPitch) * dist)
     } else if (S.camMode === 'first') {
       const fwd = forwardOf(L.yaw)
@@ -562,6 +614,17 @@ function Player({ env }: { env: SceneEnv }) {
     }
     camera.position.copy(camPos.current)
     camera.lookAt(camTarget.current)
+    const bub = bubbleAnchor.el
+    if (bub) {
+      camera.updateMatrixWorld()
+      const hp = new THREE.Vector3(c.pos[0], c.pos[1] + 2.1, c.pos[2]).project(camera)
+      const onScreen = S.camMode !== 'first' && hp.z < 1 && Math.abs(hp.x) < 0.92 && hp.y < 0.9 && hp.y > -0.6
+      if (onScreen) {
+        const r = gl_.domElement.getBoundingClientRect()
+        bub.style.transform = `translate(${((hp.x + 1) / 2) * r.width}px, ${((1 - hp.y) / 2) * r.height}px) translate(-50%, -100%)`
+        bub.dataset.docked = 'false'
+      } else bub.dataset.docked = 'true'
+    }
     if (inspectLight.current) {
       inspectLight.current.position.copy(camPos.current)
       inspectLight.current.intensity = S.panel ? 6 : 0
@@ -575,7 +638,11 @@ function Player({ env }: { env: SceneEnv }) {
       const newly: string[] = []
       for (const o of env.site.objects) {
         const d = Math.hypot(o.x - c.pos[0], o.z - c.pos[2])
-        if (d < o.noticeM && !S.discovered.includes(o.objectId)) newly.push(o.objectId)
+        if (!S.panel && d < Math.max(45, o.noticeM * 2.5) && d >= o.noticeM) announceOnce(o.objectId, 'approach', approachLine(o.objectId, d, bearingDeg(c.pos[0], c.pos[2], o.x, o.z)))
+        if (d < o.noticeM && !S.discovered.includes(o.objectId)) {
+          newly.push(o.objectId)
+          announceOnce(o.objectId, 'discover', discoverLine(o.objectId))
+        }
         if (d < o.interactM + 2.5 && d < best) {
           best = d
           nearby = o.objectId

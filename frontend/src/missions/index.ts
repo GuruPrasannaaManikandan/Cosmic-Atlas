@@ -24,6 +24,24 @@ export function dateMs(d: string): number {
   return Date.UTC(+m[1], m[2] ? +m[2] - 1 : 0, m[3] ? +m[3] : 1)
 }
 
+/** short, distinct label for a source (organisation-based), for citation chips */
+export function sourceShort(id: string): string {
+  const o = SOURCES[id]?.organisation ?? id
+  for (const k of ['NSSDCA', 'LROC', 'PDS', 'NASA Science', 'NASA 3D', 'ESA', 'ISRO', 'EGU']) if (o.includes(k)) return k === 'NASA 3D' ? 'NASA 3D Resources' : k
+  return o.split(' ')[0]
+}
+
+/** citation chips: one per distinct label, linking the first source, tooltip listing every source behind it */
+export function citeGroups(ids: string[]): { label: string; url: string; titles: string; count: number }[] {
+  const g = new Map<string, string[]>()
+  for (const id of new Set(ids)) {
+    if (!SOURCES[id]) continue
+    const k = sourceShort(id)
+    g.set(k, [...(g.get(k) ?? []), id])
+  }
+  return [...g.entries()].map(([label, list]) => ({ label, url: SOURCES[list[0]].url, titles: list.map((i) => `${SOURCES[i].title} — ${SOURCES[i].organisation}`).join(' | '), count: list.length }))
+}
+
 export const missionsForBody = (bodyId: string) => MISSIONS.filter((m) => m.target === bodyId)
 export const objectsForMission = (id: string) => OBJECTS.filter((o) => o.missionId === id)
 

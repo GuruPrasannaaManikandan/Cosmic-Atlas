@@ -4345,3 +4345,36 @@ option { background: #070d1e; color: #fff; }
 .surface-root[data-touch='on'] .surf-minimap { left: auto; right: 16px; top: 214px; bottom: auto; width: 110px; height: 110px; }
 .surface-root[data-touch='on'] .surf-keys { display: none; }
 .surf-terrain-error { position: absolute; left: 50%; top: 96px; transform: translateX(-50%); margin: 0; padding: 6px 12px; border-radius: 8px; background: rgba(60, 20, 10, 0.85); color: #fdd; font-size: 12px; }
+
+/* ===================================================================== astronaut guide: speech bubble + narration */
+.guide-bubble { position: absolute; left: 0; top: 0; z-index: 3; max-width: min(380px, 70vw); padding: 10px 12px 8px; border-radius: 14px; background: rgba(6, 12, 26, 0.88); border: 1px solid var(--line-hi); box-shadow: var(--shadow); pointer-events: auto; will-change: transform; }
+.guide-bubble[data-docked='false']::after { content: ""; position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); border: 9px solid transparent; border-bottom: 0; border-top-color: var(--line-hi); }
+.guide-bubble[data-docked='true'] { left: 50%; top: auto; bottom: 150px; transform: translateX(-50%) !important; max-width: min(640px, calc(100vw - 32px)); }
+.guide-bubble.kind-story { border-color: var(--warm); }
+.guide-who { display: block; font: 700 10px var(--font); letter-spacing: 0.14em; text-transform: uppercase; color: var(--cy); margin-bottom: 3px; }
+.guide-bubble.kind-story .guide-who { color: var(--warm); }
+.guide-text { margin: 0; font-size: 14px; line-height: 1.45; color: var(--txt); }
+.guide-src { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+.guide-src a { font-size: 10px; color: var(--cy); text-decoration: none; border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px; }
+mark.spoken-word { background: rgba(251, 191, 36, 0.35); color: inherit; border-radius: 3px; padding: 0 1px; }
+.narration-options { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; margin: 4px 0 10px; color: var(--txt-dim); }
+.narration-options label { display: inline-flex; align-items: center; gap: 5px; }
+.narr-progress { align-self: center; color: var(--mut); }
+.transcript { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.transcript li { border-left: 2px solid var(--line); padding: 2px 0 2px 8px; }
+.transcript li.speaking { border-left-color: var(--warm); background: rgba(251, 191, 36, 0.06); }
+.transcript .t-head { display: block; font-size: 11px; color: var(--mut); text-transform: uppercase; letter-spacing: 0.08em; }
+.transcript .t-line { all: unset; cursor: pointer; display: inline; line-height: 1.5; }
+.transcript .t-line:hover { color: var(--cy); }
+.comp-story { margin-top: 8px; border-top: 1px solid var(--line); padding-top: 6px; }
+.comp-story h3 { margin: 0 0 6px; font-size: 12px; color: var(--mut); text-transform: uppercase; letter-spacing: 0.1em; }
+.comp-story-part { margin-bottom: 8px; line-height: 1.5; }
+.comp-story-part .btn { margin-top: 4px; display: inline-block; }
+@media (max-width: 760px) { .guide-bubble { max-width: 80vw; font-size: 13px; } .guide-bubble[data-docked='true'] { bottom: 200px; } }
+@media (prefers-reduced-motion: reduce) { .guide-bubble { transition: none; } }
+
+/* guide bubble vs. other HUD: banner above it, docked bubble centred in the space left of the record panel */
+.surf-banner { top: 128px; }
+.surf-banner b { font-size: clamp(18px, 2.4vw, 26px); }
+.surface-root[data-panel='on'] .guide-bubble[data-docked='true'] { left: calc((100vw - 484px) / 2); max-width: min(560px, calc(100vw - 520px)); }
+@media (max-width: 760px) { .surface-root[data-panel='on'] .guide-bubble { display: none; } }

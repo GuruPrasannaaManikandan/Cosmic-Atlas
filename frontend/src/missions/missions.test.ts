@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { MISSIONS, OBJECTS, MISSION_BY_ID, OBJECT_BY_ID, SOURCES, validateCatalog, dateMs, timelineEvents, missionsActiveAt } from './index'
-import { STORIES, storyFor } from './stories'
+import { STORIES, storyFor, COMPONENT_PARTS, PART_FOCUS, partsForComponent } from './stories'
 
 describe('mission catalogue', () => {
   it('passes validation (sources resolve, dates ordered, non-NASA labelled, facts consistent)', () => {
@@ -64,6 +64,10 @@ describe('mission catalogue', () => {
     for (const s of Object.values(STORIES)) {
       expect(OBJECT_BY_ID[s.objectId]).toBeTruthy()
       expect(s.concise.length).toBeGreaterThan(0)
+      for (const l of s.concise) {
+        expect(l.sources.length, l.text).toBeGreaterThan(0)
+        l.sources.forEach((id) => expect(SOURCES[id], id).toBeTruthy())
+      }
       for (const p of s.expanded) {
         expect(p.sources.length).toBeGreaterThan(0)
         p.sources.forEach((id) => expect(SOURCES[id], id).toBeTruthy())
@@ -75,13 +79,33 @@ describe('mission catalogue', () => {
     for (const o of OBJECTS) {
       const st = storyFor(o.id)!
       expect(st.concise.length).toBeGreaterThan(0)
+      st.concise.forEach((l) => expect(l.sources.length, `${o.id}: ${l.text}`).toBeGreaterThan(0))
       for (const p of st.expanded) {
         expect(p.sources.length, `${o.id} ${p.part}`).toBeGreaterThan(0)
         p.sources.forEach((id) => expect(SOURCES[id], id).toBeTruthy())
       }
     }
-    expect(storyFor('a15-lrv')!.concise.join(' ')).toContain('27.8 km')
+    expect(storyFor('a15-lrv')!.concise.map((l) => l.text).join(' ')).toContain('27.8 km')
     expect(storyFor('a17-alsep')!.expanded.find((p) => p.part === 'end')!.text).toContain('30 September 1977')
+  })
+
+  it('component <-> story links point at real components and real story parts', () => {
+    for (const [oid, map] of Object.entries(COMPONENT_PARTS)) {
+      const comps = OBJECT_BY_ID[oid].components.map((c) => c.id)
+      const parts = storyFor(oid)!.expanded.map((p) => p.part)
+      for (const [cid, ps] of Object.entries(map)) {
+        expect(comps, `${oid}.${cid}`).toContain(cid)
+        ps.forEach((p) => expect(parts, `${oid}.${cid} -> ${p}`).toContain(p))
+        expect(partsForComponent(oid, cid).length, `${oid}.${cid}`).toBeGreaterThan(0)
+      }
+    }
+    for (const [oid, map] of Object.entries(PART_FOCUS)) {
+      const comps = OBJECT_BY_ID[oid].components.map((c) => c.id)
+      Object.values(map).forEach((cid) => expect(comps).toContain(cid))
+    }
+    // generated stories: every component is explained by the design part
+    expect(partsForComponent('a15-lrv', 'wheels').map((p) => p.part)).toEqual(['design'])
+    expect(partsForComponent('a11-lm-descent', 'ladder')[0].text).toContain('02:56:15 UT')
   })
 
   it('has a broad multi-destination catalogue', () => {

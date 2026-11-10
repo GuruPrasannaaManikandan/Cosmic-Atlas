@@ -1,6 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { OBJECT_BY_ID, MISSION_BY_ID, SOURCES, Fact, dateMs } from '../missions'
-import { storyFor } from '../missions/stories'
+import { useEffect, useMemo, useRef } from 'react'
+import { OBJECT_BY_ID, MISSION_BY_ID, Fact, dateMs, citeGroups } from '../missions'
+import { storyFor, partsForComponent } from '../missions/stories'
+import { useNarrator } from './narrator'
+import { useGuide, componentLine } from './guide'
 import { useStore } from '../store/store'
 import { useSurface, PanelTab } from './surfaceState'
 import { VALID_FROM, VALID_TO } from '../astro/ephemeris'
@@ -21,71 +23,89 @@ function Badge({ f }: { f: Fact<unknown> }) {
 function Cite({ ids }: { ids: string[] }) {
   return (
     <span className="cite">
-      {ids.map((id) => (
-        <a key={id} href={SOURCES[id]?.url} target="_blank" rel="noreferrer" title={`${SOURCES[id]?.title} — ${SOURCES[id]?.organisation}`}>
-          [{SOURCES[id]?.organisation.split(' ')[0] ?? id}]
+      {citeGroups(ids).map((g) => (
+        <a key={g.label} href={g.url} target="_blank" rel="noreferrer" title={g.titles}>
+          [{g.label}{g.count > 1 ? ` ×${g.count}` : ''}]
         </a>
       ))}
     </span>
   )
 }
 
-/** text-first narration: the transcript is always shown; voice (Web Speech API) is optional and user-controlled */
-function Narration({ lines }: { lines: string[] }) {
+/** the sentence with the word currently being spoken (voice) or read (captions) highlighted */
+export function SpokenText({ text, charIdx }: { text: string; charIdx: number }) {
+  if (charIdx < 0) return <>{text}</>
+  const end = text.slice(charIdx).search(/\s|$/)
+  const stop = end < 0 ? text.length : charIdx + end
+  return (
+    <>
+      {text.slice(0, charIdx)}
+      <mark className="spoken-word">{text.slice(charIdx, stop)}</mark>
+      {text.slice(stop)}
+    </>
+  )
+}
+
+/** story narration: one shared narrator (keeps playing across tabs), synced transcript, controls, honest voice label */
+function NarratorPanel({ objectId }: { objectId: string }) {
+  const n = useNarrator()
   const can = typeof window !== 'undefined' && 'speechSynthesis' in window
-  const [idx, setIdx] = useState(-1)
-  const [state, setState] = useState<'idle' | 'playing' | 'paused'>('idle')
-  const run = useRef(0)
-  const stop = () => {
-    run.current++
-    if (can) window.speechSynthesis.cancel()
-    setState('idle')
-    setIdx(-1)
-  }
-  useEffect(() => stop, [lines])
-  const play = (from = 0) => {
-    if (!can) return
-    const token = ++run.current
-    window.speechSynthesis.cancel()
-    const say = (i: number) => {
-      if (token !== run.current) return
-      if (i >= lines.length) {
-        setState('idle')
-        setIdx(-1)
-        return
-      }
-      setIdx(i)
-      const u = new SpeechSynthesisUtterance(lines[i])
-      u.rate = 0.95
-      u.pitch = 1
-      u.onend = () => setTimeout(() => say(i + 1), 350) // a pause between sentences
-      u.onerror = () => setState('idle')
-      window.speechSynthesis.speak(u)
-    }
-    setState('playing')
-    say(from)
-  }
+  const listRef = useRef<HTMLOListElement>(null)
+  useEffect(() => {
+    if (n.objectId !== objectId) n.load(objectId, 'short')
+  }, [objectId]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    listRef.current?.querySelector('.speaking')?.scrollIntoView?.({ block: 'nearest' })
+  }, [n.idx])
+  const story = storyFor(objectId)
+  if (!story) return null
   return (
     <div className="narration">
-      <div className="narration-controls">
-        {can ? (
-          <>
-            {state === 'idle' && <button className="btn" onClick={() => play(0)}>▶ Narrate</button>}
-            {state === 'playing' && <button className="btn" onClick={() => { window.speechSynthesis.pause(); setState('paused') }}>❚❚ Pause</button>}
-            {state === 'paused' && <button className="btn" onClick={() => { window.speechSynthesis.resume(); setState('playing') }}>▶ Resume</button>}
-            {state !== 'idle' && <button className="btn ghost" onClick={stop}>■ Stop</button>}
-            <button className="btn ghost" onClick={() => play(0)}>↺ Replay</button>
-          </>
-        ) : (
-          <span className="muted">Voice is not available in this browser — read the transcript below.</span>
-        )}
+      <div className="seg story-len" role="group" aria-label="Story version">
+        <button className={n.mode === 'short' ? 'on' : ''} aria-pressed={n.mode === 'short'} onClick={() => n.load(objectId, 'short')}>
+          Young explorers (short)
+        </button>
+        <button className={n.mode === 'full' ? 'on' : ''} aria-pressed={n.mode === 'full'} onClick={() => n.load(objectId, 'full')}>
+          Full scientific story
+        </button>
       </div>
-      {idx >= 0 && <p className="subtitle" aria-live="polite">{lines[idx]}</p>}
-      <div className="transcript">
-        {lines.map((l, i) => (
-          <p key={i} className={i === idx ? 'speaking' : ''}>{l}</p>
+      <div className="narration-controls" role="group" aria-label="Narration controls">
+        {n.state === 'idle' && <button className="btn" onClick={() => n.play(0)}>▶ Narrate</button>}
+        {n.state === 'playing' && <button className="btn" onClick={n.pause}>❚❚ Pause</button>}
+        {n.state === 'paused' && <button className="btn" onClick={n.resume}>▶ Resume</button>}
+        <button className="btn ghost" onClick={n.prev} disabled={n.idx <= 0} aria-label="Previous sentence">⏮</button>
+        <button className="btn ghost" onClick={n.next} disabled={n.idx < 0 || n.idx >= n.lines.length - 1} aria-label="Next sentence">⏭</button>
+        {n.state !== 'idle' && <button className="btn ghost" onClick={n.stop}>■ Stop</button>}
+        <span className="narr-progress mono small" aria-live="off">{n.idx >= 0 ? `${n.idx + 1} / ${n.lines.length}` : `${n.lines.length} sentences`}</span>
+      </div>
+      <div className="narration-options small">
+        <label title={can ? 'Spoken by your browser\'s built-in synthetic text-to-speech voice' : 'This browser has no speech engine — captions only'}>
+          <input type="checkbox" checked={n.voice && can} disabled={!can} onChange={(e) => n.set({ voice: e.target.checked })} /> Voice <span className="muted">(browser text-to-speech, synthetic)</span>
+        </label>
+        <label>
+          Speed{' '}
+          <select value={n.rate} onChange={(e) => n.set({ rate: parseFloat(e.target.value) })} aria-label="Narration speed">
+            <option value={0.8}>slower</option>
+            <option value={1}>normal</option>
+            <option value={1.25}>faster</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" checked={n.autoFocus} onChange={(e) => n.set({ autoFocus: e.target.checked })} /> Camera follows the story
+        </label>
+      </div>
+      <ol className="transcript" ref={listRef}>
+        {n.lines.map((l, i) => (
+          <li key={i} className={i === n.idx ? 'speaking' : ''}>
+            {l.heading && <b className="t-head">{l.heading}</b>}
+            <button className="t-line" onClick={() => n.play(i)} title="Play from this sentence">
+              {i === n.idx ? <SpokenText text={l.text} charIdx={n.charIdx} /> : l.text}
+            </button>
+            <Cite ids={l.sources} />
+          </li>
         ))}
-      </div>
+      </ol>
+      <p className="muted small">The guide reads the catalogue story above; nothing it says is a quotation of a real astronaut unless the text says so and cites it.</p>
     </div>
   )
 }
@@ -95,11 +115,18 @@ export function DiscoveryPanel() {
   const component = useSurface((s) => s.component)
   const lmModel = useSurface((s) => s.lmModel)
   const set = useSurface((s) => s.set)
-  const [expanded, setExpanded] = useState(false)
   const obj = OBJECT_BY_ID[panel.objectId]
   const mission = MISSION_BY_ID[obj.missionId]
   const story = useMemo(() => storyFor(obj.id), [obj.id])
-  const lines = useMemo(() => (story ? (expanded ? story.expanded.map((p) => `${p.heading}. ${p.text}`) : story.concise) : []), [story, expanded])
+  const narrator = useNarrator()
+  const pickComponent = (cid: string | null) => {
+    set({ component: cid })
+    if (cid) {
+      const line = componentLine(obj.id, cid)
+      if (line && narrator.state !== 'playing') useGuide.getState().say(line)
+    }
+  }
+  const compParts = component ? partsForComponent(obj.id, component) : []
   const tab = panel.tab
   const loc = obj.location.value
 
@@ -109,7 +136,7 @@ export function DiscoveryPanel() {
         <span className="eyebrow">{obj.nasaHardware ? 'NASA HARDWARE' : `${obj.builtBy} HARDWARE — NOT NASA`}</span>
         <h2>{obj.name}</h2>
         <p className="muted">{mission.name} · {obj.category.replace(/-/g, ' ')}</p>
-        <button className="discovery-close" onClick={() => set({ panel: null, component: null })} aria-label="Return to exploration">✕</button>
+        <button className="discovery-close" onClick={() => { narrator.stop(); set({ panel: null, component: null }) }} aria-label="Return to exploration">✕</button>
       </header>
       <nav className="discovery-tabs" role="tablist">
         {TABS.map((t) => (
@@ -123,9 +150,9 @@ export function DiscoveryPanel() {
           <>
             <p className="muted">Drag to orbit, scroll to zoom. Pick a part to look at it up close.</p>
             <div className="comp-list">
-              <button className={!component ? 'on' : ''} onClick={() => set({ component: null })}>Whole object</button>
+              <button className={!component ? 'on' : ''} onClick={() => pickComponent(null)}>Whole object</button>
               {obj.components.map((c) => (
-                <button key={c.id} className={component === c.id ? 'on' : ''} onClick={() => set({ component: c.id })}>
+                <button key={c.id} className={component === c.id ? 'on' : ''} onClick={() => pickComponent(c.id)}>
                   {c.name}
                 </button>
               ))}
@@ -134,6 +161,17 @@ export function DiscoveryPanel() {
               <p>
                 {obj.components.find((c) => c.id === component)?.description} <Cite ids={obj.components.find((c) => c.id === component)?.sources ?? []} />
               </p>
+            )}
+            {component && compParts.length > 0 && (
+              <div className="comp-story" data-testid="component-story">
+                <h3>In the story</h3>
+                {compParts.map((p) => (
+                  <div key={p.part} className="comp-story-part">
+                    <b>{p.heading}.</b> {p.text} <Cite ids={p.sources} />
+                    <button className="btn ghost small" onClick={() => narrator.playPart(obj.id, p.part)}>▶ Hear this from the guide</button>
+                  </div>
+                ))}
+              </div>
             )}
             {obj.model.id === 'lm-descent-stage' && (
               <div className="seg model-variant" role="group" aria-label="3D model">
@@ -153,20 +191,7 @@ export function DiscoveryPanel() {
             </p>
           </>
         )}
-        {tab === 'story' && story && (
-          <>
-            <div className="seg story-len">
-              <button className={!expanded ? 'on' : ''} onClick={() => setExpanded(false)}>Short</button>
-              <button className={expanded ? 'on' : ''} onClick={() => setExpanded(true)}>Full story</button>
-            </div>
-            <Narration lines={lines} />
-            {expanded && (
-              <p className="muted small">
-                Sources: <Cite ids={[...new Set(story.expanded.flatMap((p) => p.sources))]} />
-              </p>
-            )}
-          </>
-        )}
+        {tab === 'story' && story && <NarratorPanel objectId={obj.id} />}
         {tab === 'specs' && (
           <dl className="specs">
             <dt>Built by</dt>
@@ -220,7 +245,7 @@ export function DiscoveryPanel() {
         )}
       </div>
       <footer>
-        <button className="btn" onClick={() => set({ panel: null, component: null })}>Return to Exploration</button>
+        <button className="btn" onClick={() => { narrator.stop(); set({ panel: null, component: null }) }}>Return to Exploration</button>
       </footer>
     </div>
   )

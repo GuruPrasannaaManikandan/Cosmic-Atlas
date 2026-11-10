@@ -6,6 +6,9 @@ import { useSurface } from './surfaceState'
 import { SurfaceScene, DtmData } from './SurfaceScene'
 import { loadDtm, loadHorizon } from './terrain'
 import { TouchControls, useTouchDevice } from './TouchControls'
+import { GuideBubble } from './GuideBubble'
+import { useGuide } from './guide'
+import { useNarrator } from './narrator'
 import { MiniMap, SurfaceMap } from './SurfaceMap'
 import { DiscoveryPanel } from './DiscoveryPanel'
 import { sunDirectionAtLunarSite, elevationDeg, azimuthDeg } from './lighting'
@@ -152,6 +155,8 @@ export default function SurfaceExperience() {
   useEffect(() => {
     preloadNasaModel('apollo-lm')
     useSurface.getState().reset(siteId)
+    useGuide.getState().reset()
+    useNarrator.getState().stop()
     const site = siteId ? SITE_BY_ID[siteId] : null
     let live = true
     if (site?.terrain.kind === 'dtm') {
@@ -179,7 +184,7 @@ export default function SurfaceExperience() {
       </div>
     )
   return (
-    <div className="surface-root" data-testid="surface-root" data-touch={touch ? 'on' : undefined}>
+    <div className="surface-root" data-testid="surface-root" data-touch={touch ? 'on' : undefined} data-panel={S.panel ? 'on' : undefined}>
       <SurfaceScene site={site} dtm={dtm.data} />
       {dtm.error && <p className="surf-terrain-error" role="status">Measured terrain could not be loaded ({dtm.error}); showing illustrative terrain instead.</p>}
       {S.intro ? (
@@ -192,6 +197,7 @@ export default function SurfaceExperience() {
       ) : (
         <Hud />
       )}
+      {!S.intro && <GuideBubble />}
       {touch && !S.intro && <TouchControls />}
       {S.mapOpen && <SurfaceMap site={site} />}
       {S.panel && <DiscoveryPanel />}

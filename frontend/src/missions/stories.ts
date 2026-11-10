@@ -11,10 +11,16 @@ export interface StoryPart {
   sources: string[]
 }
 
+/** one sentence of the short (child-friendly) story, with the sources its facts come from */
+export interface StoryLine {
+  text: string
+  sources: string[]
+}
+
 export interface Story {
   objectId: string
   narrator: string
-  concise: string[]
+  concise: StoryLine[]
   expanded: StoryPart[]
 }
 
@@ -25,9 +31,9 @@ export const STORIES: Record<string, Story> = {
     objectId: 'a11-lm-descent',
     narrator: 'Astronaut guide',
     concise: [
-      'Look at this — it is the bottom half of the Apollo 11 Lunar Module, the spacecraft that carried the first people to land on the Moon.',
-      'On 20 July 1969 Neil Armstrong and Buzz Aldrin landed right here, in the Sea of Tranquility, while Michael Collins waited for them in orbit.',
-      'The next day the top half, the ascent stage, blasted off and used this descent stage as its launch pad. That is why it is still standing here today.',
+      { text: 'Look at this — it is the bottom half of the Apollo 11 Lunar Module, the spacecraft that carried the first people to land on the Moon.', sources: ['nssdca-a11-lm', 'nasa-apollo11', 'nssdca-chronology'] },
+      { text: 'On 20 July 1969 Neil Armstrong and Buzz Aldrin landed right here, in the Sea of Tranquility, while Michael Collins waited for them in orbit.', sources: ['nssdca-a11-lm', 'nssdca-a11-csm', 'nasa-apollo11'] },
+      { text: 'The next day the top half, the ascent stage, blasted off and used this descent stage as its launch pad. That is why it is still standing here today.', sources: ['nssdca-a11-lm'] },
     ],
     expanded: [
       { part: 'introduction', heading: 'What you are looking at', text: 'This is the descent stage of the Apollo 11 Lunar Module: an eight-sided box about 4.2 metres across standing on four legs. The Lunar Reconnaissance Orbiter has photographed it from orbit, so we know exactly where it is.', sources: ['nssdca-a11-lm', 'lroc-2016-coords'] },
@@ -45,9 +51,9 @@ export const STORIES: Record<string, Story> = {
     objectId: 'a11-easep-pse',
     narrator: 'Astronaut guide',
     concise: [
-      'This little station is the Early Apollo Scientific Experiments Package, with a seismometer to feel moonquakes.',
-      'Its two slanted solar panels powered it, and an antenna sent its measurements to Earth.',
-      'It was switched on the morning after the landing, worked through the lunar day, and on 27 August 1969 it stopped accepting commands from Earth.',
+      { text: 'This little station is the Early Apollo Scientific Experiments Package, with a seismometer to feel moonquakes.', sources: ['nssdca-a11-lm'] },
+      { text: 'Its two slanted solar panels powered it, and an antenna sent its measurements to Earth.', sources: ['nssdca-a11-lm'] },
+      { text: 'It was switched on the morning after the landing, worked through the lunar day, and on 27 August 1969 it stopped accepting commands from Earth.', sources: ['nssdca-a11-lm'] },
     ],
     expanded: [
       { part: 'introduction', heading: 'What you are looking at', text: 'This is EASEP, the science station the Apollo 11 crew set up near the Lunar Module. Its main instrument is a passive seismometer.', sources: ['nssdca-a11-lm'] },
@@ -61,9 +67,9 @@ export const STORIES: Record<string, Story> = {
     objectId: 'a11-lrrr',
     narrator: 'Astronaut guide',
     concise: [
-      'This is the Laser Ranging Retroreflector: a panel of special glass cubes that bounce light straight back to where it came from.',
-      'Scientists on Earth aimed lasers at it to measure the distance to the Moon.',
-      'It needs no electricity at all, so it never needed batteries or solar panels.',
+      { text: 'This is the Laser Ranging Retroreflector: a panel of special glass cubes that bounce light straight back to where it came from.', sources: ['nssdca-a11-lrrr'] },
+      { text: 'Scientists on Earth aimed lasers at it to measure the distance to the Moon.', sources: ['nssdca-a11-lrrr'] },
+      { text: 'It needs no electricity at all, so it never needed batteries or solar panels.', sources: ['nssdca-a11-lm'] },
     ],
     expanded: [
       { part: 'introduction', heading: 'What you are looking at', text: 'The Laser Ranging Retroreflector is a flat array of fused-silica cubes on a folding stand, set up a few metres from the seismometer.', sources: ['nssdca-a11-lrrr', 'nssdca-a11-lm'] },
@@ -77,9 +83,9 @@ export const STORIES: Record<string, Story> = {
     objectId: 'opportunity-rover',
     narrator: 'Astronaut guide',
     concise: [
-      'This is Opportunity, one of NASA\'s Mars Exploration Rovers. It was sent to look for clues that water once flowed on Mars.',
-      'It was planned to work for 90 Martian days, but it kept exploring for almost 15 years and drove 45.16 kilometres.',
-      'In June 2018 a huge dust storm covered Mars. Opportunity stopped communicating on 10 June 2018, and NASA declared the mission complete on 13 February 2019.',
+      { text: 'This is Opportunity, one of NASA\'s Mars Exploration Rovers. It was sent to look for clues that water once flowed on Mars.', sources: ['nasa-opportunity'] },
+      { text: 'It was planned to work for 90 Martian days, but it kept exploring for almost 15 years and drove 45.16 kilometres.', sources: ['nasa-opportunity'] },
+      { text: 'In June 2018 a huge dust storm covered Mars. Opportunity stopped communicating on 10 June 2018, and NASA declared the mission complete on 13 February 2019.', sources: ['nasa-opportunity'] },
     ],
     expanded: [
       { part: 'launch', heading: 'Launch', text: 'Opportunity launched from Cape Canaveral on 7 July 2003 (US Pacific time) on a Delta II rocket.', sources: ['nasa-opportunity'] },
@@ -114,7 +120,35 @@ export function storyFor(objectId: string): Story | null {
   return {
     objectId,
     narrator: 'Astronaut guide',
-    concise: [parts[0].text, o.design, ...(status ? [`Today it is ${status.replace(/^on the lunar surface/, 'still on the lunar surface')}.`] : [])],
+    concise: [
+      { text: parts[0].text, sources: o.sources },
+      { text: o.design, sources: parts[1].sources },
+      ...(status ? [{ text: `Today it is ${status.replace(/^on the lunar surface/, 'still on the lunar surface')}.`, sources: o.currentStatus.sources.length ? o.currentStatus.sources : o.sources }] : []),
+    ],
     expanded: parts.filter((p) => p.sources.length),
   }
+}
+
+/**
+ * Which story parts explain each inspectable component, and which component the camera should show while a story
+ * part is narrated. Handcrafted for the handcrafted stories; for catalogue-generated stories every component maps to
+ * the 'design' part (the part built from the object's design description).
+ */
+export const COMPONENT_PARTS: Record<string, Record<string, StoryPart['part'][]>> = {
+  'a11-lm-descent': { legs: ['journey', 'design'], ladder: ['events'], engine: ['design'], body: ['design', 'end'] },
+  'a11-easep-pse': { seismometer: ['objectives', 'events'], 'solar-panels': ['design', 'end'], antenna: ['design'], 'dust-detector': ['objectives'] },
+  'a11-lrrr': { array: ['design', 'objectives'], support: ['design'] },
+}
+export const PART_FOCUS: Record<string, Partial<Record<StoryPart['part'], string>>> = {
+  'a11-lm-descent': { journey: 'legs', design: 'body', events: 'ladder', end: 'body' },
+  'a11-easep-pse': { objectives: 'seismometer', design: 'solar-panels', events: 'seismometer', end: 'solar-panels' },
+  'a11-lrrr': { introduction: 'array', design: 'array', objectives: 'array' },
+}
+
+/** story parts that explain a component (falls back to 'design' for generated stories) */
+export function partsForComponent(objectId: string, componentId: string): StoryPart[] {
+  const st = storyFor(objectId)
+  if (!st) return []
+  const want = COMPONENT_PARTS[objectId]?.[componentId] ?? (STORIES[objectId] ? [] : ['design'])
+  return st.expanded.filter((p) => want.includes(p.part))
 }

@@ -44,7 +44,7 @@
   {
    "check": "[tranquility-base] frame rate on the surface (headless, balanced)",
    "pass": true,
-   "detail": "60.0"
+   "detail": "60.1"
   },
   {
    "check": "[apollo-12] LROC NAC DTM terrain loaded (not the procedural fallback)",
@@ -118,7 +118,7 @@
   {
    "check": "[apollo-14] frame rate on the surface (headless, balanced)",
    "pass": true,
-   "detail": "60.3"
+   "detail": "60.1"
   },
   {
    "check": "[apollo-15] LROC NAC DTM terrain loaded (not the procedural fallback)",
@@ -208,7 +208,7 @@
   {
    "check": "[apollo-16] frame rate on the surface (headless, balanced)",
    "pass": true,
-   "detail": "60.1"
+   "detail": "60.0"
   },
   {
    "check": "[apollo-17] LROC NAC DTM terrain loaded (not the procedural fallback)",
@@ -263,7 +263,7 @@
    "check": "T1 touch device: on-screen joystick shown and drives the astronaut",
    "pass": true,
    "detail": {
-    "moved_m": 2.17
+    "moved_m": 2.16
    }
   },
   {
@@ -286,7 +286,7 @@
  "sites": {
   "tranquility-base": {
    "product": "NAC_DTM_APOLLO11",
-   "fps": 60.0,
+   "fps": 60.1,
    "objects": [
     {
      "id": "a11-lm-descent",
@@ -323,7 +323,7 @@
   },
   "apollo-14": {
    "product": "NAC_DTM_APOLLO14",
-   "fps": 60.3,
+   "fps": 60.1,
    "objects": [
     {
      "id": "a14-lm-descent",
@@ -370,7 +370,7 @@
   },
   "apollo-16": {
    "product": "NAC_DTM_APOLLO16",
-   "fps": 60.1,
+   "fps": 60.0,
    "objects": [
     {
      "id": "a16-lm-descent",
