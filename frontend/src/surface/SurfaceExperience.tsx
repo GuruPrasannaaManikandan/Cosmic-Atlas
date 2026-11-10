@@ -18,6 +18,8 @@ import { bearingDeg } from './geo'
 import { preloadNasaModel } from './models/NasaModel'
 import { ControlsPanel } from '../input/ControlsPanel'
 import '../input/controls.css'
+import { MoonReplay, beginMoonReplay } from './MoonReplay'
+import { replayFor } from '../replay/replay'
 
 function Compass() {
   const site = SITE_BY_ID[useSurface((s) => s.siteId)!]
@@ -247,12 +249,14 @@ export default function SurfaceExperience() {
             <span className="muted">{planetFor(site.bodyId).name} · {Math.abs(site.origin.latDeg).toFixed(4)}°{site.origin.latDeg >= 0 ? 'N' : 'S'}, {site.origin.lonEastDeg.toFixed(4)}°E</span>
             <button className="btn ghost small" onClick={() => S.set({ intro: false })}>Skip</button>
           </div>
+        ) : S.replay ? (
+          <MoonReplay />
         ) : (
           <Hud touch={touch} />
         )}
-        {!S.intro && <GuideBubble />}
+        {!S.intro && !S.replay && <GuideBubble />}
       </div>
-      {S.panel && <DiscoveryPanel />}
+      {S.panel && !S.replay && <DiscoveryPanel onRelive={replayFor(S.panel.objectId) ? () => beginMoonReplay(S.panel!.objectId) : undefined} />}
       {S.mapOpen && <SurfaceMap site={site} />}
       {S.paused && !S.helpOpen && <PauseMenu />}
       {S.helpOpen && <Help />}

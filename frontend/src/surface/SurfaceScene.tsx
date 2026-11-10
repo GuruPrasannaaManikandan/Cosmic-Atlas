@@ -9,7 +9,7 @@ import { stepCharacter, newCharacter, paramsForGravity, gaitPose, CharacterState
 import { elevationDeg, azimuthDeg } from './lighting'
 import { planetFor, PlanetEnvironment } from './planets'
 import { measureSafeArea, placeBubble, SafeArea } from './hudLayout'
-import { useSurface, surfaceDebug } from './surfaceState'
+import { useSurface, surfaceDebug, surfaceControl } from './surfaceState'
 import { useGuide, announceOnce, approachLine, discoverLine, inspectHint } from './guide'
 import { useNarrator } from './narrator'
 import { bearingDeg } from './geo'
@@ -363,6 +363,10 @@ function Player({ env }: { env: SceneEnv }) {
   const camPos = useRef(new THREE.Vector3())
   const camTarget = useRef(new THREE.Vector3())
   const t0 = useRef(performance.now())
+  /** historical replay: descent camera start time (null = not replaying the descent) */
+  const replayT0 = useRef<number | null>(null)
+  /** snap the camera on the next frame (exact restore, no glide) */
+  const snapCam = useRef(false)
   const lastHud = useRef(0)
   const lastPhase = useRef(0)
   const dust = useMemo(() => new DustSystem(), [])
@@ -378,6 +382,19 @@ function Player({ env }: { env: SceneEnv }) {
 
   // debug/test hooks
   useEffect(() => {
+    surfaceControl.snapshot = () => ({ pos: [...ch.current.pos] as [number, number, number], yaw: ch.current.yaw, camYaw: look.current.yaw, camPitch: look.current.pitch, camDist: look.current.dist, camMode: useSurface.getState().camMode })
+    surfaceControl.restore = (p) => {
+      ch.current = { ...ch.current, pos: [...p.pos] as [number, number, number], vel: [0, 0, 0], yaw: p.yaw }
+      look.current.yaw = p.camYaw
+      look.current.pitch = p.camPitch
+      look.current.dist = p.camDist
+      replayT0.current = null
+      snapCam.current = true
+      if (useSurface.getState().camMode !== p.camMode) useSurface.getState().set({ camMode: p.camMode })
+    }
+    surfaceControl.replayDescent = () => {
+      replayT0.current = performance.now()
+    }
     surfaceDebug.teleport = (x, z) => {
       ch.current = { ...ch.current, pos: [x, ground.heightAt(x, z), z], vel: [0, 0, 0] }
     }
@@ -413,6 +430,7 @@ function Player({ env }: { env: SceneEnv }) {
     }
     surfaceDebug.terrain = () => ({ daylightMs: env.site.daylight.ms, kind: ground.kind, product: ground.kind === 'dtm' ? (ground as DtmTerrain).meta.source.product : null, horizonReliefM: ground.kind === 'dtm' ? (ground as DtmTerrain).horizon?.meta.reliefM ?? null : null, objects: env.placed.map((p) => ({ id: p.id, x: p.x, z: p.z, y: p.y, model: p.modelId })) })
     return () => {
+      surfaceControl.snapshot = surfaceControl.restore = surfaceControl.replayDescent = undefined
       surfaceDebug.teleport = undefined
       surfaceDebug.character = undefined
       surfaceDebug.camera = undefined
@@ -519,7 +537,7 @@ function Player({ env }: { env: SceneEnv }) {
     const dt = Math.min(rawDt, 0.05)
     const S = useSurface.getState()
     const L = look.current
-    const frozen = S.paused || S.mapOpen || !!S.panel || S.intro
+    const frozen = S.paused || S.mapOpen || !!S.panel || S.intro || !!S.replay
     // arrow keys TURN THE CAMERA (never move the astronaut): right = turn right, up = look up, at the user's speed.
     // While inspecting they orbit the inspection view instead. Mouse look uses the same yaw / pitch and limits.
     const lk = input.look()
@@ -527,7 +545,7 @@ function Player({ env }: { env: SceneEnv }) {
     if (S.panel) {
       L.inspYaw -= lk.x * turn
       L.inspPitch = THREE.MathUtils.clamp(L.inspPitch + lk.y * turn, -1.2, 0.35)
-    } else if (!frozen) {
+    } else if (!frozen || (S.replay && replayT0.current === null)) {
       L.yaw -= lk.x * turn
       L.pitch = THREE.MathUtils.clamp(L.pitch + lk.y * turn, PITCH_MIN, PITCH_MAX)
     }
@@ -695,8 +713,17 @@ function Player({ env }: { env: SceneEnv }) {
       camPos.current.copy(high.lerp(desired, e))
       camTarget.current.copy(new THREE.Vector3(lm.x, lm.y, lm.z).lerp(target, e))
       if (t >= 1) S.set({ intro: false })
+    } else if (replayT0.current !== null) {
+      // historical replay of the descent: the same illustrative camera move onto the measured LM position
+      const t = Math.min(1, (performance.now() - replayT0.current) / (reduced ? 1 : 6000))
+      const e = 1 - Math.pow(1 - t, 3)
+      const high = new THREE.Vector3(lm.x + 60, lm.y + 260, lm.z + 120)
+      camPos.current.copy(high.lerp(desired, e))
+      camTarget.current.copy(new THREE.Vector3(lm.x, lm.y, lm.z).lerp(target, e))
+      if (t >= 1) replayT0.current = null
     } else {
-      const k = S.camMode === 'first' && !S.panel ? 1 : 1 - Math.exp(-dt * 9)
+      const k = snapCam.current || (S.camMode === 'first' && !S.panel) ? 1 : 1 - Math.exp(-dt * 9)
+      snapCam.current = false
       camPos.current.lerp(desired, k)
       camTarget.current.lerp(target, k)
     }

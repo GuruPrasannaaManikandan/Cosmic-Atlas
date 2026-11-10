@@ -16,6 +16,25 @@ cd frontend && npm install && npm run dev
 Open http://localhost:5173 (Vite proxies `/api` to the backend). The 3D explorer, tour and time controls work
 **without the backend**; only live catalogue search, Horizons comparison and dataset upload need it.
 
+### Abandoned but Not Forgotten (main experience)
+
+On the home screen, choose **Expedition · Moon** or **Expedition · Mars**: the app flies you from Earth to the destination and lands you at a historic site. You can also reach it from the Moon or Mars info panel ("Begin expedition"), or from the "Explore" button when you are near either body.
+
+- **Moon:** the six Apollo sites are rendered by the web app (React Three Fiber, LROC terrain).
+- **Mars:** Victoria crater is rendered by the embedded Unity 6.3 player. The dev server serves it from `unity/CosmicAtlas/Builds/MarsExplorer`. That build is a generated artefact (about 90 MB) and is not in git, so build it once with Unity 6000.3.28f1 (takes 4–9 minutes):
+
+```bash
+"C:/Program Files/Unity/Hub/Editor/6000.3.28f1/Editor/Unity.exe" -batchmode -nographics -projectPath unity/CosmicAtlas -executeMethod CosmicAtlas.Rendering.Editor.MarsPrototypeBuild.Build -logFile unity-build.log
+```
+
+`npm run build` copies the player into `dist/unity/mars/` when it exists. Without it, the Mars entry shows a clear "renderer unavailable" message and the rest of the app works.
+
+To run the acceptance journeys (Mars and Moon, in headless Chrome, with screenshots and a JSON report):
+
+```bash
+python scripts/e2e/abandoned_journey_check.py --base http://localhost:5173 --out docs/qa/abandoned-but-not-forgotten
+```
+
 Build / tests:
 ```bash
 cd frontend && npm run build && npm test

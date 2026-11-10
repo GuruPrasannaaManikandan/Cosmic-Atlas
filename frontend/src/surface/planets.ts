@@ -6,9 +6,10 @@
  * narrator, map, minimap, character controller and camera are shared and read only from this interface — none of them
  * may assume a particular world.
  *
- * Only environments with status 'implemented' can be explored. Mars is described here as PLANNED: its sourced facts
- * are recorded, but it has no terrain, lighting model or sky yet, so no Mars site can be opened (see
- * docs/space-exploration/surface-exploration/PLANETARY_ARCHITECTURE.md).
+ * Only environments with status 'implemented' can be explored. The Moon is rendered by the web app (React Three Fiber).
+ * Mars is rendered by the Unity 6.3 URP player embedded in the app (renderer decision, Stage 2 GRAPHICS_PERFORMANCE_REPORT
+ * §3): its terrain (HiRISE DTM), Sun (Mars24 port, unit-tested) and sky live there, so `sunDirection` stays null here and
+ * the R3F surface never opens a Mars site. `requirements` lists what is still missing on Mars.
  */
 import type { Fact } from '../missions'
 import { v, u } from '../missions/catalog/facts'
@@ -20,6 +21,8 @@ export interface PlanetEnvironment {
   bodyId: string
   name: string
   status: 'implemented' | 'planned'
+  /** which renderer draws the surface: the web app's own (R3F) or the embedded Unity player */
+  renderer: 'r3f' | 'unity'
   /** volumetric mean radius (m) — terrain curvature, horizon distance, map scale */
   radiusM: number
   /** surface gravity used by the character controller and the dust particles */
@@ -49,6 +52,7 @@ export const PLANETS: Record<string, PlanetEnvironment> = {
     bodyId: 'moon',
     name: 'Moon',
     status: 'implemented',
+    renderer: 'r3f',
     radiusM: 1737.4e3,
     gravity: v(1.62, ['nssdca-moon-fact']),
     rotationHours: 655.72,
@@ -65,7 +69,8 @@ export const PLANETS: Record<string, PlanetEnvironment> = {
   mars: {
     bodyId: 'mars',
     name: 'Mars',
-    status: 'planned',
+    status: 'implemented',
+    renderer: 'unity',
     radiusM: 3389.5e3,
     // NSSDCA fact sheet: 3.73 m/s² (mean); the brief's "≈3.71" is not used because it is not the sourced value
     gravity: v(3.73, ['nssdca-mars-fact'], 'mean surface gravity (equator 3.69, pole 3.73)'),
@@ -78,20 +83,23 @@ export const PLANETS: Record<string, PlanetEnvironment> = {
     ground: { color: '#000000', farColor: '#000000', rockColor: '#000000', bounce: '#000000' },
     dust: { drag: true },
     words: { night: 'Night at this date.', nightLight: 'the ground is unlit' },
+    // what is still missing (Victoria crater is open; everything below is NOT done)
     requirements: [
-      'Mars rotation model (IAU WGCCRE 2015 Mars elements) and Sun direction at a site, unit-tested against a sourced lander sol time',
-      'Daytime sky: a sourced atmospheric scattering model (dusty butterscotch sky, blue sunsets) — no guessed colours',
-      'Terrain: HiRISE / CTX DTMs around each landing site (NASA PDS) plus MOLA MEGDR for the horizon, with the same windowed-read pipeline and LM-style elevation cross-checks',
-      'Surface albedo / colour from orbital imagery (HiRISE colour or CTX), not invented palettes',
-      'Dust behaviour with atmospheric drag (pressure and density sourced)',
+      'Daytime sky: the Unity sky and dust are ILLUSTRATIVE (tau 0.9 assumed); a sourced scattering model and the PDS Pancam tau record are needed',
+      'Surface colour: the Victoria terrain uses the grayscale HiRISE RED band with an illustrative tint; calibrated colour (HiRISE IRB or CTX) is not applied',
+      'Terrain for the other sites: Endeavour (Opportunity\'s final site), Gusev (Spirit), Gale (Curiosity), Jezero (Perseverance), Chryse / Utopia (Viking), Ares Vallis (Pathfinder); a MOLA horizon around each',
       'Site records: sourced coordinates for Perseverance (Jezero) and InSight (have only "about"), final positions for Spirit and Opportunity',
-      'Hardware placement for Viking 1/2, Pathfinder + Sojourner, Spirit, Opportunity, Curiosity, Perseverance + Ingenuity, with models validated in the Spacecraft Archive (several already are)',
+      'Hardware placement beyond Opportunity at Victoria, with models validated in the Spacecraft Archive (several already are)',
+      'Opportunity model detail: the NASA MER .blend (63 named parts) needs Blender to convert; the low-poly MER-B model is 17% short in height',
     ],
   },
 }
 
 /** only implemented environments can be explored */
-export const isExplorable = (bodyId: string) => PLANETS[bodyId]?.status === 'implemented' && PLANETS[bodyId].sunDirection !== null
+export const isExplorable = (bodyId: string) => {
+  const p = PLANETS[bodyId]
+  return !!p && p.status === 'implemented' && (p.renderer === 'unity' || p.sunDirection !== null)
+}
 
 export function planetFor(bodyId: string): PlanetEnvironment {
   const p = PLANETS[bodyId]

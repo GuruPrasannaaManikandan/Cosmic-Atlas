@@ -1,0 +1,36 @@
+/* Expedition overlay (during the flight) and the Abandoned but Not Forgotten launchers (home screen, info panel). */
+.expedition { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); width: min(720px, calc(100vw - 32px)); z-index: 60; padding: 14px 18px; border-radius: var(--r); background: rgba(6, 10, 22, 0.86); border: 1px solid var(--line-hi); box-shadow: var(--shadow); backdrop-filter: blur(10px); display: flex; flex-direction: column; gap: 6px; }
+.expedition .eyebrow { color: var(--cy); letter-spacing: 0.16em; font-size: 11px; }
+.exp-track { display: flex; gap: 4px; list-style: none; margin: 2px 0 4px; padding: 0; flex-wrap: wrap; }
+.exp-track li { flex: 1 1 0; min-width: 90px; font-size: 11px; padding: 4px 6px; border-radius: 6px; border: 1px solid var(--line); color: var(--dim); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exp-track li.done { color: var(--mut); border-color: rgba(103, 232, 249, 0.25); }
+.exp-track li.now { color: #fff; border-color: var(--cy); background: rgba(103, 232, 249, 0.14); font-weight: 600; }
+.exp-title { font-size: 20px; color: var(--txt); }
+.exp-text { margin: 0; color: var(--txt-dim); font-size: 14px; }
+.exp-progress { position: relative; height: 18px; border-radius: 9px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.exp-progress i { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, rgba(103, 232, 249, 0.55), rgba(167, 139, 250, 0.55)); transition: width 0.25s; }
+.exp-progress span { position: relative; padding-left: 10px; line-height: 18px; color: #fff; }
+.exp-honest { margin: 0; color: var(--mut); }
+.exp-honest a { color: var(--cy); }
+.exp-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+.abnf-intro { margin: 6px auto 14px; max-width: 760px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.abnf-intro .eyebrow { color: var(--warm); letter-spacing: 0.22em; font-size: 11px; }
+.abnf-intro h2 { margin: 0; font-size: clamp(20px, 3vw, 30px); letter-spacing: 0.06em; color: #fff; font-weight: 600; }
+.abnf-tag { margin: 0 0 6px; color: var(--txt-dim); font-style: italic; }
+.exp-launchers { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; }
+.exp-launchers.compact { grid-template-columns: 1fr; }
+.exp-card { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: 12px 14px; border-radius: var(--r); border: 1px solid var(--line); background: var(--glass-card); color: inherit; cursor: pointer; transition: border-color 0.15s, transform 0.15s, background 0.15s; }
+.exp-card:hover, .exp-card:focus-visible { border-color: var(--line-hi); transform: translateY(-1px); }
+.exp-card.moon { background: linear-gradient(135deg, rgba(148, 163, 184, 0.16), rgba(13, 22, 46, 0.7)); }
+.exp-card.mars { background: linear-gradient(135deg, rgba(234, 88, 12, 0.22), rgba(13, 22, 46, 0.7)); }
+.exp-card .eyebrow { font-size: 10px; letter-spacing: 0.16em; color: var(--warm); }
+.exp-card b { font-size: 16px; color: #fff; }
+.exp-start-btn { background: linear-gradient(135deg, rgba(234, 88, 12, 0.35), rgba(251, 191, 36, 0.18)); border-color: rgba(251, 146, 60, 0.6); color: #fff; font-weight: 600; }
+.relive-btn { background: linear-gradient(135deg, rgba(251, 191, 36, 0.32), rgba(245, 158, 11, 0.14)); border-color: rgba(251, 191, 36, 0.65); color: #fff; font-weight: 600; }
+.overview .ov-row { display: contents; }
+.ov-h { margin: 14px 0 4px; font-size: 14px; letter-spacing: 0.06em; color: var(--mut); text-transform: uppercase; }
+@media (max-width: 640px) {
+  .exp-launchers { grid-template-columns: 1fr; }
+  .expedition { bottom: 12px; }
+}

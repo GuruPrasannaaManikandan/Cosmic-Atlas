@@ -111,9 +111,53 @@ export const SURFACE_SITES: SurfaceSite[] = [
 export function catalogueSitesFor(bodyId: string) {
   return Object.values(MISSION_BY_ID)
     .filter((m) => m.target === bodyId && m.landingSite?.value)
-    .map((m) => ({ missionId: m.id, name: m.name, nasa: m.nasaMission, site: m.landingSite!.value!, explorable: SURFACE_SITES.some((s) => s.missionIds.includes(m.id) && s.available) }))
+    .map((m) => ({ missionId: m.id, name: m.name, nasa: m.nasaMission, site: m.landingSite!.value!, explorable: SURFACE_SITES.some((s) => s.missionIds.includes(m.id) && s.available) || UNITY_SITES.some((s) => s.missionIds.includes(m.id)) }))
 }
 
 export const SITE_BY_ID: Record<string, SurfaceSite> = Object.fromEntries(SURFACE_SITES.map((s) => [s.id, s]))
-/** explorable sites only: a site exists only when its world's environment is implemented */
+/** explorable R3F sites only: a site exists only when its world's environment is implemented */
 export const sitesForBody = (bodyId: string) => SURFACE_SITES.filter((s) => s.bodyId === bodyId && isExplorable(bodyId))
+
+/**
+ * Sites drawn by the embedded Unity player (Mars). Their terrain, Sun and hardware positions come from the Unity data
+ * (Assets/CosmicAtlas/Mars/Data, prepared by scripts/mars/*.py) and are reported back over the bridge at run time.
+ */
+export interface UnitySite {
+  id: string
+  bodyId: string
+  name: string
+  missionIds: string[]
+  /** fitted crater centre of the DTM tile (locally registered, see terrainProvenance) */
+  origin: { latDeg: number; lonEastDeg: number }
+  /** the build the player loads (served at /unity/<build>/) */
+  build: string
+  /** the moment the scene shows, and why */
+  scene: { date: string; label: string; note: string }
+  objectIds: string[]
+  terrainProvenance: string
+  summary: string
+}
+
+export const UNITY_SITES: UnitySite[] = [
+  {
+    id: 'victoria-crater',
+    bodyId: 'mars',
+    name: 'Victoria crater — Meridiani Planum',
+    missionIds: ['mer-opportunity'],
+    origin: { latDeg: -2.0513630760095034, lonEastDeg: 354.5042359725547 },
+    build: 'mars',
+    scene: {
+      date: '2007-09-11',
+      label: '11 Sep 2007, the day Opportunity drove into Victoria crater',
+      note: 'Opportunity is shown at its recorded drive position for that sol. It left Victoria in 2008; its final resting place is Perseverance Valley on the rim of Endeavour crater, which is not modelled yet.',
+    },
+    objectIds: ['opportunity-rover'],
+    terrainProvenance:
+      'Terrain: HiRISE DTM DTEEC_001414_1780_001612_1780 (1.01 m posts; NASA PDS). Ground shade: HiRISE RED band (grayscale) with an ILLUSTRATIVE tint. Sun: Mars24 algorithm (NASA GISS) at an ILLUSTRATIVE 14:00 local solar time. Sky and dust: ILLUSTRATIVE. Opportunity: NASA 3D Resources MER-B model on its recorded traverse (WUSTL / PDS Geosciences Node, locally registered, about 15 m RMS).',
+    summary: 'An 800 m crater Opportunity explored for two years. Drive its rim, find the rover, and relive its Victoria campaign drive by drive.',
+  },
+]
+export const UNITY_SITE_BY_ID: Record<string, UnitySite> = Object.fromEntries(UNITY_SITES.map((s) => [s.id, s]))
+export const unitySitesForBody = (bodyId: string) => UNITY_SITES.filter((s) => s.bodyId === bodyId && isExplorable(bodyId))
+/** the first explorable site on a body, for the expedition's landing (any renderer) */
+export const defaultSiteFor = (bodyId: string): string | null => sitesForBody(bodyId)[0]?.id ?? unitySitesForBody(bodyId)[0]?.id ?? null

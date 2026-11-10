@@ -9,12 +9,52 @@ import { VALID_FROM, VALID_TO } from '../astro/ephemeris'
 
 /** short visible labels; the accessible name always contains the visible label (WCAG 2.5.3) */
 const TABS: { id: PanelTab; label: string; name: string }[] = [
-  { id: 'inspect', label: 'Inspect', name: 'Inspect' },
+  { id: 'overview', label: 'Overview', name: 'Mission Overview' },
+  { id: 'inspect', label: 'Inspect', name: 'Engineering Inspection' },
   { id: 'story', label: 'Story', name: 'Historical Story' },
   { id: 'specs', label: 'Specifications', name: 'Technical Specifications' },
   { id: 'timeline', label: 'Timeline', name: 'Mission Timeline' },
   { id: 'science', label: 'Science', name: 'Science' },
 ]
+
+/** mission status in the directive's vocabulary: operational / completed / inactive / lost contact (never "abandoned" by default) */
+const STATUS_LABEL: Record<string, string> = { operating: 'Operational', completed: 'Completed', ended: 'Mission ended — inactive', lost: 'Lost contact', unknown: 'Unknown' }
+
+const fmtDate = (f?: Fact<string>) => (f?.value ? f.value.replace('T', ' ').replace(/:\d{2}Z$/, ' UT').replace('Z', ' UT') : null)
+
+function Overview({ objectId }: { objectId: string }) {
+  const obj = OBJECT_BY_ID[objectId]
+  const m = MISSION_BY_ID[obj.missionId]
+  const surface = m.classes.some((c) => c === 'lander' || c === 'rover' || c === 'crewed-landing' || c === 'helicopter')
+  const site = m.landingSite?.value
+  const rows: { k: string; v: React.ReactNode; f?: Fact<unknown> }[] = [
+    { k: 'Mission', v: m.name },
+    { k: 'Spacecraft', v: obj.name },
+    { k: 'Agency', v: <>{m.agency}{m.partners.length > 0 && <> · partners: {m.partners.map((p) => `${p.agency} (${p.role})`).join(', ')}</>}{!m.nasaMission && <em className="non-nasa"> · not a NASA mission: {m.nonNasaNote}</em>}</> },
+    { k: 'Mission type', v: `${m.classes.join(', ')} · ${surface ? 'surface mission' : 'orbital / flyby mission'}` },
+    { k: 'Launch', v: fmtDate(m.launch) ?? m.launch.note, f: m.launch },
+    ...(m.landing ? [{ k: 'Landing', v: fmtDate(m.landing) ?? m.landing.note, f: m.landing as Fact<unknown> }] : []),
+    ...(m.plannedDuration ? [{ k: 'Planned duration', v: m.plannedDuration.value ?? m.plannedDuration.note, f: m.plannedDuration as Fact<unknown> }] : []),
+    ...(m.actualDuration ? [{ k: 'Actual duration', v: m.actualDuration.value ?? m.actualDuration.note, f: m.actualDuration as Fact<unknown> }] : []),
+    { k: 'Mission status', v: m.status.value ? STATUS_LABEL[m.status.value] : m.status.note, f: m.status },
+    { k: 'This hardware now', v: obj.currentStatus.value ?? obj.currentStatus.note, f: obj.currentStatus },
+    { k: 'Historical location', v: site ? `${Math.abs(site.latDeg).toFixed(4)}°${site.latDeg >= 0 ? 'N' : 'S'}, ${site.lonEastDeg.toFixed(4)}°E (landing site)` : m.landingSite?.note ?? '—', f: m.landingSite as Fact<unknown> | undefined },
+  ]
+  return (
+    <>
+      <dl className="specs overview">
+        {rows.map((r) => (
+          <div key={r.k} className="ov-row">
+            <dt>{r.k} {r.f && <Badge f={r.f} />}</dt>
+            <dd>{r.v} {r.f && r.f.sources.length > 0 && <Cite ids={r.f.sources} />}{r.f?.note && r.f.value !== null && <div className="muted small">{r.f.note}</div>}</dd>
+          </div>
+        ))}
+      </dl>
+      <h3 className="ov-h">Why it was sent</h3>
+      <p>{m.summary}</p>
+    </>
+  )
+}
 
 function Badge({ f }: { f: Fact<unknown> }) {
   const cls = f.status === 'verified' ? 'ok' : f.status === 'conflicting' ? 'warn' : 'bad'
@@ -111,7 +151,7 @@ function NarratorPanel({ objectId }: { objectId: string }) {
   )
 }
 
-export function DiscoveryPanel() {
+export function DiscoveryPanel({ inspectNote, clockButtons = true, onRelive }: { inspectNote?: string; clockButtons?: boolean; onRelive?: () => void } = {}) {
   const panel = useSurface((s) => s.panel)!
   const component = useSurface((s) => s.component)
   const lmModel = useSurface((s) => s.lmModel)
@@ -188,9 +228,10 @@ export function DiscoveryPanel() {
         ))}
       </div>
       <div className="discovery-body" id="discovery-body" role="tabpanel" aria-labelledby={`dtab-${tab}`} tabIndex={0}>
+        {tab === 'overview' && <Overview objectId={obj.id} />}
         {tab === 'inspect' && (
           <>
-            <p className="muted">Drag to orbit, scroll to zoom. Pick a part to look at it up close.</p>
+            <p className="muted">{inspectNote ?? 'Drag to orbit, scroll to zoom. Pick a part to look at it up close.'}</p>
             <div className="comp-list">
               <button className={!component ? 'on' : ''} onClick={() => pickComponent(null)}>Whole object</button>
               {obj.components.map((c) => (
@@ -265,7 +306,7 @@ export function DiscoveryPanel() {
                   <time>{m.date.replace('T', ' ').replace('Z', ' UT')}</time>
                   <b>{m.title}</b>
                   <p>{m.description} <Cite ids={m.sources} /></p>
-                  {ms >= VALID_FROM && ms <= VALID_TO && (
+                  {clockButtons && ms >= VALID_FROM && ms <= VALID_TO && (
                     <button className="btn ghost small" onClick={() => useStore.getState().setSim(ms)} title="Moves the simulation clock: the Sun and shadows here change to that moment">
                       ☀ Set clock to this moment
                     </button>
@@ -287,6 +328,11 @@ export function DiscoveryPanel() {
         )}
       </div>
       <footer className="discovery-foot">
+        {onRelive && (
+          <button className="btn relive-btn" data-testid="relive-mission" onClick={() => { narrator.stop(); onRelive() }} title="Travel back through this mission's documented events">
+            ⏪ Relive the mission
+          </button>
+        )}
         <button className="btn" onClick={close}>Return to Exploration</button>
       </footer>
       </div>

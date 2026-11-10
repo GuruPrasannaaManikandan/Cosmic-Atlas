@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-export type PanelTab = 'inspect' | 'story' | 'specs' | 'timeline' | 'science'
+export type PanelTab = 'overview' | 'inspect' | 'story' | 'specs' | 'timeline' | 'science'
 export type CamMode = 'third' | 'first'
 
 export interface SurfaceUI {
@@ -25,6 +25,8 @@ export interface SurfaceUI {
   waypointId: string | null
   /** Apollo LM: official NASA model (stylised legs) or the dimension-accurate procedural reconstruction */
   lmModel: 'nasa' | 'reconstruction'
+  /** historical replay running for this object (the exploration state is saved in replay.ts and restored on return) */
+  replay: { objectId: string } | null
   /** HUD snapshot of the astronaut (updated ~10×/s) */
   player: { x: number; z: number; yaw: number; speed: number; grounded: boolean; camYaw: number }
   set: (p: Partial<SurfaceUI>) => void
@@ -46,6 +48,7 @@ const initial = {
   component: null,
   waypointId: null,
   lmModel: 'nasa' as 'nasa' | 'reconstruction',
+  replay: null as { objectId: string } | null,
   player: { x: 0, z: 0, yaw: 0, speed: 0, grounded: true, camYaw: 0 },
 }
 
@@ -55,6 +58,11 @@ export const useSurface = create<SurfaceUI>((set) => ({
   set: (p) => set(p),
   reset: (siteId) => set({ siteId, ...initial, discovered: [] }),
 }))
+
+/** R3F surface pose, as saved for "Go back to present" */
+export interface SurfacePose { pos: [number, number, number]; yaw: number; camYaw: number; camPitch: number; camDist: number; camMode: CamMode }
+/** app-level control of the running R3F scene (historical replay): set by SurfaceScene while it is mounted */
+export const surfaceControl: { snapshot?: () => SurfacePose; restore?: (p: SurfacePose) => void; replayDescent?: () => void } = {}
 
 /** test/automation handle (read + a few safe actions), same pattern as window.__store / __nav */
 export const surfaceDebug: { teleport?: (x: number, z: number) => void; character?: () => unknown; camera?: () => unknown; terrain?: () => unknown; guide?: () => unknown; inspectFrame?: () => unknown; astronautScreen?: () => unknown } = {}

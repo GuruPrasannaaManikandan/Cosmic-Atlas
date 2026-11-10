@@ -6,6 +6,7 @@ import { createInputManager, type InputMode } from './inputManager'
 import { useStore } from '../store/store'
 import { useSurface } from '../surface/surfaceState'
 import { travelUi } from '../travel/travelUi'
+import { useExpedition } from '../expedition/expedition'
 
 /** any open modal dialog (About, Help, Spacecraft Archive, site picker, nav map, …) owns the keyboard */
 function modalOpen(): boolean {
@@ -18,11 +19,14 @@ export function resolveMode(): InputMode {
   if (st.surfaceSiteId) {
     const S = useSurface.getState()
     if (S.paused || S.mapOpen || S.helpOpen || S.intro) return 'UI_INTERACTION'
+    if (S.replay) return 'HISTORICAL_REPLAY'
     if (S.panel) return 'HARDWARE_INSPECTION'
     if (S.driving) return 'VEHICLE_EXPLORATION'
     return 'PLANETARY_EXPLORATION'
   }
   if (modalOpen()) return 'UI_INTERACTION'
+  // an expedition flight is automatic: no movement or look keys reach the camera until it lands (Esc skips)
+  if (useExpedition.getState().stage !== 'idle') return 'UI_INTERACTION'
   if (st.phase === 'travel') return st.navMapOpen || travelUi.helpOpen ? 'UI_INTERACTION' : 'SPACECRAFT_FLIGHT'
   return 'MAIN_MENU'
 }

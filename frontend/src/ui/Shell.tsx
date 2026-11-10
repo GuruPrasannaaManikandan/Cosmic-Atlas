@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
+import { expedition } from '../expedition/expedition'
 import { useStore } from '../store/store'
 import { OBJECTS, BY_ID, positionOf } from '../data/catalog'
 import { TOUR, STAGES } from '../data/tour'
@@ -248,6 +249,11 @@ export function Info() {
         <button className="btn primary" onClick={() => travel(o.id)}>
           ➜ Fly here
         </button>
+        {(o.id === 'moon' || o.id === 'mars') && (
+          <button className="btn exp-start-btn" data-testid={`info-expedition-${o.id}`} onClick={() => expedition.start(o.id as 'moon' | 'mars')} title="Depart from Earth, fly there and land at a historic site">
+            🚀 Begin expedition to {o.id === 'moon' ? 'the Moon' : 'Mars'}
+          </button>
+        )}
         {o.id === 'betelgeuse' && (
           <button
             className="btn action-supernova-btn"

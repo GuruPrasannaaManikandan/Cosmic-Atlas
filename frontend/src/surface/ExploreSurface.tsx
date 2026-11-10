@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import { useStore } from '../store/store'
 import { nav, distanceTo } from '../store/nav'
 import { BY_ID } from '../data/catalog'
-import { sitesForBody, catalogueSitesFor, SURFACE_BODIES } from './sites'
+import { sitesForBody, unitySitesForBody, catalogueSitesFor, SURFACE_BODIES } from './sites'
 import { MISSION_BY_ID } from '../missions'
 
 const KM_PER_LY = 9.4607304725808e12
 /** "approaching": within this distance of the body's centre the EXPLORE action appears */
-const APPROACH_KM: Record<string, number> = { moon: 120000 }
+const APPROACH_KM: Record<string, number> = { moon: 120000, mars: 250000 }
 
 /** the body the observer is at, if it has an explorable surface */
 function useNearSurfaceBody(): string | null {
@@ -20,7 +20,7 @@ function useNearSurfaceBody(): string | null {
   }, [])
   const candidates = [nav.followId, selectedId, nav.nearestId].filter(Boolean) as string[]
   for (const id of candidates) {
-    if (!APPROACH_KM[id] || !BY_ID[id] || !sitesForBody(id).some((s) => s.available)) continue
+    if (!APPROACH_KM[id] || !BY_ID[id] || (!sitesForBody(id).some((s) => s.available) && !unitySitesForBody(id).length)) continue
     const km = distanceTo(id, simMs) * KM_PER_LY
     if (km < APPROACH_KM[id]) return id
   }
@@ -45,6 +45,7 @@ export function ExploreSurfaceButton({ hidden }: { hidden?: boolean }) {
 
 export function SitePicker({ bodyId, onClose }: { bodyId: string; onClose: () => void }) {
   const sites = sitesForBody(bodyId)
+  const unitySites = unitySitesForBody(bodyId)
   const catalogue = catalogueSitesFor(bodyId)
   useEffect(() => {
     const k = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
@@ -70,6 +71,19 @@ export function SitePicker({ bodyId, onClose }: { bodyId: string; onClose: () =>
               </div>
               <button className="btn big" data-testid={`descend-${s.id}`} onClick={() => useStore.getState().enterSurface(s.id)}>
                 Descend ▾
+              </button>
+            </li>
+          ))}
+          {unitySites.map((s) => (
+            <li key={s.id} className="site available">
+              <div>
+                <b>{s.name}</b>
+                <span className="muted small">
+                  {Math.abs(s.origin.latDeg).toFixed(4)}°{s.origin.latDeg >= 0 ? 'N' : 'S'}, {s.origin.lonEastDeg.toFixed(4)}°E · {s.summary} Rendered by the embedded Unity player (~90 MB download).
+                </span>
+              </div>
+              <button className="btn big" data-testid={`descend-${s.id}`} onClick={() => useStore.getState().enterSurface(s.id)}>
+                Land ▾
               </button>
             </li>
           ))}

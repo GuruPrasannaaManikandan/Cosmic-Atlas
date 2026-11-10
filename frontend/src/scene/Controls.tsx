@@ -3,6 +3,7 @@ import { useThree } from '@react-three/fiber'
 import { nav, interrupt } from '../store/nav'
 import { useStore } from '../store/store'
 import { input as keyboard } from '../input/appInput'
+import { expedition } from '../expedition/expedition'
 import type { Action } from '../input/inputManager'
 
 const input = { yaw: 0, pitch: 0, panX: 0, panY: 0, dolly: 0 }
@@ -32,6 +33,7 @@ function ControlsComponent() {
       const dx = e.clientX - p.x, dy = e.clientY - p.y
       p.x = e.clientX; p.y = e.clientY
       moved += Math.abs(dx) + Math.abs(dy)
+      if (expedition.active()) return // the expedition flight is autonomous; Skip / Cancel end it
       if (moved > 3) interrupt()
       if (ptrs.size === 2) {
         const [a, b] = [...ptrs.values()]
@@ -48,6 +50,7 @@ function ControlsComponent() {
     const up = (e: PointerEvent) => { ptrs.delete(e.pointerId) }
     const wheel = (e: WheelEvent) => {
       e.preventDefault()
+      if (expedition.active()) return
       interrupt()
       input.dolly += -Math.sign(e.deltaY) * Math.min(3, Math.abs(e.deltaY) / 100 + 0.4)
     }

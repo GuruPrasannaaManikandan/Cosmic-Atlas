@@ -73,9 +73,10 @@ export const DEFAULT_BINDINGS: Record<InputMode, Binding[]> = {
     { action: 'back', codes: ['Escape'], label: 'Pause' },
   ],
   VEHICLE_EXPLORATION: [
-    ...MOVE('Drive forward', 'Brake / reverse', 'Steer left', 'Steer right'),
+    ...MOVE('Drive forward', 'Brake, then reverse', 'Steer left', 'Steer right'),
     ...LOOK,
-    { action: 'board', codes: ['KeyR'], label: 'Leave the rover' },
+    { action: 'sprint', codes: ['ShiftLeft', 'ShiftRight'], label: 'Higher speed limit while held', held: true },
+    { action: 'interact', codes: ['KeyE'], label: 'Inspect nearby hardware' },
     { action: 'map', codes: ['KeyM'], label: 'Site map' },
     { action: 'help', codes: ['KeyH'], label: 'Controls' },
     { action: 'back', codes: ['Escape'], label: 'Pause' },

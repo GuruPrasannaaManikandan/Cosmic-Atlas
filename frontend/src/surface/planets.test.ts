@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { PLANETS, isExplorable, planetFor } from './planets'
-import { SURFACE_SITES, sitesForBody, SURFACE_BODIES } from './sites'
+import { SURFACE_SITES, sitesForBody, SURFACE_BODIES, unitySitesForBody, defaultSiteFor, UNITY_SITES } from './sites'
 import { SOURCES } from '../missions'
 
 describe('planetary environments', () => {
@@ -16,12 +16,17 @@ describe('planetary environments', () => {
     expect(m.skyBodies.map((b) => b.id)).toContain('earth')
   })
 
-  it('Mars is configured but NOT presented as implemented: no sites, no lighting, requirements listed', () => {
+  it('Mars is explorable only through the embedded Unity renderer (Victoria crater); the R3F surface never opens it', () => {
     const mars = PLANETS.mars
-    expect(mars.status).toBe('planned')
-    expect(isExplorable('mars')).toBe(false)
+    expect(mars.status).toBe('implemented')
+    expect(mars.renderer).toBe('unity')
+    expect(isExplorable('mars')).toBe(true)
     expect(sitesForBody('mars')).toEqual([])
     expect(SURFACE_SITES.some((s) => s.bodyId === 'mars')).toBe(false)
+    expect(unitySitesForBody('mars').map((s) => s.id)).toEqual(['victoria-crater'])
+    expect(defaultSiteFor('mars')).toBe('victoria-crater')
+    expect(defaultSiteFor('moon')).toBe('tranquility-base')
+    // the Sun on Mars is computed in Unity (Mars24 port); the web app does not pretend to have a Mars lighting model
     expect(mars.sunDirection).toBeNull()
     expect(mars.requirements!.length).toBeGreaterThanOrEqual(5)
     // its own physics, from its own source — never the lunar values
@@ -36,6 +41,10 @@ describe('planetary environments', () => {
 
   it('every explorable site belongs to an implemented world; the body table is the planet table', () => {
     for (const s of SURFACE_SITES) expect(isExplorable(s.bodyId), s.id).toBe(true)
+    for (const s of UNITY_SITES) {
+      expect(isExplorable(s.bodyId), s.id).toBe(true)
+      expect(PLANETS[s.bodyId].renderer).toBe('unity')
+    }
     expect(SURFACE_BODIES).toBe(PLANETS)
     expect(() => planetFor('venus')).toThrow()
   })

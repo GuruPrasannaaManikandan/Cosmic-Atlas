@@ -1,6 +1,9 @@
 import { Component, ReactNode, Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { CosmicCanvas } from '../scene/Scene'
 import { ExploreSurfaceButton } from '../surface/ExploreSurface'
+import { UNITY_SITE_BY_ID } from '../surface/sites'
+import { ExpeditionOverlay, ExpeditionLaunchers } from '../expedition/ExpeditionOverlay'
+import { useExpedition, expedition } from '../expedition/expedition'
 import { Labels } from './Labels'
 import { useStore } from '../store/store'
 import { CosmicObject, searchObjects, registerObject } from '../data/catalog'
@@ -38,6 +41,7 @@ const AcademyCompleteModal = lazy(() => import('../tutorial/AcademyCompleteModal
 const HelpModal = lazy(() => import('./HelpModal').then((m) => ({ default: m.HelpModal })))
 const AboutModal = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutModal })))
 const SurfaceExperience = lazy(() => import('../surface/SurfaceExperience'))
+const MarsExperience = lazy(() => import('../mars/MarsExperience'))
 const SpacecraftArchive = lazy(() => import('../surface/SpacecraftArchive'))
 
 class Boundary extends Component<{ children: ReactNode }, { err: Error | null }> {
@@ -298,6 +302,7 @@ export function App() {
   } = useStore()
   const tourIdx = useStore((s) => s.tourIndex)
   const surfaceSiteId = useStore((s) => s.surfaceSiteId)
+  const expeditionStage = useExpedition((s) => s.stage)
   // warp flight in progress: large panels step aside so the flight is the focus (restored on arrival)
   const [inFlight, setInFlight] = useState(false)
   useEffect(() => subscribeTravelEngine(() => setInFlight(travelEngineState.phase === 'traveling')), [])
@@ -426,10 +431,11 @@ export function App() {
       {surfaceSiteId && (
         <Boundary>
           <Suspense fallback={<ModuleLoader label="Preparing the surface…" />}>
-            <SurfaceExperience />
+            {UNITY_SITE_BY_ID[surfaceSiteId] ? <MarsExperience /> : <SurfaceExperience />}
           </Suspense>
         </Boundary>
       )}
+      {!surfaceSiteId && <ExpeditionOverlay />}
       {!surfaceSiteId && phase !== 'intro' && <ExploreSurfaceButton hidden={inFlight || !!activeEventId || hasActiveModal} />}
       {phase !== 'intro' && phase !== 'travel' && !activeEventId && <Labels />}
       <Loader />
@@ -473,7 +479,7 @@ export function App() {
       {phase !== 'intro' && !activeEventId && <ScaleBreadcrumbs />}
 
       {/* Floating Travel Progress HUD */}
-      <TravelProgressHUD />
+      {expeditionStage === 'idle' && <TravelProgressHUD />}
 
       {/* Opening Intro Experience */}
       {phase === 'intro' && (
@@ -489,6 +495,13 @@ export function App() {
             Traverse 15 orders of magnitude in an interactive, camera-relative 3D universe.
             Fly from the 1-billion-light-year cosmic web filaments, through local galaxy superclusters and the Milky Way spiral arms, all the way home to Earth.
           </p>
+
+          <section className="abnf-intro" aria-label="Abandoned but Not Forgotten">
+            <span className="eyebrow">MAIN EXPERIENCE</span>
+            <h2>Abandoned but Not Forgotten</h2>
+            <p className="abnf-tag">Every machine has a story. Every mission left a legacy.</p>
+            <ExpeditionLaunchers />
+          </section>
 
           <div className="intro-actions">
             <button className="btn academy-btn big" onClick={() => startTutorial(true)}>
@@ -574,6 +587,9 @@ export function App() {
               <span className="sel-chip-cat">{sel.category.replace('-', ' ')}</span>
               <button className="sel-chip-btn" onClick={() => set({ rightOpen: true })} title="Open the Inspector (I)">Details</button>
               <button className="sel-chip-btn" onClick={() => st.travel(sel.id)} title="Fly here">Fly here</button>
+              {(sel.id === 'moon' || sel.id === 'mars') && (
+                <button className="sel-chip-btn" onClick={() => expedition.start(sel.id as 'moon' | 'mars')} title="Depart from Earth, fly there and land at a historic site">🚀 Expedition</button>
+              )}
               <button className="sel-chip-x" onClick={() => st.select(null)} aria-label="Clear selection" title="Clear selection">✕</button>
             </div>
           )}
