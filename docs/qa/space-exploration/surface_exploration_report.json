@@ -53,7 +53,7 @@
    "check": "A3 W walks toward where the camera looks, then stops (no drift)",
    "pass": true,
    "detail": {
-    "along": 2.69,
+    "along": 2.7,
     "across": -0.0
    }
   },
@@ -175,7 +175,7 @@
    "check": "P1 surface frame rate (headless Chrome, balanced quality)",
    "pass": true,
    "detail": {
-    "fps": 60.1
+    "fps": 60.2
    }
   },
   {
@@ -227,7 +227,7 @@
  ],
  "errors": [],
  "metrics": {
-  "surfaceFps": 60.1
+  "surfaceFps": 60.2
  },
  "browser": "chrome 157.0.8103.39"
 }
