@@ -89,11 +89,9 @@ async def mars_journey(page, base: str, out: Path):
     rep["metrics"]["unityLoadMs"] = await page.evaluate("window.__marsBridge.last.loadMs")
     rep["metrics"]["ready"] = {k: ready.get(k) for k in ("device", "profile", "sol", "utc", "terrainTriangles", "heightCheck", "route", "objects", "trail")}
     check("M06 terrain height check still passes in the embedded player", bool(ready.get("heightCheck", {}).get("pass")), ready.get("heightCheck"))
-    arr = await wait_for(page, f"{POSE} && {POSE}.mode === 'Arrival'", 15, 0.1)
-    if arr:
-        await asyncio.sleep(2.5)
-        await shot(page, out, "m05_mars_arrival_descent")
-    check("M05 Mars arrival sequence plays", arr)
+    # M3: the expedition flight itself lands and deploys the rover; Unity opens at the rover (no separate camera drop)
+    st = await page.evaluate("window.__expedition.state()")
+    check("M05 the expedition landed and deployed the rover before the surface opened", st["stage"] in ("arrival", "idle"), st)
     ok = await wait_for(page, f"{POSE} && {POSE}.mode === 'Explore' && !window.__surface.state().intro", 30)
     check("M06 arrival ends in exploration", ok)
     await asyncio.sleep(1.5)
@@ -235,11 +233,15 @@ async def mars_journey(page, base: str, out: Path):
 
     # return to orbit: one renderer again
     await page.get_by_role("button", name="⤴ Return to orbit").first.click()
-    ok = await wait_for(page, "!window.__store.getState().surfaceSiteId", 10)
+    # M3: the view climbs back to orbit (Relive engine) — Unity is gone while it flies; skip the rest of the climb
+    ok = await wait_for(page, "!window.__store.getState().surfaceSiteId && !!(window.__relive && window.__relive.state().id)", 15)
     await asyncio.sleep(2)
     running = await page.evaluate("window.__marsBridge.running()")
+    await page.click("[data-testid=expedition-skip]")
+    ok2 = await wait_for(page, "!window.__relive.state().id", 15)
+    await asyncio.sleep(1.5)
     canvases = await page.evaluate("document.querySelectorAll('canvas').length")
-    check("M-exit Return to orbit leaves Mars and destroys the Unity player", ok and not running and canvases == 1, {"running": running, "canvases": canvases})
+    check("M-exit Return to orbit leaves Mars and destroys the Unity player", ok and ok2 and not running and canvases == 1, {"running": running, "canvases": canvases})
     await shot(page, out, "m17_back_in_orbit")
 
 
@@ -254,7 +256,7 @@ async def moon_journey(page, out: Path):
     await wait_for(page, "!!window.__surface.debug.character", 30)
     await asyncio.sleep(2)
     await shot(page, out, "l01_moon_descent")
-    await wait_for(page, "!window.__surface.state().intro", 15)
+    await wait_for(page, "!window.__surface.state().intro", 50)
     sun = await page.evaluate("new Date(window.__store.getState().simMs).toISOString()")
     check("L02 lands at the site's sourced daylight moment", sun.startswith("1969-07-21"), sun)
     await asyncio.sleep(1)

@@ -26,6 +26,7 @@ import { AsteroidBeltLayer } from './AsteroidBeltLayer'
 import { isPlanet, planetOrientation, primeMeridianRad, URANUS_RINGS, NEPTUNE_RINGS } from '../astro/planetFrames'
 import { jdTdbFromUtcMs } from '../astro/time'
 import { IceGiantSurface, RingSystem } from './outerPlanets'
+import { useRelive } from '../relive/player'
 
 const KM_TO_LY = 1 / 9.4607304725808e12
 const scaleVec = (v: Vec3, k: number): Vec3 => [v[0] * k, v[1] * k, v[2] * k]
@@ -1638,6 +1639,8 @@ export function CosmicCanvas() {
   const quality = useStore((s) => s.quality)
   // while on a planetary surface the orbital scene is hidden and paused (state kept, no GPU work)
   const onSurface = useStore((s) => !!s.surfaceSiteId)
+  // Relive Mission draws its own scene: the orbital one is paused meanwhile (one live renderer at a time)
+  const reliving = useRelive((s) => !!s.id)
 
   return (
     <Canvas
@@ -1652,7 +1655,7 @@ export function CosmicCanvas() {
       dpr={quality === 'performance' ? 1 : quality === 'balanced' ? [1, 1.5] : [1, 2]}
       camera={{ fov: 55, near: 0.001, far: 1e13, position: [0, 0, 0] }}
       onPointerMissed={() => {}}
-      frameloop={onSurface ? 'never' : 'always'}
+      frameloop={onSurface || reliving ? 'never' : 'always'}
     >
       <color attach="background" args={['#000004']} />
       <GLWatch />

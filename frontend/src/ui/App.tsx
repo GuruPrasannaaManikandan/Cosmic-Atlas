@@ -1,6 +1,6 @@
 import { Component, ReactNode, Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { CosmicCanvas } from '../scene/Scene'
-import { ExploreSurfaceButton } from '../surface/ExploreSurface'
+import { ExploreSurfaceButton, SitePickerHost } from '../surface/ExploreSurface'
 import { UNITY_SITE_BY_ID } from '../surface/sites'
 import { ExpeditionOverlay, ExpeditionLaunchers } from '../expedition/ExpeditionOverlay'
 import { useExpedition, expedition } from '../expedition/expedition'
@@ -27,6 +27,7 @@ import { BY_ID } from '../data/catalog'
 import { ModuleBoundary, ModuleLoader } from './ModuleBoundary'
 import { TopNav } from './TopNav'
 import { installInput } from '../input/appInput'
+import { useRelive } from '../relive/player'
 
 // Lazy-loaded heavy modules for production bundle optimization and code-splitting
 const DataPanel = lazy(() => import('./DataPanel').then((m) => ({ default: m.DataPanel })))
@@ -42,7 +43,9 @@ const HelpModal = lazy(() => import('./HelpModal').then((m) => ({ default: m.Hel
 const AboutModal = lazy(() => import('./AboutModal').then((m) => ({ default: m.AboutModal })))
 const SurfaceExperience = lazy(() => import('../surface/SurfaceExperience'))
 const MarsExperience = lazy(() => import('../mars/MarsExperience'))
+const MarsSiteExperience = lazy(() => import('../mars/MarsSiteExperience'))
 const SpacecraftArchive = lazy(() => import('../surface/SpacecraftArchive'))
+const ReliveMission = lazy(() => import('../relive/ReliveMission'))
 
 class Boundary extends Component<{ children: ReactNode }, { err: Error | null }> {
   state = { err: null as Error | null }
@@ -386,6 +389,7 @@ export function App() {
     return () => clearInterval(t)
   }, [])
 
+  const reliveId = useRelive((r) => r.id)
   const hasActiveModal = archive || eventsModalOpen || help || about || navMapOpen || dataOpen || welcomeOpen || completeOpen
 
   const inSolar = len(sub(nav.pos, SUN_POS)) < 0.02
@@ -431,13 +435,22 @@ export function App() {
       {surfaceSiteId && (
         <Boundary>
           <Suspense fallback={<ModuleLoader label="Preparing the surface…" />}>
-            {UNITY_SITE_BY_ID[surfaceSiteId] ? <MarsExperience /> : <SurfaceExperience />}
+            {UNITY_SITE_BY_ID[surfaceSiteId] ? (UNITY_SITE_BY_ID[surfaceSiteId].site ? <MarsSiteExperience key={surfaceSiteId} /> : <MarsExperience />) : <SurfaceExperience />}
+          </Suspense>
+        </Boundary>
+      )}
+      {reliveId && (
+        <Boundary>
+          <Suspense fallback={<ModuleLoader label="Preparing the mission…" />}>
+            <ReliveMission />
           </Suspense>
         </Boundary>
       )}
       {!surfaceSiteId && <ExpeditionOverlay />}
       {!surfaceSiteId && phase !== 'intro' && <ExploreSurfaceButton hidden={inFlight || !!activeEventId || hasActiveModal} />}
-      {phase !== 'intro' && phase !== 'travel' && !activeEventId && <Labels />}
+      <SitePickerHost />
+      {/* orbital labels are hidden on a surface: unmount them there (they ticked every frame for nothing) */}
+      {phase !== 'intro' && phase !== 'travel' && !activeEventId && !surfaceSiteId && <Labels />}
       <Loader />
 
       {/* Top Application Header (Hidden in Travel Mode or Event Mode) */}

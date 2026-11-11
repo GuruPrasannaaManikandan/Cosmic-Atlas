@@ -919,9 +919,21 @@ option { background: #070d1e; color: #fff; }
   background: radial-gradient(ellipse at center, rgba(3, 7, 20, 0.3) 15%, rgba(1, 2, 8, 0.88) 100%);
   pointer-events: none;
   animation: fade 0.8s ease;
-  padding: 24px;
+  /* the hero is often taller than the window: start below the fixed 64 px top bar and scroll, instead of centring
+     (centring overflowed upward, under the bar and out of reach: the title was clipped at 1280x720 and hidden on phones) */
+  justify-content: flex-start;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(64px + 28px) 24px 40px;
 }
-.intro > * { pointer-events: auto; }
+.intro > * { pointer-events: auto; flex-shrink: 0; }
+/* safe centring: auto margins centre the content only when it fits */
+.intro > :first-child { margin-top: auto; }
+.intro > :last-child { margin-bottom: auto; }
+@media (max-height: 860px) {
+  .intro h1 { font-size: clamp(36px, 5.4vw, 68px); margin: 2px 0 8px; }
+  .intro p { margin-bottom: 18px; font-size: 15.5px; }
+}
 .intro-badge {
   display: inline-flex;
   align-items: center;
@@ -4253,6 +4265,26 @@ option { background: #070d1e; color: #fff; }
 .site-picker { position: relative; width: min(720px, 100%); max-height: 100%; overflow: auto; padding: 18px; }
 .site-picker header { position: relative; padding-right: 36px; }
 .site-picker h2 { margin: 4px 0 10px; }
+/* landing-site catalogue: a responsive grid of equal cards (no single environment dominates) */
+.site-picker { width: min(1040px, 100%); }
+.site-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); gap: 10px; }
+.site-card { display: flex; flex-direction: column; gap: 5px; padding: 12px 13px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--glass-card); min-width: 0; }
+.site-card.available { border-color: rgba(253, 186, 116, 0.45); }
+.site-card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.site-badge { font-size: 10.5px; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border-radius: 99px; border: 1px solid var(--line); color: var(--txt-dim); white-space: nowrap; }
+.site-badge.ok { color: #86efac; border-color: rgba(134, 239, 172, 0.4); }
+.site-badge.kind.rover { color: var(--cy); border-color: rgba(103, 232, 249, 0.4); }
+.site-badge.kind.lander { color: #fcd34d; border-color: rgba(252, 211, 77, 0.4); }
+.site-card-title { font-size: 15px; line-height: 1.25; }
+.site-card-meta { font-size: 12px; color: var(--txt-dim); }
+.site-card-text { font-size: 12.5px; color: var(--txt-dim); line-height: 1.45; }
+.site-card-hw { font-size: 11.5px; color: var(--mut); }
+.site-card-scene { font-size: 11.5px; color: var(--mut); font-style: italic; }
+.site-card-go { margin-top: auto; align-self: flex-start; }
+.site-card .site-card-text { flex: 1 1 auto; }
+.site-subhead { margin: 16px 0 6px; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mut); }
+.site-pending { list-style: none; margin: 0 0 8px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr)); gap: 6px; }
+.site-pending li { display: flex; flex-direction: column; gap: 2px; padding: 7px 10px; border-radius: var(--r-sm); border: 1px dashed var(--line); opacity: 0.85; }
 .site-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .site-list li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--r-sm); border: 1px solid var(--line); background: var(--glass-card); }
 .site-list li.available { border-color: var(--warm); }
@@ -4429,3 +4461,8 @@ mark.spoken-word { background: rgba(251, 191, 36, 0.35); color: inherit; border-
   .discovery-title h2 { font-size: 17px; }
 }
 @media (prefers-reduced-motion: reduce) { .surf-banner { animation: none; } .guide-bubble { transition: none; } }
+
+/* shared close button of dialogs and side records (it had no style at all and rendered as a blank white square) */
+.site-picker .discovery-close, .site-inspector .discovery-close { position: absolute; top: 0; right: 0; width: 32px; height: 32px; display: grid; place-items: center; padding: 0; border-radius: var(--r-sm); border: 1px solid var(--line); background: rgba(255, 255, 255, 0.04); color: var(--txt); font: inherit; font-size: 15px; line-height: 1; cursor: pointer; }
+.site-picker .discovery-close:hover, .site-inspector .discovery-close:hover, .site-picker .discovery-close:focus-visible, .site-inspector .discovery-close:focus-visible { border-color: var(--line-hi); background: rgba(103, 232, 249, 0.12); }
+.site-inspector .discovery-head { position: relative; padding-right: 40px; }

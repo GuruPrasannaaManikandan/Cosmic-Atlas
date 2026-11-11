@@ -1,0 +1,123 @@
+{
+ "id": "spirit",
+ "name": "Spirit (MER-A) \u2014 Gusev crater",
+ "missionId": "mer-spirit",
+ "mode": "rover",
+ "landing": {
+  "utc": "2004-01-04T04:35:00Z",
+  "landingSol": 1,
+  "source": "nasa-mer-spirit (date); MER landing sol = Sol 1 (Mars24 notes)",
+  "solNote": "catalogue gives the landing DATE as 3 January (US); the UTC time used for the sol count is ILLUSTRATIVE"
+ },
+ "scene": {
+  "date": "2004-01-20",
+  "ltst": 14.0,
+  "label": "Columbia Memorial Station, early mission: Spirit beside its lander after rolling off (date and offset ILLUSTRATIVE)",
+  "tau": 0.5,
+  "tauLabel": "tau 0.5 ASSUMED (no sourced optical depth for this sol in the scene)"
+ },
+ "hardware": [
+  {
+   "id": "spirit-rover",
+   "label": "Spirit rover",
+   "model": "mer",
+   "kind": "rover",
+   "x": 3.4,
+   "z": 2.2,
+   "yawDeg": 35,
+   "radius": 1.4,
+   "provenance": "NASA MODEL (NASA 3D Resources articulated MER model; Spirit and Opportunity were twins), solar-panel span scaled to 2.25 m (PDS). Position beside the lander ILLUSTRATIVE.",
+   "components": [
+    {
+     "id": "mast",
+     "label": "Pancam mast assembly (Pancam, Navcam, Mini-TES)",
+     "parts": [
+      "mer:mast"
+     ]
+    },
+    {
+     "id": "solar",
+     "label": "Solar array",
+     "parts": [
+      "mer:solar"
+     ]
+    },
+    {
+     "id": "mobility",
+     "label": "Rocker-bogie suspension and six wheels",
+     "parts": [
+      "mer:mobility"
+     ]
+    },
+    {
+     "id": "arm",
+     "label": "Instrument deployment device (arm) and turret",
+     "parts": [
+      "mer:arm"
+     ]
+    },
+    {
+     "id": "hga",
+     "label": "High-gain antenna",
+     "parts": [
+      "mer:hga"
+     ]
+    },
+    {
+     "id": "body",
+     "label": "Warm electronics box",
+     "parts": [
+      "mer:body"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "spirit-lander",
+   "label": "MER-A lander (Columbia Memorial Station)",
+   "model": "proc:mer-lander",
+   "kind": "lander",
+   "x": 0,
+   "z": 0,
+   "yawDeg": 0,
+   "radius": 2.2,
+   "provenance": "SIMPLIFIED MODEL \u2014 no NASA model of the MER lander exists. Base, three opened petals, deflated airbags and egress aids; shapes and dimensions ILLUSTRATIVE. Placed at the sourced landing coordinate.",
+   "components": [
+    {
+     "id": "petals",
+     "label": "Lander petals",
+     "parts": [
+      "base petal",
+      "side petal"
+     ]
+    },
+    {
+     "id": "airbags",
+     "label": "Deflated airbags",
+     "parts": [
+      "airbags"
+     ]
+    }
+   ]
+  }
+ ],
+ "start": {
+  "x": -40,
+  "z": -25,
+  "headingDeg": 60
+ },
+ "origin": {
+  "latDeg": -14.5692,
+  "lonEastDeg": 175.4729,
+  "source": "PDS ODE (Arvidson et al. 2004), landing site",
+  "registration": "Catalogue coordinate; the hardware has NOT been identified in the HiRISE orthoimage yet. Historical coordinate frames can differ from the HiRISE/MOLA-controlled frame by up to hundreds of metres, so the true spot may be elsewhere in this terrain or beyond it."
+ },
+ "terrain": {
+  "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_001513_1655_001777_1650_U01 (collection mro_hirise_socet_dtms)",
+  "spacingM": 1.0,
+  "sizeM": 1400.0,
+  "validFraction": 1.0,
+  "albedo": "HiRISE orthoimage (RED band, single channel) at 0.5 m, colourised with an ILLUSTRATIVE soil ramp",
+  "horizon": "same DTM, decimated to ~24 m, out to ~9 km where the DTM covers it"
+ }
+}

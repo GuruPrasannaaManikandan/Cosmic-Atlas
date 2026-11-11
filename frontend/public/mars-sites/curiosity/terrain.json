@@ -1,0 +1,29 @@
+{
+ "width": 1401,
+ "height": 1401,
+ "rowOrder": "north-to-south",
+ "spacingM": [
+  1.0,
+  1.0
+ ],
+ "gridEastOfOriginM": -700.0,
+ "gridNorthOfOriginM": 700.0,
+ "upMinM": -9.024113762073497,
+ "upMaxM": 6.8796164469239045,
+ "quantStepM": 0.00024267907054349502,
+ "nodata": 65535,
+ "validCells": 1208719,
+ "cells": 1962801,
+ "source": "USGS Astrogeology controlled HiRISE DTM DTEEC_018854_1755_018920_1755_U01 (collection mro_hirise_socet_dtms)",
+ "dtmUrl": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/ESP_018854_1755_ESP_018920_1755/DTEEC_018854_1755_018920_1755_U01.tif",
+ "dtmNativeM": 1.0117630165416043,
+ "dtmCrs": "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs=True",
+ "originLatLon": [
+  -4.59,
+  137.44
+ ],
+ "originSource": "PDS ODE (Seelos et al. 2014)",
+ "elevationReferenceM": -4493.13010913141,
+ "elevationDatum": "as in the DTM (USGS ARD: Mars 2015 sphere, R 3396190 m)",
+ "curvature": "up includes the sphere curvature about the origin (R 3396.19 km)"
+}

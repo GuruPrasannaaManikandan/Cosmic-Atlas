@@ -27,6 +27,8 @@ export interface SurfaceUI {
   lmModel: 'nasa' | 'reconstruction'
   /** historical replay running for this object (the exploration state is saved in replay.ts and restored on return) */
   replay: { objectId: string } | null
+  /** the explorer's (conceptual) expedition lander beside the spawn point: parked, landing, or lifting off */
+  lander: { phase: 'parked' | 'descent' | 'ascent'; t0: number }
   /** HUD snapshot of the astronaut (updated ~10×/s) */
   player: { x: number; z: number; yaw: number; speed: number; grounded: boolean; camYaw: number }
   set: (p: Partial<SurfaceUI>) => void
@@ -50,7 +52,13 @@ const initial = {
   lmModel: 'nasa' as 'nasa' | 'reconstruction',
   replay: null as { objectId: string } | null,
   player: { x: 0, z: 0, yaw: 0, speed: 0, grounded: true, camYaw: 0 },
+  lander: { phase: 'parked' as 'parked' | 'descent' | 'ascent', t0: 0 },
 }
+
+/** set by the expedition module: called once the lander has climbed away during "Return to orbit" */
+export const landerHooks = { onAscentDone: null as null | (() => void) }
+/** landing: 26 s powered descent from the hand-off hover, ramp, egress; liftoff: ramp up, then a 14 s climb */
+export const LANDER_T = { descent: 26000, ramp: 1500, egress: 2600, settle: 4200, ascentClimb: 14000 }
 
 export const useSurface = create<SurfaceUI>((set) => ({
   siteId: null,

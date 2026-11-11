@@ -1,0 +1,258 @@
+{
+ "missions": {
+  "apollo-11": {
+   "shots": {
+    "pad": {
+     "phase": "count",
+     "clock": "T\u2212000:00:04",
+     "tele": []
+    },
+    "liftoff": {
+     "phase": "sic",
+     "clock": "T+000:00:05",
+     "tele": [
+      "Altitude88 minterpolatedabove Earth (SP-4029 ascent / translunar tables) [NASA S",
+      "Velocity1 m/sinterpolatedEarth-fixed (SP-4029 ascent table) [NASA SP-4029]"
+     ]
+    },
+    "maxq": {
+     "phase": "sic",
+     "clock": "T+000:01:23",
+     "tele": [
+      "Altitude13.6 kmpublishedabove Earth (SP-4029 ascent / translunar tables) [NASA S",
+      "Velocity504 m/spublishedEarth-fixed (SP-4029 ascent table) [NASA SP-4029]"
+     ]
+    },
+    "staging": {
+     "phase": "sii",
+     "clock": "T+000:02:43",
+     "tele": [
+      "Altitude67.2 kminterpolatedabove Earth (SP-4029 ascent / translunar tables) [NAS",
+      "Velocity2.41 km/sinterpolatedEarth-fixed (SP-4029 ascent table) [NASA SP-4029]"
+     ]
+    },
+    "tower-jett": {
+     "phase": "sii",
+     "clock": "T+000:03:19",
+     "tele": [
+      "Altitude80.7 kminterpolatedabove Earth (SP-4029 ascent / translunar tables) [NAS",
+      "Velocity2.76 km/sinterpolatedEarth-fixed (SP-4029 ascent table) [NASA SP-4029]"
+     ]
+    },
+    "sii": {
+     "phase": "sii",
+     "clock": "T+000:06:59",
+     "tele": [
+      "Altitude164.7 kminterpolatedabove Earth (SP-4029 ascent / translunar tables) [NA",
+      "Velocity4.91 km/sinterpolatedEarth-fixed (SP-4029 ascent table) [NASA SP-4029]"
+     ]
+    },
+    "orbit": {
+     "phase": "epo",
+     "clock": "T+000:50:00",
+     "tele": []
+    },
+    "tli": {
+     "phase": "tli",
+     "clock": "T+002:46:40",
+     "tele": [
+      "Velocity9.06 km/sinterpolatedspace-fixed (SP-4029 Earth-orbit / translunar table"
+     ]
+    },
+    "docking": {
+     "phase": "td",
+     "clock": "T+003:21:40",
+     "tele": [
+      "Velocity7.10 km/sinterpolatedspace-fixed (SP-4029 Earth-orbit / translunar table",
+      "Altitude (Earth)9,080 kminterpolatedaltitude above Earth (SP-4029 translunar tab"
+     ]
+    },
+    "coast": {
+     "phase": "coast-out",
+     "clock": "T+041:40:00",
+     "tele": []
+    },
+    "loi": {
+     "phase": "loi",
+     "clock": "T+075:51:40",
+     "tele": []
+    },
+    "undock": {
+     "phase": "lunar-orbit",
+     "clock": "T+100:13:20",
+     "tele": []
+    },
+    "powered-descent": {
+     "phase": "descent",
+     "clock": "T+102:38:20",
+     "tele": [
+      "Altitude8,765 minterpolatedabove the Moon (SP-4029 timeline) [NASA SP-4029]"
+     ]
+    },
+    "final": {
+     "phase": "descent",
+     "clock": "T+102:45:00",
+     "tele": [
+      "Altitude795 minterpolatedabove the Moon (SP-4029 timeline) [NASA SP-4029]"
+     ]
+    },
+    "landed": {
+     "phase": "surface",
+     "clock": "T+102:55:00",
+     "tele": []
+    },
+    "eva": {
+     "phase": "surface",
+     "clock": "T+110:16:40",
+     "tele": []
+    },
+    "lunar-liftoff": {
+     "phase": "ascent",
+     "clock": "T+124:22:25",
+     "tele": []
+    },
+    "rendezvous": {
+     "phase": "ascent",
+     "clock": "T+128:01:40",
+     "tele": []
+    },
+    "tei": {
+     "phase": "tei",
+     "clock": "T+135:25:00",
+     "tele": [
+      "Velocity2.14 km/sinterpolatedspace-fixed (SP-4029 transearth table, entry text) "
+     ]
+    },
+    "entry": {
+     "phase": "entry",
+     "clock": "T+195:05:00",
+     "tele": []
+    },
+    "chutes": {
+     "phase": "recovery",
+     "clock": "T+195:15:00",
+     "tele": []
+    },
+    "splashdown": {
+     "phase": "recovery",
+     "clock": "T+195:21:40",
+     "tele": []
+    }
+   },
+   "checks": {
+    "intro": true,
+    "playing": "playing",
+    "clockAfter3s": "T\u2212000:00:08",
+    "cardAfterNext": true,
+    "fps": 60.3,
+    "infoPanel": true,
+    "ended": true,
+    "handoff": true,
+    "closed": true,
+    "snapshotRestored": true,
+    "resumeOffered": true
+   }
+  },
+  "mer-opportunity": {
+   "shots": {
+    "pad": {
+     "phase": "count",
+     "clock": "L\u221200:00:03",
+     "tele": []
+    },
+    "liftoff": {
+     "phase": "boost",
+     "clock": "L+00:00:08",
+     "tele": []
+    },
+    "airlit": {
+     "phase": "boost",
+     "clock": "L+00:01:04",
+     "tele": []
+    },
+    "fairing": {
+     "phase": "boost",
+     "clock": "L+00:04:52",
+     "tele": []
+    },
+    "parking": {
+     "phase": "parking",
+     "clock": "L+00:33:19",
+     "tele": []
+    },
+    "stage3": {
+     "phase": "departure",
+     "clock": "L+01:11:40",
+     "tele": []
+    },
+    "cruise": {
+     "phase": "cruise",
+     "clock": "L+23 d 03:33:19",
+     "tele": []
+    },
+    "cruise-sep": {
+     "phase": "entry",
+     "clock": "L+201 d 01:16:05",
+     "tele": []
+    },
+    "entry": {
+     "phase": "entry",
+     "clock": "L+201 d 01:32:05",
+     "tele": []
+    },
+    "chute": {
+     "phase": "descent",
+     "clock": "L+201 d 01:34:44",
+     "tele": [
+      "Altitude10 kmpublishedabove the surface at that step (JPL, PDS); not timed in th"
+     ]
+    },
+    "airbags-rad": {
+     "phase": "descent",
+     "clock": "L+201 d 01:36:37",
+     "tele": []
+    },
+    "bounce": {
+     "phase": "bounces",
+     "clock": "L+201 d 01:36:53",
+     "tele": [
+      "Altitude9 mpublishedabove the surface at that step (JPL, PDS); not timed in the "
+     ]
+    },
+    "rest": {
+     "phase": "unfold",
+     "clock": "L+201 d 01:39:15",
+     "tele": []
+    },
+    "petals": {
+     "phase": "unfold",
+     "clock": "L+201 d 04:39:15",
+     "tele": []
+    },
+    "egress": {
+     "phase": "egress",
+     "clock": "L+207 d 07:42:15",
+     "tele": []
+    }
+   },
+   "checks": {
+    "intro": true,
+    "playing": "playing",
+    "clockAfter3s": "L\u221200:00:06",
+    "cardAfterNext": true,
+    "fps": 60.3,
+    "infoPanel": true,
+    "ended": true,
+    "handoff": true,
+    "closed": true,
+    "snapshotRestored": true,
+    "resumeOffered": true
+   }
+  }
+ },
+ "console": [],
+ "menuCards": [
+  "relive-apollo-11",
+  "relive-mer-opportunity"
+ ]
+}

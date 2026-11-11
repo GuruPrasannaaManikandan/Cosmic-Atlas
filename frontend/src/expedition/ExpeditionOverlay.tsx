@@ -1,3 +1,4 @@
+import { relive, useRelive } from '../relive/player'
 import { useEffect } from 'react'
 import { useExpedition, expedition, STAGE_TEXT, realCruise, type ExpeditionStage } from './expedition'
 import { travelEngineState } from '../travel/travelEngine'
@@ -5,14 +6,18 @@ import { fmtDistance } from '../travel/TravelProgressHUD'
 import { input } from '../input/appInput'
 import { citeGroups } from '../missions'
 import './expedition.css'
+import { openSitePicker } from '../surface/ExploreSurface'
+import { unitySitesForBody, sitesForBody } from '../surface/sites'
 
 const ORDER: Exclude<ExpeditionStage, 'idle'>[] = ['departure', 'cruise', 'approach', 'arrival']
 
 /** captions, stage track and Skip for a running expedition (the flight itself is the orbital scene behind it) */
 export function ExpeditionOverlay() {
   const E = useExpedition()
+  const flying = useRelive((s) => !!s.id)
   useEffect(() => input.on('back', () => expedition.skip(), 'UI_INTERACTION'), [])
-  if (E.stage === 'idle' || !E.dest) return null
+  // the flight itself is drawn by the Relive engine (full screen, with its own captions and controls)
+  if (flying || E.stage === 'idle' || !E.dest) return null
   const text = STAGE_TEXT[E.dest][E.stage]
   const real = realCruise(E.siteId)
   const idx = ORDER.indexOf(E.stage)
@@ -69,6 +74,26 @@ export function ExpeditionLaunchers({ compact }: { compact?: boolean }) {
         <b>Opportunity at Victoria crater</b>
         {!compact && <span className="muted small">HiRISE terrain in the embedded Unity renderer. Find the rover, inspect it, and relive its Victoria campaign drive by drive.</span>}
       </button>
+      <button className="exp-card relive-a11" onClick={() => relive.open('apollo-11')} data-testid="relive-apollo-11">
+        <span className="eyebrow">RELIVE THE MISSION · APOLLO 11</span>
+        <b>Launch to splashdown</b>
+        {!compact && <span className="muted small">Saturn V, staging, the coast, lunar orbit, the landing, the moonwalk and the return — on NASA's published mission clock.</span>}
+      </button>
+      <button className="exp-card relive-mer" onClick={() => relive.open('mer-opportunity')} data-testid="relive-mer-opportunity">
+        <span className="eyebrow">RELIVE THE MISSION · OPPORTUNITY</span>
+        <b>Launch, cruise, airbag landing</b>
+        {!compact && <span className="muted small">Delta II launch, the cruise to Mars, entry, parachute, retro-rockets, 26 bounces into Eagle crater, and the drive off the lander.</span>}
+      </button>
+      {!compact && (
+        <div className="exp-sites-row">
+          <button className="btn exp-sites" onClick={() => openSitePicker('mars')} data-testid="open-sites-mars">
+            ◉ Mars landing sites <span className="muted small">· {unitySitesForBody('mars').length} environments</span>
+          </button>
+          <button className="btn exp-sites" onClick={() => openSitePicker('moon')} data-testid="open-sites-moon">
+            ◌ Moon landing sites <span className="muted small">· {sitesForBody('moon').filter((s) => s.available).length} Apollo sites</span>
+          </button>
+        </div>
+      )}
     </div>
   )
 }

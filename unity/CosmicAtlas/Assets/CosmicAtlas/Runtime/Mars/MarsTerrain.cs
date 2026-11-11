@@ -19,9 +19,12 @@ namespace CosmicAtlas.Rendering.Mars
         public readonly List<GameObject> Chunks = new List<GameObject>();
         public int Triangles;
 
-        public static MarsTerrain Load(TextAsset heights, TextAsset meta)
+        public static MarsTerrain Load(TextAsset heights, TextAsset meta) => Load(heights.bytes, meta.text);
+
+        /// <summary>Same format from raw bytes (site mode fetches the packages at run time: scripts/mars/build_site.py).</summary>
+        public static MarsTerrain Load(byte[] b, string metaJson)
         {
-            var m = MiniJson.O(MiniJson.Parse(meta.text));
+            var m = MiniJson.O(MiniJson.Parse(metaJson));
             var t = new MarsTerrain
             {
                 Width = MiniJson.I(m["width"]), Height = MiniJson.I(m["height"]),
@@ -29,10 +32,23 @@ namespace CosmicAtlas.Rendering.Mars
                 East0 = MiniJson.F(m["gridEastOfOriginM"]), North0 = MiniJson.F(m["gridNorthOfOriginM"]),
                 UpMin = MiniJson.F(m["upMinM"]), Step = MiniJson.F(m["quantStepM"]),
             };
-            var b = heights.bytes;
+            if (b.Length < t.Width * t.Height * 2) throw new System.ArgumentException($"terrain: {b.Length} bytes for {t.Width}x{t.Height}");
             t._q = new ushort[t.Width * t.Height];
             System.Buffer.BlockCopy(b, 0, t._q, 0, t._q.Length * 2);
             return t;
+        }
+
+        /// <summary>release the meshes (site switching / unload)</summary>
+        public void Destroy()
+        {
+            foreach (var g in Chunks)
+            {
+                if (!g) continue;
+                foreach (var mf in g.GetComponentsInChildren<MeshFilter>()) if (mf.sharedMesh) Object.Destroy(mf.sharedMesh);
+                Object.Destroy(g);
+            }
+            Chunks.Clear();
+            Triangles = 0;
         }
 
         public bool Valid(int c, int r) => c >= 0 && r >= 0 && c < Width && r < Height && _q[r * Width + c] != NoData;
@@ -60,9 +76,7 @@ namespace CosmicAtlas.Rendering.Mars
 
         public void Build(Transform parent, Material mat, int baseStride, bool castShadows, int chunkCells = 128)
         {
-            foreach (var g in Chunks) Object.Destroy(g);
-            Chunks.Clear();
-            Triangles = 0;
+            Destroy(); // also frees the previous profile's meshes (they used to leak on every profile switch)
             for (int r0 = 0; r0 < Height - 1; r0 += chunkCells)
                 for (int c0 = 0; c0 < Width - 1; c0 += chunkCells)
                 {

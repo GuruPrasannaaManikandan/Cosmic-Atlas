@@ -21,7 +21,7 @@ export function beginMarsReplay(objectId: string, ready: MarsReady, pose: MarsPo
     pose: { x: pose.x, z: pose.z, heading: pose.heading, camYawOffset: pose.camYawOffset, camPitch: pose.camPitch, camDist: pose.camDist },
   }
   S.set({ replay: { objectId }, panel: null, component: null, banner: null })
-  send('ReplayStart', String(ready.route.firstSol))
+  send('ReplayStart', String(ready.route!.firstSol))
 }
 
 /** "Go back to present": end the replay and restore the saved exploration state exactly (not the landing point) */
@@ -43,7 +43,7 @@ const RATES = [1, 4, 15, 40]
 
 export function MarsReplay({ ready, pose }: { ready: MarsReady; pose: MarsPose | null }) {
   const objectId = useSurface((s) => s.replay!.objectId)
-  const def = useMemo(() => replayFor(objectId, { solRange: [ready.route.firstSol, ready.route.lastSol] }) as ReplayDef, [objectId, ready])
+  const def = useMemo(() => replayFor(objectId, { solRange: [ready.route!.firstSol, ready.route!.lastSol] }) as ReplayDef, [objectId, ready])
   const [lo, hi] = def.solRange!
   const [sol, setSol] = useState(lo)
   const [playing, setPlaying] = useState(true)
@@ -138,7 +138,7 @@ export function MarsReplay({ ready, pose }: { ready: MarsReady; pose: MarsPose |
               ))}
             </select>
           </label>
-          <span className="muted small">Sol {lo} → {hi} · {ready.route.points.toLocaleString('en-US')} recorded drive points</span>
+          <span className="muted small">Sol {lo} → {hi} · {ready.route!.points.toLocaleString('en-US')} recorded drive points</span>
         </div>
         <div className="replay-scrub">
           <input

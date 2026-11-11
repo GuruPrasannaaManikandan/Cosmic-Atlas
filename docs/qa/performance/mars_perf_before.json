@@ -1,0 +1,117 @@
+{
+ "viewport": [
+  1920,
+  1080,
+  1.5
+ ],
+ "scenarios": {
+  "stationary": {
+   "msP50": 18.5,
+   "fpsFromP50": 54.1,
+   "msP95": 6563,
+   "msP99": 6563,
+   "drawCalls": 481,
+   "setPass": 43,
+   "trianglesM": 5.64,
+   "longTasks": 1,
+   "longTaskMaxMs": 6557,
+   "backbuffer": [
+    2880,
+    1620
+   ]
+  },
+  "driving": {
+   "msP50": 17.0,
+   "fpsFromP50": 58.8,
+   "msP95": 23,
+   "msP99": 24,
+   "drawCalls": 479,
+   "setPass": 41,
+   "trianglesM": 5.83,
+   "longTasks": 1,
+   "longTaskMaxMs": 1806,
+   "backbuffer": [
+    2880,
+    1620
+   ]
+  },
+  "cameraRotation": {
+   "msP50": 17.0,
+   "fpsFromP50": 58.8,
+   "msP95": 19,
+   "msP99": 21,
+   "drawCalls": 276,
+   "setPass": 39,
+   "trianglesM": 6.03,
+   "longTasks": 1,
+   "longTaskMaxMs": 86,
+   "backbuffer": [
+    2880,
+    1620
+   ]
+  },
+  "closeUpInspection": {
+   "msP50": 17.0,
+   "fpsFromP50": 58.8,
+   "msP95": 18,
+   "msP99": 21,
+   "drawCalls": 316,
+   "setPass": 41,
+   "trianglesM": 6.22,
+   "longTasks": 0,
+   "longTaskMaxMs": 0,
+   "backbuffer": [
+    2250,
+    1620
+   ]
+  },
+  "terrainHeavy": {
+   "msP50": 17.0,
+   "fpsFromP50": 58.8,
+   "msP95": 35,
+   "msP99": 38,
+   "drawCalls": 482,
+   "setPass": 43,
+   "trianglesM": 5.17,
+   "longTasks": 0,
+   "longTaskMaxMs": 0,
+   "backbuffer": [
+    2880,
+    1620
+   ]
+  },
+  "mapOpen": {
+   "msP50": 17,
+   "fpsFromP50": 58.8,
+   "msP95": 25,
+   "msP99": 26,
+   "drawCalls": 482,
+   "setPass": 43,
+   "trianglesM": 5.17,
+   "longTasks": 0,
+   "longTaskMaxMs": 0,
+   "backbuffer": [
+    2880,
+    1620
+   ]
+  },
+  "replay": {
+   "msP50": 27.0,
+   "fpsFromP50": 37.0,
+   "msP95": 80,
+   "msP99": 127.0,
+   "drawCalls": 258,
+   "setPass": 39,
+   "trianglesM": 6.99,
+   "longTasks": 3,
+   "longTaskMaxMs": 881,
+   "backbuffer": [
+    2880,
+    1620
+   ]
+  }
+ },
+ "loadToReadySec": 22.81,
+ "build": "dfe5faf55a7f",
+ "jsHeapMB": 108
+}

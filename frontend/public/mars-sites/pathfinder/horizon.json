@@ -1,0 +1,20 @@
+{
+ "width": 751,
+ "height": 751,
+ "rowOrder": "north-to-south",
+ "spacingM": [
+  24.0,
+  24.0
+ ],
+ "gridEastOfOriginM": -9000.0,
+ "gridNorthOfOriginM": 9000.0,
+ "upMinM": -258.12035322677457,
+ "upMaxM": 46.63837834443393,
+ "quantStepM": 0.004650391118674406,
+ "nodata": 65535,
+ "validCells": 113881,
+ "cells": 564001,
+ "source": "DTEEC_002391_1995_001890_1995_A01 decimated to ~24 m (same controlled DTM)",
+ "decimation": 24,
+ "cutout": "nodes within 652 m of the origin are left out (the local terrain is drawn there)"
+}

@@ -1,0 +1,131 @@
+{
+ "id": "pathfinder",
+ "name": "Mars Pathfinder and Sojourner \u2014 Ares Vallis",
+ "missionId": "mars-pathfinder",
+ "mode": "rover",
+ "landing": {
+  "utc": "1997-07-04T16:56:55Z",
+  "landingSol": 1,
+  "source": "nssdca (impact 16:56:55 UT)",
+  "solNote": "sol count from landing (convention not sourced here)"
+ },
+ "scene": {
+  "date": "1997-07-06",
+  "ltst": 14.0,
+  "label": "After Sojourner rolled onto the surface (NASA: 5 July 1997, US date; NSSDCA: ~05:40 UT 6 July). Local time ILLUSTRATIVE",
+  "tau": 0.5,
+  "tauLabel": "tau 0.5 ASSUMED (no sourced optical depth for this sol in the scene)"
+ },
+ "hardware": [
+  {
+   "id": "pathfinder-lander",
+   "label": "Mars Pathfinder lander (Carl Sagan Memorial Station)",
+   "model": "proc:pathfinder-lander",
+   "kind": "lander",
+   "x": 0,
+   "z": 0,
+   "yawDeg": 0,
+   "radius": 2.4,
+   "provenance": "DOCUMENTED RECONSTRUCTION \u2014 NASA publishes no 3D model. Tetrahedral lander, three solar petals with 2.8 m\u00b2 of cells, IMP camera ~1.5 m above the ground, 1 m meteorology mast (Mars Pathfinder Landing Press Kit; NSSDCA). Petal size derived from the cell area; ramps and airbags ILLUSTRATIVE.",
+   "components": [
+    {
+     "id": "petals",
+     "label": "Solar petals",
+     "parts": [
+      "solar petal",
+      "base petal"
+     ]
+    },
+    {
+     "id": "imp",
+     "label": "Imager for Mars Pathfinder (IMP) on its pop-up mast",
+     "parts": [
+      "imp"
+     ]
+    },
+    {
+     "id": "met",
+     "label": "Atmospheric structure / meteorology mast (ASI/MET)",
+     "parts": [
+      "met mast"
+     ]
+    },
+    {
+     "id": "ramps",
+     "label": "Rover ramps",
+     "parts": [
+      "rover ramp"
+     ]
+    },
+    {
+     "id": "airbags",
+     "label": "Retracted airbags",
+     "parts": [
+      "airbags"
+     ]
+    }
+   ]
+  },
+  {
+   "id": "sojourner",
+   "label": "Sojourner rover",
+   "model": "proc:sojourner",
+   "kind": "rover",
+   "x": 0.3,
+   "z": 3.1,
+   "yawDeg": 10,
+   "radius": 0.5,
+   "provenance": "DOCUMENTED RECONSTRUCTION \u2014 NASA publishes no 3D model. 65 x 48 x 30 cm, 10.6 kg, six 13 cm wheels, rocker-bogie, 0.2 m\u00b2 solar array, APXS (Mars Pathfinder Landing Press Kit; NSSDCA gives 63 x 48 x 28 cm, 10.5 kg). Position just off the ramp ILLUSTRATIVE.",
+   "components": [
+    {
+     "id": "solar",
+     "label": "Solar array (0.2 m\u00b2)",
+     "parts": [
+      "solar"
+     ]
+    },
+    {
+     "id": "wheels",
+     "label": "Six wheels and rocker-bogie",
+     "parts": [
+      "wheel",
+      "rocker-bogie"
+     ]
+    },
+    {
+     "id": "apxs",
+     "label": "Alpha proton X-ray spectrometer (APXS)",
+     "parts": [
+      "apxs"
+     ]
+    },
+    {
+     "id": "cameras",
+     "label": "Front stereo cameras",
+     "parts": [
+      "cameras"
+     ]
+    }
+   ]
+  }
+ ],
+ "start": {
+  "x": 30,
+  "z": 20,
+  "headingDeg": -120
+ },
+ "origin": {
+  "latDeg": 19.095,
+  "lonEastDeg": -33.252999999999986,
+  "source": "PDS ODE (Folkner et al. 1997)",
+  "registration": "Catalogue coordinate; the hardware has NOT been identified in the HiRISE orthoimage yet. Historical coordinate frames can differ from the HiRISE/MOLA-controlled frame by up to hundreds of metres, so the true spot may be elsewhere in this terrain or beyond it."
+ },
+ "terrain": {
+  "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_002391_1995_001890_1995_A01 (collection mro_hirise_socet_dtms)",
+  "spacingM": 1.0,
+  "sizeM": 1400.0,
+  "validFraction": 1.0,
+  "albedo": "HiRISE orthoimage (RED band, single channel) at 0.5 m, colourised with an ILLUSTRATIVE soil ramp",
+  "horizon": "same DTM, decimated to ~24 m, out to ~9 km where the DTM covers it"
+ }
+}

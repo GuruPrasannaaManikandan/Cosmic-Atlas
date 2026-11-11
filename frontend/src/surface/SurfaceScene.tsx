@@ -15,6 +15,9 @@ import { useNarrator } from './narrator'
 import { bearingDeg } from './geo'
 import { Astronaut, AstronautHandle } from './models/Astronaut'
 import { HardwareModel, COLLIDERS, COMPONENT_ANCHORS, PositionMarker } from './models/Hardware'
+import { ExpLander } from '../relive/scene/expeditionModels'
+import { LANDER_T, landerHooks } from './surfaceState'
+import type { Obj } from '../relive/flight'
 import { input } from '../input/appInput'
 import type { InputMode } from '../input/inputManager'
 import { regolithMap, regolithBump } from './models/materials'
@@ -91,6 +94,7 @@ function useEnv(site: SurfaceSite, simMs: number, lmModel: 'nasa' | 'reconstruct
   )
   const colliders = useMemo(() => {
     const cs: Collider[] = terrain.rockColliders()
+    if (placed[0]) { const L = landerSpot(placed[0]); cs.push({ x: L.x, z: L.z, r: 2.1, h: 4.6, id: 'expedition-lander' }) }
     for (const p of placed) {
       for (const [cx, cz, r, h] of COLLIDERS[modelKey(p.modelId, lmModel)] ?? (p.modelId ? [[0, 0, 0.5, 1]] : [])) {
         const c = Math.cos(p.rotY), s = Math.sin(p.rotY)
@@ -342,6 +346,32 @@ class DustSystem {
   }
 }
 
+/** where the explorer's expedition lander stands: beside the spawn point (clear of the third-person camera behind the
+ *  astronaut), its ramp ending at the spawn point */
+export function landerSpot(lm: { x: number; z: number }) {
+  const sx = lm.x - 14, sz = lm.z + 10
+  const dx = lm.x - sx, dz = lm.z - sz, d = Math.hypot(dx, dz)
+  const ux = dx / d, uz = dz / d
+  // to the astronaut's left (looking at the LM), 5.6 m away; the ramp (+Z of the model) points back at the spawn
+  const lx = -uz, lz = ux
+  const x = sx + lx * 5.6, z = sz + lz * 5.6
+  return { x, z, rotY: Math.atan2(-lx, -lz), ux, uz, lx, lz }
+}
+
+/** the parked / landing / lifting expedition lander (conceptual) on the measured terrain */
+function SurfaceLander({ env, state }: { env: SceneEnv; state: { current: { h: number; thrust: number; ramp: number } } }) {
+  const spot = useMemo(() => landerSpot(env.placed[0]), [env])
+  const g = useRef<THREE.Group>(null!)
+  const obj = useRef<Obj>({ key: 'lander', model: 'exp-lander', pos: [0, 0, 0], fwd: [0, 1, 0], p: { legs: 1, ramp: 1 } })
+  useFrame(() => {
+    const s = state.current
+    obj.current.thrust = s.thrust
+    obj.current.p = { legs: 1, ramp: s.ramp }
+    if (g.current) g.current.position.set(spot.x, env.terrain.heightAt(spot.x, spot.z) - 0.05 + s.h, spot.z)
+  })
+  return <group ref={g} rotation={[0, spot.rotY, 0]}><ExpLander get={() => obj.current} /></group>
+}
+
 function Player({ env }: { env: SceneEnv }) {
   const { camera, gl } = useThree()
   const gl_ = gl
@@ -363,6 +393,9 @@ function Player({ env }: { env: SceneEnv }) {
   const camPos = useRef(new THREE.Vector3())
   const camTarget = useRef(new THREE.Vector3())
   const t0 = useRef(performance.now())
+  const spot = useMemo(() => landerSpot(lm), [lm])
+  const landerState = useRef({ h: 0, thrust: 0, ramp: 1 })
+  const ascentFired = useRef(false)
   /** historical replay: descent camera start time (null = not replaying the descent) */
   const replayT0 = useRef<number | null>(null)
   /** snap the camera on the next frame (exact restore, no glide) */
@@ -706,7 +739,45 @@ function Player({ env }: { env: SceneEnv }) {
       const gy = ground.heightAt(desired.x, desired.z) + 0.35
       if (desired.y < gy) desired.y = gy
     }
-    if (S.intro) {
+    // the expedition lander: landing on arrival, liftoff on "Return to orbit" (conceptual vehicle, measured terrain)
+    const LS = S.lander
+    const nowL = performance.now()
+    const lg = env.terrain.heightAt(spot.x, spot.z)
+    const lst = landerState.current
+    let astroHidden = false
+    if (LS.phase === 'descent') {
+      const el = nowL - LS.t0
+      const tau = Math.min(1, el / LANDER_T.descent)
+      lst.h = tau < 1 ? 420 * Math.pow(1 - tau, 1.8) : 0
+      lst.thrust = tau < 1 ? 1 : 0
+      lst.ramp = Math.min(1, Math.max(0, (el - LANDER_T.descent - 400) / LANDER_T.ramp))
+      astroHidden = el < LANDER_T.descent + LANDER_T.egress
+      if (el > LANDER_T.descent + LANDER_T.settle) S.set({ intro: false, lander: { phase: 'parked', t0: 0 } })
+    } else if (LS.phase === 'ascent') {
+      const el = (nowL - LS.t0) / 1000
+      lst.ramp = Math.max(0, 1 - el / 1.5)
+      lst.h = el > 2 ? 0.5 * 3 * (el - 2) * (el - 2) : 0
+      lst.thrust = el > 1.6 ? 1 : 0
+      astroHidden = true
+      if (el > 2 + LANDER_T.ascentClimb / 1000 && !ascentFired.current) { ascentFired.current = true; landerHooks.onAscentDone?.() }
+    } else { lst.h = 0; lst.thrust = 0; lst.ramp = 1; ascentFired.current = false }
+    if (astro.current) astro.current.root.visible = !astroHidden
+    const landerTarget = new THREE.Vector3(spot.x, lg + lst.h + 2.4, spot.z)
+    // an observer back from the landing point, framing the lander against the ground (the LM in view behind it)
+    const groundSpot = new THREE.Vector3(spot.x, lg + 1.5, spot.z)
+    const obsAt = (hgt: number) => new THREE.Vector3(spot.x - spot.ux * 70 - spot.lx * 40, lg + 14 + hgt * 0.35, spot.z - spot.uz * 70 - spot.lz * 40)
+    const lookAtLander = () => groundSpot.clone().lerp(landerTarget, Math.min(1, 0.35 + lst.h / 900))
+    if (LS.phase === 'descent') {
+      // ... then a glide into the normal third-person view at the foot of the ramp
+      const w = Math.min(1, Math.max(0, (nowL - LS.t0 - LANDER_T.descent - 600) / 3200))
+      const e = w * w * (3 - 2 * w)
+      camPos.current.copy(obsAt(lst.h).lerp(desired, e))
+      camTarget.current.copy(lookAtLander().lerp(target, e))
+    } else if (LS.phase === 'ascent') {
+      const k = 1 - Math.exp(-dt * 1.6)
+      camPos.current.lerp(obsAt(lst.h), k)
+      camTarget.current.lerp(lookAtLander(), k)
+    } else if (S.intro) {
       const t = Math.min(1, (performance.now() - t0.current) / (reduced ? 1 : 4200))
       const e = 1 - Math.pow(1 - t, 3)
       const high = new THREE.Vector3(lm.x + 60, lm.y + 260, lm.z + 120)
@@ -804,6 +875,7 @@ function Player({ env }: { env: SceneEnv }) {
       <pointLight ref={inspectLight} intensity={0} distance={30} decay={1.2} color="#e8eeff" />
       <DetailPatch terrain={env.terrain} follow={followRef} color={env.planet.ground.color} />
       <Astronaut ref={astro} visibleBody={useSurface((s) => s.camMode) !== 'first'} />
+      <SurfaceLander env={env} state={landerState} />
       <instancedMesh ref={prints} args={[printGeo, printMat, 500]} receiveShadow frustumCulled={false} />
       <points geometry={dust.geo} frustumCulled={false}>
         <pointsMaterial color="#b7b4ad" size={0.035} transparent opacity={0.8} depthWrite={false} />

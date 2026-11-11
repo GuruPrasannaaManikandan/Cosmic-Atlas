@@ -23,7 +23,8 @@ describe('planetary environments', () => {
     expect(isExplorable('mars')).toBe(true)
     expect(sitesForBody('mars')).toEqual([])
     expect(SURFACE_SITES.some((s) => s.bodyId === 'mars')).toBe(false)
-    expect(unitySitesForBody('mars').map((s) => s.id)).toEqual(['victoria-crater'])
+    expect(unitySitesForBody('mars').map((s) => s.id)).toEqual(['victoria-crater', 'mars-viking-1', 'mars-viking-2', 'mars-pathfinder', 'mars-spirit', 'mars-phoenix', 'mars-curiosity', 'mars-insight'])
+    expect(unitySitesForBody('mars').slice(1).every((s) => s.site && (s.mode === 'rover' || s.mode === 'lander'))).toBe(true) // M4 sites: Unity site packages
     expect(defaultSiteFor('mars')).toBe('victoria-crater')
     expect(defaultSiteFor('moon')).toBe('tranquility-base')
     // the Sun on Mars is computed in Unity (Mars24 port); the web app does not pretend to have a Mars lighting model

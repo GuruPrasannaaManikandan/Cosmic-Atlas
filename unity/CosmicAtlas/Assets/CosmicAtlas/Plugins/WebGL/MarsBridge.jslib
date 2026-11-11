@@ -25,6 +25,17 @@ mergeInto(LibraryManager.library, {
     }
   },
 
+  // M4 site mode: the landing site the host wants, as JSON ('{"id":"viking-1","base":"/mars-sites/"}'), or '' for the
+  // Victoria scene. Read once in Start(); the host sets window.__marsSite before creating the player.
+  MarsGetSite: function () {
+    var s = '';
+    try { if (typeof window !== 'undefined' && window.__marsSite) s = String(window.__marsSite); } catch (e) { s = ''; }
+    var n = lengthBytesUTF8(s) + 1;
+    var p = _malloc(n);
+    stringToUTF8(s, p, n);
+    return p;
+  },
+
   MarsGetInput: function (bufPtr, n) {
     var a = null;
     if (typeof window !== 'undefined' && typeof window.__marsInput === 'function') {

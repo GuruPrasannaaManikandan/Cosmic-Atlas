@@ -1,0 +1,52 @@
+{
+ "id": "curiosity",
+ "name": "Curiosity \u2014 Gale crater (Bradbury Landing)",
+ "missionId": "msl-curiosity",
+ "mode": "rover",
+ "landing": {
+  "utc": "2012-08-06T05:17:57Z",
+  "landingSol": 0,
+  "source": "nasa-msl-curiosity (date); MSL landing sol = Sol 0 (Mars24 notes)",
+  "solNote": "UTC time of day used for the sol count is ILLUSTRATIVE"
+ },
+ "scene": {
+  "date": "2012-08-06",
+  "ltst": 14.0,
+  "label": "Bradbury Landing, landing day (local time ILLUSTRATIVE). Mount Sharp lies beyond the terrain modelled here",
+  "tau": 0.5,
+  "tauLabel": "tau 0.5 ASSUMED (no sourced optical depth for this sol in the scene)"
+ },
+ "hardware": [
+  {
+   "id": "curiosity-rover",
+   "label": "Curiosity rover",
+   "model": "glb:curiosity",
+   "kind": "rover",
+   "x": 0,
+   "z": 0,
+   "yawDeg": 0,
+   "radius": 2.0,
+   "provenance": "NASA MODEL (NASA 3D Resources: Curiosity), scaled to the sourced 2.2 m height; its length measures 3.92 m vs 3.0 m sourced (+31 %: the model's arm pose extends it). The model has no separately named parts, so inspection frames the whole rover. Heading ILLUSTRATIVE.",
+   "components": []
+  }
+ ],
+ "start": {
+  "x": 35,
+  "z": 30,
+  "headingDeg": -130
+ },
+ "origin": {
+  "latDeg": -4.59,
+  "lonEastDeg": 137.44,
+  "source": "PDS ODE (Seelos et al. 2014)",
+  "registration": "Catalogue coordinate; the hardware has NOT been identified in the HiRISE orthoimage yet. Historical coordinate frames can differ from the HiRISE/MOLA-controlled frame by up to hundreds of metres, so the true spot may be elsewhere in this terrain or beyond it."
+ },
+ "terrain": {
+  "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_018854_1755_018920_1755_U01 (collection mro_hirise_socet_dtms)",
+  "spacingM": 1.0,
+  "sizeM": 1400.0,
+  "validFraction": 0.616,
+  "albedo": "HiRISE orthoimage (RED band, single channel) at 0.5 m, colourised with an ILLUSTRATIVE soil ramp",
+  "horizon": "same DTM, decimated to ~24 m, out to ~9 km where the DTM covers it"
+ }
+}

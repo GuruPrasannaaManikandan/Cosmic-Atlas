@@ -9,6 +9,7 @@ import { ControlsPanel } from '../input/ControlsPanel'
 import { input } from '../input/appInput'
 import { startMars, stopMars, onMars, send, addPointer, marsLast, type MarsPose, type MarsReady } from './marsBridge'
 import { MarsReplay, beginMarsReplay } from './MarsReplay'
+import { MarsMiniMap } from './MarsMiniMap'
 import { expedition } from '../expedition/expedition'
 import '../input/controls.css'
 import './mars.css'
@@ -134,8 +135,8 @@ export default function MarsExperience() {
       } else if (kind === 'pose') {
         setPose(data)
         const S = useSurface.getState()
+        // only real changes go to the shared store (the minimap and HUD read the pose directly, not 10x/s store writes)
         if ((data.near ?? null) !== S.nearbyId) S.set({ nearbyId: data.near ?? null })
-        S.set({ player: { x: data.x, z: data.z, yaw: data.heading, speed: data.speed, grounded: true, camYaw: data.camYaw } })
       } else if (kind === 'discovered') {
         const S = useSurface.getState()
         if (!S.discovered.includes(data.id)) {
@@ -240,7 +241,7 @@ export default function MarsExperience() {
             <span className="eyebrow">MARS RENDERER UNAVAILABLE</span>
             <b>The Mars surface could not start</b>
             <span className="muted small">{load.error}</span>
-            <button className="btn" onClick={() => useStore.getState().exitSurface()}>⤴ Return to orbit</button>
+            <button className="btn" onClick={() => expedition.returnToOrbit()} data-testid="return-to-orbit">⤴ Return to orbit</button>
           </div>
         )}
 
@@ -265,7 +266,7 @@ export default function MarsExperience() {
               <nav className="surf-top-actions" aria-label="Surface actions">
                 <button className="btn ghost" onClick={() => S.set({ mapOpen: true })}>🗺 Map <kbd>M</kbd></button>
                 <button className="btn ghost" onClick={() => S.set({ helpOpen: true })} aria-label="Controls help">? <kbd>H</kbd></button>
-                <button className="btn" onClick={() => useStore.getState().exitSurface()}>⤴ Return to orbit</button>
+                <button className="btn" onClick={() => expedition.returnToOrbit()} data-testid="return-to-orbit">⤴ Return to orbit</button>
               </nav>
             </header>
             <div className="surf-status">
@@ -297,13 +298,19 @@ export default function MarsExperience() {
             </div>
             {!inspecting && (
               <div className="surf-bottom">
-                <div className="surf-bottom-left mars-telemetry" data-testid="mars-telemetry">
+                <div className="surf-bottom-left mars-bottom-left">
+                <MarsMiniMap onOpen={() => S.set({ mapOpen: true })} />
+                <div className="mars-telemetry" data-testid="mars-telemetry">
                   <span className="eyebrow">EXPEDITION ROVER · ILLUSTRATIVE</span>
                   <b>{Math.abs(pose.speed).toFixed(1)} m/s{pose.speed < -0.05 ? ' reverse' : ''}</b>
                   <span className="muted small">pitch {pose.pitchDeg.toFixed(0)}° · roll {pose.rollDeg.toFixed(0)}° · {pose.x.toFixed(0)} m E, {pose.z.toFixed(0)} m N of the crater centre</span>
                   {pose.blocked && <span className="mars-blocked">Too steep or blocked — back up or turn</span>}
                 </div>
-                <p className="surf-provenance">{site.terrainProvenance}</p>
+                </div>
+                <p className="surf-provenance">
+                  {site.terrainProvenance}
+                  {marsLast.build && <span className="mars-build" data-testid="mars-build"> · Unity player {marsLast.build.id}, built {new Date(marsLast.build.built).toLocaleString()}</span>}
+                </p>
                 <div className="surf-bottom-right">
                   <div className="surf-keys">
                     <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> drive · <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> look · <kbd>Shift</kbd> faster · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> pause
@@ -331,7 +338,7 @@ export default function MarsExperience() {
             <button className="btn big" onClick={() => S.set({ paused: false })}>Resume exploration</button>
             <button className="btn ghost" onClick={() => S.set({ helpOpen: true })}>Controls</button>
             <button className="btn ghost" onClick={() => S.set({ mapOpen: true, paused: false })}>Site map</button>
-            <button className="btn" onClick={() => useStore.getState().exitSurface()}>⤴ Return to orbit</button>
+            <button className="btn" onClick={() => expedition.returnToOrbit()} data-testid="return-to-orbit">⤴ Return to orbit</button>
           </div>
         </div>
       )}

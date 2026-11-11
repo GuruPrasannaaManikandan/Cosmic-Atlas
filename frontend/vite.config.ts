@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createHash } from 'node:crypto'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 
@@ -14,6 +15,18 @@ const HERE = path.dirname(fileURLToPath(import.meta.url))
  */
 const UNITY_BUILDS: Record<string, string> = { mars: '../unity/CosmicAtlas/Builds/MarsExplorer' }
 
+/**
+ * Identity of a Unity player build: file names, sizes and modification times (cheap: no hashing of ~100 MB). Served as
+ * /unity/<name>/build-info.json, so the app can (a) cache-bust the player files per build and (b) show which build runs.
+ */
+function buildInfo(buildDir: string) {
+  const files = fs.readdirSync(buildDir).filter((f) => !f.startsWith('.')).sort()
+  const stats = files.map((f) => { const st = fs.statSync(path.join(buildDir, f)); return { name: f, bytes: st.size, modified: st.mtime.toISOString() } })
+  const id = createHash('sha1').update(JSON.stringify(stats)).digest('hex').slice(0, 12)
+  const built = stats.reduce((t, f) => (f.modified > t ? f.modified : t), '')
+  return { id, built, files: stats }
+}
+
 const MIME: Record<string, string> = { '.wasm': 'application/wasm', '.js': 'application/javascript', '.data': 'application/octet-stream', '.json': 'application/json' }
 
 function unityBuilds(): Plugin {
@@ -24,6 +37,13 @@ function unityBuilds(): Plugin {
         const m = /^\/unity\/([a-z0-9-]+)\/(.+)$/.exec((req.url ?? '').split('?')[0])
         if (!m || !UNITY_BUILDS[m[1]]) return next()
         const root = path.resolve(HERE, UNITY_BUILDS[m[1]])
+        if (m[2] === 'build-info.json') {
+          const dir = path.join(root, 'Build')
+          res.setHeader('Content-Type', 'application/json')
+          res.setHeader('Cache-Control', 'no-store')
+          if (!fs.existsSync(dir)) { res.statusCode = 404; return res.end('{"error":"no Unity build"}') }
+          return res.end(JSON.stringify({ ...buildInfo(dir), source: 'live Unity build folder (dev server)' }))
+        }
         const file = path.resolve(root, decodeURIComponent(m[2]))
         if (!file.startsWith(root + path.sep) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
           res.statusCode = 404
@@ -38,6 +58,18 @@ function unityBuilds(): Plugin {
         fs.createReadStream(file).pipe(res)
       })
     },
+    configurePreviewServer(server) {
+      // `vite preview` serves dist: say so loudly when dist holds an OLDER player than the Unity build folder
+      for (const [name, rel] of Object.entries(UNITY_BUILDS)) {
+        const live = path.resolve(HERE, rel, 'Build')
+        const info = path.resolve(HERE, 'dist', 'unity', name, 'build-info.json')
+        if (!fs.existsSync(live) || !fs.existsSync(info)) continue
+        const shipped = JSON.parse(fs.readFileSync(info, 'utf8')).id
+        const current = buildInfo(live).id
+        if (shipped !== current)
+          server.config.logger.warn(`\n[unity] ${name}: dist has player ${shipped}, but the Unity build folder has ${current}. Run "npm run build" to ship the current player.\n`)
+      }
+    },
     closeBundle() {
       if (process.env.VITEST || this.meta.watchMode) return // only a real production build copies the players
       for (const [name, rel] of Object.entries(UNITY_BUILDS)) {
@@ -49,7 +81,9 @@ function unityBuilds(): Plugin {
         const dst = path.resolve(HERE, 'dist', 'unity', name, 'Build')
         fs.mkdirSync(dst, { recursive: true })
         for (const f of fs.readdirSync(src)) fs.copyFileSync(path.join(src, f), path.join(dst, f))
-        console.log(`[unity] ${name}: copied ${fs.readdirSync(src).length} files to dist/unity/${name}/Build`)
+        const info = { ...buildInfo(src), source: 'copied into dist by vite build' }
+        fs.writeFileSync(path.resolve(HERE, 'dist', 'unity', name, 'build-info.json'), JSON.stringify(info))
+        console.log(`[unity] ${name}: copied ${fs.readdirSync(src).length} files (player ${info.id}, built ${info.built}) to dist/unity/${name}/Build`)
       }
     },
   }

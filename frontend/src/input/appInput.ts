@@ -7,6 +7,7 @@ import { useStore } from '../store/store'
 import { useSurface } from '../surface/surfaceState'
 import { travelUi } from '../travel/travelUi'
 import { useExpedition } from '../expedition/expedition'
+import { useRelive } from '../relive/player'
 
 /** any open modal dialog (About, Help, Spacecraft Archive, site picker, nav map, …) owns the keyboard */
 function modalOpen(): boolean {
@@ -16,6 +17,8 @@ function modalOpen(): boolean {
 
 export function resolveMode(): InputMode {
   const st = useStore.getState()
+  // Relive Mission owns the keyboard (its own capture handler drives the player)
+  if (useRelive.getState().id) return 'UI_INTERACTION'
   if (st.surfaceSiteId) {
     const S = useSurface.getState()
     if (S.paused || S.mapOpen || S.helpOpen || S.intro) return 'UI_INTERACTION'

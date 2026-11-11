@@ -14,7 +14,21 @@
  */
 import { input } from '../input/appInput'
 
-export interface MarsObjectReport { id: string; x: number; z: number; noticeM: number; interactM: number; routeIndex: number; sol: number }
+export interface MarsObjectReport {
+  id: string
+  x: number
+  z: number
+  noticeM: number
+  interactM: number
+  routeIndex?: number
+  sol?: number
+  /** M4 landing sites: display label, model source and the component groups the model actually has */
+  label?: string
+  model?: string
+  note?: string
+  parts?: number
+  components?: { id: string; renderers: number }[]
+}
 export interface MarsReady {
   device: string
   api: string
@@ -31,7 +45,12 @@ export interface MarsReady {
   roverCalibration: string
   objects: MarsObjectReport[]
   start: { x: number; z: number; heading: number }
-  route: { points: number; firstSol: number; lastSol: number }
+  route: { points: number; firstSol: number; lastSol: number } | null
+  /** M4 landing sites only (absent for the Victoria scene) */
+  siteId?: string
+  siteKind?: 'rover' | 'lander'
+  horizon?: { triangles: number; chunks: number } | null
+  loadMs?: number
   site: { latDeg: number; lonEastDeg: number; extentEastM: [number, number]; extentNorthM: [number, number] }
   mode: string
   embedded: boolean
@@ -66,6 +85,10 @@ export interface MarsPose {
   camY: number
   camZ: number
   rebases: number
+  /** M4 landing sites */
+  nearestId?: string | null
+  fov?: number
+  inspect?: { hw: string; component: string } | null
 }
 
 interface UnityInstance {
@@ -80,6 +103,7 @@ declare global {
     __marsEvent?: Listener
     __marsInput?: () => number[]
     __marsBridge?: unknown
+    __marsSite?: string
   }
 }
 
@@ -90,7 +114,9 @@ let instance: UnityInstance | null = null
 let starting: Promise<void> | null = null
 const listeners = new Set<Listener>()
 const pointer = { dx: 0, dy: 0, zoom: 0 }
-export const marsLast: { ready: MarsReady | null; pose: MarsPose | null; loadMs: number | null } = { ready: null, pose: null, loadMs: null }
+/** identity of the player build being served (vite plugin: /unity/<name>/build-info.json) */
+export interface MarsBuildInfo { id: string; built: string; source: string; files: { name: string; bytes: number; modified: string }[] }
+export const marsLast: { ready: MarsReady | null; pose: MarsPose | null; loadMs: number | null; build: MarsBuildInfo | null } = { ready: null, pose: null, loadMs: null, build: null }
 
 export function onMars(fn: Listener): () => void {
   listeners.add(fn)
@@ -118,8 +144,13 @@ function loadScript(src: string): Promise<void> {
   })
 }
 
-export function startMars(canvas: HTMLCanvasElement, build: string, onProgress: (p: number) => void): Promise<void> {
+/**
+ * site: an M4 landing-site package id (frontend/public/mars-sites/<site>/) or undefined for the Victoria scene. The
+ * player reads it once at boot (MarsBridge.jslib MarsGetSite), so a different site always means a fresh player.
+ */
+export function startMars(canvas: HTMLCanvasElement, build: string, onProgress: (p: number) => void, site?: string): Promise<void> {
   if (starting) return starting
+  window.__marsSite = site ? JSON.stringify({ id: site, base: `${window.location.origin}/mars-sites/` }) : ''
   const t0 = performance.now()
   window.__marsEvent = (kind, data) => {
     if (kind === 'ready') marsLast.ready = data as MarsReady
@@ -135,14 +166,26 @@ export function startMars(canvas: HTMLCanvasElement, build: string, onProgress: 
   }
   const base = `/unity/${build}/Build/`
   starting = (async () => {
-    await loadScript(base + PRODUCT + '.loader.js')
+    // which player build is this? Its id versions every player URL, so neither the browser cache nor Unity's own
+    // IndexedDB cache (keyed by URL) can hand back a player from an earlier build after a rebuild.
+    let info: MarsBuildInfo | null = null
+    try {
+      const r = await fetch(`/unity/${build}/build-info.json`, { cache: 'no-store' })
+      if (r.ok) info = await r.json()
+    } catch {
+      info = null
+    }
+    marsLast.build = info
+    const v = info ? `?v=${info.id}` : `?v=${Date.now()}`
+    if (info) console.info(`[Mars] Unity player build ${info.id}, built ${info.built} (${info.source})`)
+    await loadScript(base + PRODUCT + '.loader.js' + v)
     let bannerError: string | null = null
     instance = await window.createUnityInstance!(
       canvas,
       {
-        dataUrl: base + PRODUCT + '.data',
-        frameworkUrl: base + PRODUCT + '.framework.js',
-        codeUrl: base + PRODUCT + '.wasm',
+        dataUrl: base + PRODUCT + '.data' + v,
+        frameworkUrl: base + PRODUCT + '.framework.js' + v,
+        codeUrl: base + PRODUCT + '.wasm' + v,
         streamingAssetsUrl: 'StreamingAssets',
         companyName: 'Cosmic Atlas',
         productName: 'Mars',

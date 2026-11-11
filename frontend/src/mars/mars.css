@@ -21,3 +21,25 @@
 .mm-start { fill: none; stroke: #a7f3d0; stroke-width: 4; }
 .mm-opp { fill: #fbbf24; stroke: #000; stroke-width: 3; }
 .mm-you { fill: #67e8f9; stroke: #000; stroke-width: 3; }
+
+/* persistent minimap (Moon parity) stacked above the rover telemetry */
+.mars-bottom-left { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; pointer-events: none; }
+.mars-bottom-left > * { pointer-events: auto; }
+.mars-minimap-wrap { display: flex; align-items: flex-end; gap: 6px; }
+.mars-minimap { width: clamp(118px, 11vw, 168px); }
+.mars-minimap-toggle { font: 600 11px var(--font-mono); color: var(--txt-dim); background: rgba(6, 10, 20, 0.72); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; cursor: pointer; }
+.mars-minimap-toggle:hover { border-color: var(--line-hi); color: var(--txt); }
+@media (max-height: 560px) { .mars-minimap { width: 92px; } }
+
+/* M4 landing-site inspector (MarsSiteExperience) */
+.site-inspector .discovery-body { display: flex; flex-direction: column; gap: 10px; }
+.site-facts { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; font-size: 13px; }
+.site-facts dt { color: var(--mut); }
+.site-facts dd { margin: 0; }
+.site-parts { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.site-parts button { width: 100%; text-align: left; padding: 7px 10px; border-radius: var(--r-sm); border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); color: var(--txt); cursor: pointer; font: inherit; font-size: 13px; }
+.site-parts button.on { border-color: var(--cy); background: rgba(103, 232, 249, 0.12); }
+.site-parts button:disabled { opacity: 0.5; cursor: not-allowed; }
+.site-timeline { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.site-sources { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 13px; }
+.site-sources a { color: var(--cy); }

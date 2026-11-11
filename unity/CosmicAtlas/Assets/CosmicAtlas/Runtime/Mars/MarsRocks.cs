@@ -9,36 +9,66 @@ namespace CosmicAtlas.Rendering.Mars
     ///
     /// WHERE rocks are is data-driven (scripts/mars/victoria_surface.py): the 25 cm HiRISE orthoimage separates bright
     /// Burns-formation outcrop from dark basaltic sand, and the DTM gives slope; so outcrop slabs line the capes and the
-    /// exposed rim, boulders sit on steep walls, and the plains carry only small clasts (Meridiani is famously rock-poor,
-    /// with hematite spherules on the sand). WHAT each rock looks like is ILLUSTRATIVE: individual rocks are below the
-    /// DTM's 1 m resolution, so their shapes are procedural (seeded noise on a subdivided sphere / layered slab), with
-    /// controlled variation so no two neighbours repeat.
+    /// exposed rim, boulders sit on steep walls, and the plains carry only small clasts. WHAT each rock looks like is
+    /// ILLUSTRATIVE (below the DTM's 1 m resolution): procedural shapes with controlled variation.
+    ///
+    /// Performance design (the first version froze for seconds while driving): every instance list is pre-sized from the
+    /// real counts so nothing grows (no garbage, so no WebGL stop-the-world collections); matrices are shifted for the
+    /// floating origin only when the visible set is rebuilt (camera moved > 6 m, or the origin moved), never per frame;
+    /// lists go to the GPU directly (no per-frame copies); a near band draws the detailed mesh with shadows, the far band
+    /// a coarse mesh of the same shape without shadows.
     /// </summary>
     public sealed class MarsRocks
     {
-        const float Cell = 32f;
-        static readonly float[] Range = { 0f, 140f, 450f, 450f }; // per category (1 cobble, 2 slab, 3 boulder)
-        const float PebbleRange = 34f, PebbleStep = 0.85f;
+        const float Cell = 64f;
+        // per category: 1 cobble, 2 outcrop slab, 3 boulder — total range and the detailed / shadowed near band (m)
+        static readonly float[] Range = { 0f, 110f, 450f, 450f };
+        static readonly float[] Near = { 0f, 35f, 90f, 90f };
+        const float PebbleRange = 30f, PebbleStep = 0.85f;
+        const int Variants = 6;
+        /// <summary>
+        /// every instanced draw is exactly this many instances. Unity's WebGL backend bakes the batch size into the shader
+        /// (unity_Builtins0Array[N]) and links a new GL program for every new size bucket; Chrome on Windows links it
+        /// synchronously (1-1.3 s each), so a changing number of visible rocks froze the page while driving. One fixed
+        /// size = one program per pass, compiled once in the warm-up; short batches are padded with zero-scale instances.
+        /// </summary>
+        public const int Batch = 64;
 
         readonly MarsTerrain _t;
         readonly Material[] _mat = new Material[4];
-        readonly Mesh[][] _mesh = new Mesh[4][];
-        readonly Dictionary<long, List<Matrix4x4>[][]> _cells = new Dictionary<long, List<Matrix4x4>[][]>();
+        readonly Mesh[][] _lod0 = new Mesh[4][], _lod1 = new Mesh[4][];
+        // cell key -> per category -> per variant -> instance matrices (site frame)
+        readonly Dictionary<long, Matrix4x4[][][]> _cells = new Dictionary<long, Matrix4x4[][][]>();
         readonly byte[] _mask; readonly int _mw, _mh;
-        readonly List<Matrix4x4>[][] _draw;
-        readonly List<Matrix4x4>[] _pebbles;
+        readonly List<Matrix4x4>[][] _near = new List<Matrix4x4>[4][], _far = new List<Matrix4x4>[4][];
+        readonly List<Matrix4x4>[] _pebbles = new List<Matrix4x4>[Variants];
         Vector3 _lastPebbleCam = new Vector3(1e9f, 0, 0), _lastCam = new Vector3(1e9f, 0, 0), _lastOrigin;
-        public int Instances, DrawCalls;
+        public int Instances, DrawCalls, Triangles;
+        public float LastRebuildMs, MaxRebuildMs;
         public bool Visible = true;
+        /// <summary>
+        /// frames left to pre-warm: on Chrome/Windows (ANGLE on Direct3D 11) the first draw of a new program / vertex
+        /// layout compiles synchronously and froze the page for 1-3 s while driving; drawing every rock pipeline once
+        /// (near / far mesh, with and without shadows) during the arrival pays that cost before the user has control
+        /// </summary>
+        public int WarmFrames = 8;
+        readonly List<Matrix4x4> _warm = new List<Matrix4x4>(Batch);
+        readonly System.Diagnostics.Stopwatch _sw = new System.Diagnostics.Stopwatch();
 
         public MarsRocks(MarsTerrain terrain, TextAsset placements, TextAsset groundMask, Material rockTemplate)
+            : this(terrain, placements.bytes, groundMask ? groundMask.bytes : null, rockTemplate) { }
+
+        /// <summary>same data as raw bytes (M4 site mode fetches each site's rocks.bin / ground_mask.bin at run time)</summary>
+        public MarsRocks(MarsTerrain terrain, byte[] placementBytes, byte[] groundMaskBytes, Material rockTemplate)
         {
             _t = terrain;
-            var outcrop = new Color(0.66f, 0.52f, 0.38f); // light, layered sulfate-rich sandstone (Burns formation)
-            var basalt = new Color(0.30f, 0.23f, 0.18f);
-            var cobble = new Color(0.42f, 0.31f, 0.22f);
-            var clast = new Color(0.24f, 0.19f, 0.16f);   // dark spherules / basaltic clasts on the sand
-            Color[] cols = { clast, cobble, outcrop, basalt };
+            Color[] cols =
+            {
+                new Color(0.24f, 0.19f, 0.16f), // dark spherules / basaltic clasts on the sand
+                new Color(0.42f, 0.31f, 0.22f), // cobbles
+                new Color(0.66f, 0.52f, 0.38f), // light, layered sulfate-rich sandstone (Burns formation)
+                new Color(0.30f, 0.23f, 0.18f), // boulders
+            };
             for (int c = 0; c < 4; c++)
             {
                 var m = new Material(rockTemplate) { name = "Rock " + c, enableInstancing = true };
@@ -46,43 +76,61 @@ namespace CosmicAtlas.Rendering.Mars
                 m.SetFloat("_Smoothness", c == 2 ? 0.12f : 0.18f);
                 _mat[c] = m;
             }
-            _mesh[0] = Variants(6, 0, 3, 0.75f, 0.12f, 0.0f, 11);
-            _mesh[1] = Variants(8, 1, 3, 0.70f, 0.22f, 0.0f, 23);
-            _mesh[2] = Variants(8, 2, 3, 0.32f, 0.16f, 0.6f, 37);
-            _mesh[3] = Variants(8, 3, 3, 0.85f, 0.30f, 0.15f, 51);
+            // detailed (near) and coarse (far) versions of the same seeded shapes
+            (int sub0, int sub1, float round, float rough, float strata, int seed)[] spec =
+            {
+                (2, 2, 0.75f, 0.12f, 0.0f, 11), (3, 1, 0.70f, 0.22f, 0.0f, 23), (3, 1, 0.32f, 0.16f, 0.6f, 37), (3, 1, 0.85f, 0.30f, 0.15f, 51),
+            };
+            for (int c = 0; c < 4; c++)
+            {
+                _lod0[c] = BuildVariants(Variants, c, spec[c].sub0, spec[c].round, spec[c].rough, spec[c].strata, spec[c].seed);
+                _lod1[c] = spec[c].sub1 == spec[c].sub0 ? _lod0[c] : BuildVariants(Variants, c, spec[c].sub1, spec[c].round, spec[c].rough, spec[c].strata, spec[c].seed);
+            }
 
-            _draw = new List<Matrix4x4>[4][];
-            for (int c = 0; c < 4; c++) { _draw[c] = new List<Matrix4x4>[_mesh[c].Length]; for (int v = 0; v < _mesh[c].Length; v++) _draw[c][v] = new List<Matrix4x4>(1024); }
-            _pebbles = new List<Matrix4x4>[_mesh[0].Length];
-            for (int v = 0; v < _pebbles.Length; v++) _pebbles[v] = new List<Matrix4x4>(2048);
+            if (groundMaskBytes != null) { _mask = groundMaskBytes; _mw = (_t.Width + 1) / 2; _mh = (_t.Height + 1) / 2; }
 
-            if (groundMask) { _mask = groundMask.bytes; _mw = (_t.Width + 1) / 2; _mh = (_t.Height + 1) / 2; }
-
-            // bucket the data-driven rocks into 32 m cells (matrices in the site frame; the origin offset is applied per draw)
-            var b = placements.bytes;
+            // bucket the data-driven rocks per 64 m cell, category and variant
+            var b = placementBytes;
             int n = b.Length / 24;
             var f = new float[n * 6];
             System.Buffer.BlockCopy(b, 0, f, 0, n * 24);
+            var tmp = new Dictionary<long, List<Matrix4x4>[][]>();
+            var totals = new int[4, Variants];
             for (int i = 0; i < n; i++)
             {
                 float e = f[i * 6], no = f[i * 6 + 1], u = f[i * 6 + 2], s = f[i * 6 + 3], yaw = f[i * 6 + 4];
                 int cat = (int)f[i * 6 + 5];
                 if (cat < 1 || cat > 3) continue;
-                int variant = (int)(Hash(i * 7919 + cat) * _mesh[cat].Length) % _mesh[cat].Length;
+                int variant = (int)(Hash(i * 7919 + cat) * Variants) % Variants;
                 float tilt = (Hash(i * 31 + 5) - 0.5f) * (cat == 2 ? 14f : 30f);
                 var rot = Quaternion.Euler(tilt, yaw, (Hash(i * 17 + 3) - 0.5f) * 20f);
                 float bury = cat == 2 ? 0.45f : 0.3f; // partly buried: rocks sit in the regolith, not on it
                 var scale = new Vector3(s * (0.8f + 0.5f * Hash(i * 13)), s * (cat == 2 ? 0.55f : 0.8f + 0.3f * Hash(i * 19)), s * (0.8f + 0.5f * Hash(i * 23)));
-                var m = Matrix4x4.TRS(new Vector3(e, u - bury * scale.y, no), rot, scale);
                 long key = Key(e, no);
-                if (!_cells.TryGetValue(key, out var lists))
-                {
-                    lists = new List<Matrix4x4>[4][];
-                    _cells[key] = lists;
-                }
-                if (lists[cat] == null) { lists[cat] = new List<Matrix4x4>[_mesh[cat].Length]; for (int v = 0; v < lists[cat].Length; v++) lists[cat][v] = new List<Matrix4x4>(); }
-                lists[cat][variant].Add(m);
+                if (!tmp.TryGetValue(key, out var lists)) { lists = new List<Matrix4x4>[4][]; tmp[key] = lists; }
+                if (lists[cat] == null) { lists[cat] = new List<Matrix4x4>[Variants]; for (int v = 0; v < Variants; v++) lists[cat][v] = new List<Matrix4x4>(); }
+                lists[cat][variant].Add(Matrix4x4.TRS(new Vector3(e, u - bury * scale.y, no), rot, scale));
+                totals[cat, variant]++;
             }
+            foreach (var kv in tmp)
+            {
+                var arr = new Matrix4x4[4][][];
+                for (int c = 1; c < 4; c++)
+                {
+                    if (kv.Value[c] == null) continue;
+                    arr[c] = new Matrix4x4[Variants][];
+                    for (int v = 0; v < Variants; v++) arr[c][v] = kv.Value[c][v].ToArray();
+                }
+                _cells[kv.Key] = arr;
+            }
+            // pre-sized draw lists: they can hold every instance, so they never reallocate while driving
+            for (int c = 1; c < 4; c++)
+            {
+                _near[c] = new List<Matrix4x4>[Variants]; _far[c] = new List<Matrix4x4>[Variants];
+                for (int v = 0; v < Variants; v++) { _near[c][v] = new List<Matrix4x4>(totals[c, v] + Batch); _far[c][v] = new List<Matrix4x4>(totals[c, v] + Batch); }
+            }
+            int pebbleCap = (int)(Mathf.PI * PebbleRange * PebbleRange / (PebbleStep * PebbleStep) / Variants * 1.6f) + Batch;
+            for (int v = 0; v < Variants; v++) _pebbles[v] = new List<Matrix4x4>(pebbleCap);
         }
 
         static long Key(float e, float n) => ((long)Mathf.FloorToInt(e / Cell) << 32) ^ (uint)Mathf.FloorToInt(n / Cell);
@@ -94,9 +142,9 @@ namespace CosmicAtlas.Rendering.Mars
 
         /// <summary>
         /// Rock meshes: a subdivided octahedron displaced by seeded multi-octave noise (rough / angular), optionally squashed
-        /// into a slab with horizontal strata ridges (outcrop). Normals recomputed; small meshes (≤ 2k triangles).
+        /// into a slab with horizontal strata ridges (outcrop). The same seed at a lower subdivision gives the far LOD.
         /// </summary>
-        static Mesh[] Variants(int count, int category, int subdiv, float roundness, float roughness, float strata, int seed)
+        static Mesh[] BuildVariants(int count, int category, int subdiv, float roundness, float roughness, float strata, int seed)
         {
             var list = new Mesh[count];
             for (int v = 0; v < count; v++)
@@ -109,10 +157,8 @@ namespace CosmicAtlas.Rendering.Mars
                 for (int i = 0; i < verts.Count; i++)
                 {
                     var p = verts[i].normalized;
-                    float noise = 0;
-                    float amp = 1, freq = 1.6f;
+                    float noise = 0, amp = 1, freq = 1.6f;
                     for (int o = 0; o < 4; o++) { noise += amp * (Noise3(p * freq + new Vector3(sd, sd * 0.37f, sd * 0.71f)) - 0.5f); amp *= 0.5f; freq *= 2.1f; }
-                    // angularity: pull toward a few random planes (fractured faces), less for rounded clasts
                     float facet = 0;
                     for (int k = 0; k < 6; k++)
                     {
@@ -121,12 +167,11 @@ namespace CosmicAtlas.Rendering.Mars
                     }
                     float r = Mathf.Lerp(facet * 1.15f, 1f, roundness) + roughness * noise;
                     var q = Vector3.Scale(p * r, axis);
-                    if (strata > 0) q.y += strata * 0.04f * Mathf.Sin(q.y * 38f + sd) * (1 - Mathf.Abs(p.y)); // bedding ridges on the flanks
+                    if (strata > 0) q.y += strata * 0.04f * Mathf.Sin(q.y * 38f + sd) * (1 - Mathf.Abs(p.y));
                     verts[i] = q * 0.5f;
                 }
-                // flatten the underside a little so rocks sit (and bury) naturally
                 for (int i = 0; i < verts.Count; i++) if (verts[i].y < -0.25f) verts[i] = new Vector3(verts[i].x, Mathf.Lerp(verts[i].y, -0.25f, 0.6f), verts[i].z);
-                var m = new Mesh { name = $"rock{category}_{v}" };
+                var m = new Mesh { name = $"rock{category}_{v}_s{subdiv}" };
                 m.SetVertices(verts); m.SetTriangles(tris, 0);
                 m.RecalculateNormals(); m.RecalculateBounds();
                 m.UploadMeshData(true);
@@ -138,8 +183,7 @@ namespace CosmicAtlas.Rendering.Mars
         static void Octahedron(List<Vector3> v, List<int> t)
         {
             v.AddRange(new[] { Vector3.right, Vector3.left, Vector3.up, Vector3.down, Vector3.forward, Vector3.back });
-            int[] f = { 2, 4, 0, 2, 0, 5, 2, 5, 1, 2, 1, 4, 3, 0, 4, 3, 5, 0, 3, 1, 5, 3, 4, 1 };
-            t.AddRange(f);
+            t.AddRange(new[] { 2, 4, 0, 2, 0, 5, 2, 5, 1, 2, 1, 4, 3, 0, 4, 3, 5, 0, 3, 1, 5, 3, 4, 1 });
         }
 
         static void Subdivide(List<Vector3> v, List<int> t)
@@ -181,9 +225,9 @@ namespace CosmicAtlas.Rendering.Mars
         }
 
         /// <summary>small clasts in a disc around the camera, deterministic per 0.85 m cell (no popping while driving)</summary>
-        void RebuildPebbles(Vector3 cam)
+        void RebuildPebbles(Vector3 cam, Vector3 origin)
         {
-            foreach (var l in _pebbles) l.Clear();
+            for (int v = 0; v < Variants; v++) _pebbles[v].Clear();
             int c0 = Mathf.FloorToInt((cam.x - PebbleRange) / PebbleStep), c1 = Mathf.FloorToInt((cam.x + PebbleRange) / PebbleStep);
             int r0 = Mathf.FloorToInt((cam.z - PebbleRange) / PebbleStep), r1 = Mathf.FloorToInt((cam.z + PebbleRange) / PebbleStep);
             for (int r = r0; r <= r1; r++)
@@ -195,57 +239,103 @@ namespace CosmicAtlas.Rendering.Mars
                     if (dx * dx + dz * dz > PebbleRange * PebbleRange) continue;
                     float bright = MaskAt(e, n);
                     if (bright < 0) continue;
-                    // sand (dark) carries scattered spherules / clasts; bright outcrop pavement carries more angular fragments
                     if (Hash(id + 2) > 0.28f + 0.5f * bright) continue;
                     float h = _t.Sample(e, n); if (float.IsNaN(h)) continue;
                     float s = 0.035f + 0.11f * Hash(id + 3) * Hash(id + 4) + 0.08f * bright * Hash(id + 5);
-                    var m = Matrix4x4.TRS(new Vector3(e, h - 0.3f * s, n), Quaternion.Euler(Hash(id + 6) * 40, Hash(id + 7) * 360, 0), new Vector3(s, s * 0.75f, s * 1.1f));
-                    _pebbles[(int)(Hash(id + 8) * _pebbles.Length) % _pebbles.Length].Add(m);
+                    var list = _pebbles[(int)(Hash(id + 8) * Variants) % Variants];
+                    if (list.Count >= list.Capacity - Batch) continue; // never grow (no garbage); room left for padding
+                    list.Add(Matrix4x4.TRS(new Vector3(e - origin.x, h - 0.3f * s - origin.y, n - origin.z), Quaternion.Euler(Hash(id + 6) * 40, Hash(id + 7) * 360, 0), new Vector3(s, s * 0.75f, s * 1.1f)));
                 }
         }
 
-        static readonly Matrix4x4[] Batch = new Matrix4x4[1023];
-
-        /// <summary>draw everything in range of the camera (site-frame camera position; origin = floating-origin offset)</summary>
-        public void Draw(Vector3 cam, Vector3 origin, bool shadows)
+        void RebuildVisible(Vector3 cam, Vector3 origin)
         {
-            Instances = DrawCalls = 0;
-            if (!Visible) return;
-            if ((cam - _lastPebbleCam).sqrMagnitude > 9f) { RebuildPebbles(cam); _lastPebbleCam = cam; }
-            if ((cam - _lastCam).sqrMagnitude > 64f || origin != _lastOrigin)
-            {
-                _lastCam = cam; _lastOrigin = origin;
-                for (int c = 1; c < 4; c++) foreach (var l in _draw[c]) l.Clear();
-                int reach = Mathf.CeilToInt(Range[2] / Cell);
-                int cx = Mathf.FloorToInt(cam.x / Cell), cz = Mathf.FloorToInt(cam.z / Cell);
-                for (int i = -reach; i <= reach; i++)
-                    for (int j = -reach; j <= reach; j++)
+            for (int c = 1; c < 4; c++) for (int v = 0; v < Variants; v++) { _near[c][v].Clear(); _far[c][v].Clear(); }
+            int reach = Mathf.CeilToInt(Range[2] / Cell) + 1;
+            int cx = Mathf.FloorToInt(cam.x / Cell), cz = Mathf.FloorToInt(cam.z / Cell);
+            for (int i = -reach; i <= reach; i++)
+                for (int j = -reach; j <= reach; j++)
+                {
+                    if (!_cells.TryGetValue(((long)(cx + i) << 32) ^ (uint)(cz + j), out var cell)) continue;
+                    float d = new Vector2((cx + i + 0.5f) * Cell - cam.x, (cz + j + 0.5f) * Cell - cam.z).magnitude;
+                    for (int c = 1; c < 4; c++)
                     {
-                        if (!_cells.TryGetValue(((long)(cx + i) << 32) ^ (uint)(cz + j), out var lists)) continue;
-                        float d = new Vector2((cx + i + 0.5f) * Cell - cam.x, (cz + j + 0.5f) * Cell - cam.z).magnitude;
-                        for (int c = 1; c < 4; c++)
+                        if (cell[c] == null || d > Range[c] + Cell * 0.71f) continue;
+                        bool near = d < Near[c] + Cell * 0.71f;
+                        for (int v = 0; v < Variants; v++)
                         {
-                            if (lists[c] == null || d > Range[c] + Cell) continue;
-                            for (int v = 0; v < lists[c].Length; v++) _draw[c][v].AddRange(lists[c][v]);
+                            var src = cell[c][v]; var dst = near ? _near[c][v] : _far[c][v];
+                            for (int k = 0; k < src.Length; k++)
+                            {
+                                var m = src[k];
+                                m.m03 -= origin.x; m.m13 -= origin.y; m.m23 -= origin.z; // floating origin, applied once per rebuild
+                                dst.Add(m);
+                            }
                         }
                     }
-            }
-            var shift = Matrix4x4.Translate(-origin);
-            for (int c = 1; c < 4; c++)
-                for (int v = 0; v < _draw[c].Length; v++) Submit(_mesh[c][v], _mat[c], _draw[c][v], shift, shadows && c >= 2);
-            for (int v = 0; v < _pebbles.Length; v++) Submit(_mesh[0][v], _mat[0], _pebbles[v], shift, false);
+                }
         }
 
-        void Submit(Mesh mesh, Material mat, List<Matrix4x4> list, Matrix4x4 shift, bool shadows)
+        /// <summary>draw everything in range of the camera (site-frame camera position; origin = floating-origin offset)</summary>
+        public void Draw(Vector3 cam, Vector3 origin, bool shadows, Vector3 forward = default)
         {
-            var rp = new RenderParams(mat) { shadowCastingMode = shadows ? ShadowCastingMode.On : ShadowCastingMode.Off, receiveShadows = true };
-            for (int i = 0; i < list.Count; i += 1023)
+            Instances = DrawCalls = Triangles = 0;
+            if (WarmFrames > 0)
             {
-                int n = Mathf.Min(1023, list.Count - i);
-                for (int k = 0; k < n; k++) Batch[k] = shift * list[i + k];
-                Graphics.RenderMeshInstanced(rp, mesh, 0, Batch, n);
-                Instances += n; DrawCalls++;
+                WarmFrames--;
+                // one tiny instance a few metres in front of the camera: in view and inside the shadow cascades
+                // a real multi-instance batch (a single instance can be drawn without the instancing variant, which is
+                // why a one-instance warm-up did not prevent the freezes): 48 tiny instances in front of the camera
+                var at = cam + (forward.sqrMagnitude > 0 ? forward.normalized : Vector3.forward) * 3f - origin;
+                _warm.Clear();
+                for (int k = 0; k < Batch; k++) _warm.Add(Matrix4x4.TRS(at + new Vector3((k % 8) * 0.01f, 0, (k / 8) * 0.01f), Quaternion.identity, Vector3.one * 0.002f));
+                for (int c = 0; c < 4; c++)
+                    for (int l = 0; l < 2; l++)
+                    {
+                        var mesh = (l == 0 ? _lod0[c] : _lod1[c])[0];
+                        Submit(mesh, _mat[c], _warm, true);
+                        Submit(mesh, _mat[c], _warm, false);
+                    }
             }
+            if (!Visible) return;
+            bool originMoved = origin != _lastOrigin;
+            if (originMoved || (cam - _lastPebbleCam).sqrMagnitude > 9f) { RebuildPebbles(cam, origin); _lastPebbleCam = cam; }
+            if (originMoved || (cam - _lastCam).sqrMagnitude > 36f)
+            {
+                _sw.Restart();
+                RebuildVisible(cam, origin);
+                _lastCam = cam; _lastOrigin = origin;
+                LastRebuildMs = (float)_sw.Elapsed.TotalMilliseconds; if (LastRebuildMs > MaxRebuildMs) MaxRebuildMs = LastRebuildMs;
+            }
+            for (int c = 1; c < 4; c++)
+                for (int v = 0; v < Variants; v++)
+                {
+                    Submit(_lod0[c][v], _mat[c], _near[c][v], shadows && c >= 2);
+                    Submit(_lod1[c][v], _mat[c], _far[c][v], false);
+                }
+            for (int v = 0; v < Variants; v++) Submit(_lod0[0][v], _mat[0], _pebbles[v], false);
+        }
+
+        void Submit(Mesh mesh, Material mat, List<Matrix4x4> list, bool shadows)
+        {
+            if (list.Count == 0) return;
+            var rp = new RenderParams(mat) { shadowCastingMode = shadows ? ShadowCastingMode.On : ShadowCastingMode.Off, receiveShadows = true };
+            int tri = (int)(mesh.GetIndexCount(0) / 3);
+            int real = list.Count;
+            // pad to a whole number of batches with zero-scale copies of the last instance (degenerate: draws nothing)
+            int pad = (Batch - real % Batch) % Batch;
+            if (pad > 0)
+            {
+                var z = list[real - 1]; z.m00 = z.m01 = z.m02 = z.m10 = z.m11 = z.m12 = z.m20 = z.m21 = z.m22 = 0f;
+                for (int k = 0; k < pad; k++) list.Add(z);
+            }
+            for (int i = 0; i < list.Count; i += Batch)
+            {
+                Graphics.RenderMeshInstanced(rp, mesh, 0, list, Batch, i); // no copy: the list goes to the GPU as is
+                DrawCalls++;
+            }
+            if (pad > 0) list.RemoveRange(real, pad);
+            Instances += real; Triangles += real * tri;
         }
     }
 }
