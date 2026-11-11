@@ -1,0 +1,17 @@
+{
+  "comment": "Unity WebGL players that a clean checkout (e.g. the Render build) downloads before `vite build`. See scripts/fetch-unity-player.mjs and DEPLOYMENT.md.",
+  "players": {
+    "mars": {
+      "id": "74731b2a3a5a",
+      "unity": "6000.3.28f1",
+      "dir": "../unity/CosmicAtlas/Builds/MarsExplorer/Build",
+      "baseUrl": "https://github.com/GuruPrasannaaManikandan/Cosmic-Atlas/releases/download/unity-mars-74731b2a3a5a/",
+      "files": [
+        { "name": "MarsExplorer.data", "bytes": 41736847, "modified": "2026-11-11T07:10:48.503Z", "sha256": "6b34342c73cc5e759ba1cea7fea6633a1b771a62947406417bb02f724b13188b" },
+        { "name": "MarsExplorer.framework.js", "bytes": 469879, "modified": "2026-11-11T07:15:57.525Z", "sha256": "bd56b8b2f5a29886490bc0b32f9b48dd81ab24b373093e9419c46acddb757b97" },
+        { "name": "MarsExplorer.loader.js", "bytes": 26983, "modified": "2026-11-11T07:15:57.525Z", "sha256": "d5e4018835ce888a5902e3fec6b784c79bb14e89f221c0b2726528f731d18e57" },
+        { "name": "MarsExplorer.wasm", "bytes": 58410923, "modified": "2026-11-11T07:15:56.369Z", "sha256": "a6ec6faaedd5d8cda62560eb6a89ee114f1a1a4bc56b41df5a3bd94e31a414e4" }
+      ]
+    }
+  }
+}

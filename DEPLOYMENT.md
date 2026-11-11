@@ -130,6 +130,19 @@ Verify after every deploy:
 python scripts/smoke_test_deployment.py https://cosmic-atlas-jk2e.onrender.com
 ```
 
+## Unity Mars player in deploys
+
+The Unity WebGL player (`unity/CosmicAtlas/Builds/MarsExplorer/Build`, ~100 MB) is gitignored, so a clean clone such
+as the Render build has no player. `npm run build` first runs `frontend/scripts/fetch-unity-player.mjs`: if that folder
+is missing, it downloads the player pinned in `frontend/unity-player.json` (gzipped assets on a GitHub release
+`unity-mars-<id>`), checks size and sha256, and restores the recorded mtimes so `/unity/mars/build-info.json` reports
+the same player id. A checkout that already has a local Unity build uses it unchanged.
+
+To ship a new player: build and validate it, gzip the four `Build/` files (`gzip -9 -k`), publish them as release
+`unity-mars-<id>` (`gh release create unity-mars-<id> --target <commit sha> *.gz`), then update `id`, `baseUrl` and
+each file's `bytes` / `modified` / `sha256` in `frontend/unity-player.json` (values from `dist/unity/mars/build-info.json`
+and `sha256sum`) in the same commit as the frontend code that matches that player.
+
 ## External services
 
 | Service | Used for | Auth | Failure behaviour |
