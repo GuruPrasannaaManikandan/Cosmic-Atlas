@@ -86,10 +86,11 @@
   "headingDeg": 40
  },
  "origin": {
-  "latDeg": 68.22,
-  "lonEastDeg": -125.75,
-  "source": "PDS ODE (Smith et al. 2009)",
-  "registration": "Catalogue coordinate; the hardware has NOT been identified in the HiRISE orthoimage yet. Historical coordinate frames can differ from the HiRISE/MOLA-controlled frame by up to hundreds of metres, so the true spot may be elsewhere in this terrain or beyond it."
+  "latDeg": 68.217789,
+  "lonEastDeg": -125.750032,
+  "source": "HiRISE-identified lander, PSP_008591_2485 controlled orthoimage (this project, M5)",
+  "registration": "Lander identified by eye in the USGS controlled orthoimage PSP_008591_2485 (taken 22 hours after landing): the bright lander deck at the centre of the ~25 m dark zone scoured by its descent engines; a second dark spot with a streak ~200 m away is consistent with the heat shield (uahirise.org/PSP_008591_2485). Measured in this controlled frame; 131 m south of the catalogue coordinate (68.22 N, 234.25 E; Smith et al. 2009).",
+  "located": true
  },
  "terrain": {
   "dtm": "USGS Astrogeology controlled HiRISE DTM DTEPC_008591_2485_008644_2485_U01 (collection mro_hirise_socet_dtms)",

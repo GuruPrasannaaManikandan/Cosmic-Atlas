@@ -144,11 +144,13 @@ async def site_run(page, base, out: Path, sid: str, logs: list):
     if comps:
         await page.click("[data-testid=site-inspector] [role=tab]:nth-child(2)")
         await asyncio.sleep(0.3)
-        await page.click(f"[data-testid=site-inspector] .site-parts li:nth-child(2) button")
-        ok = await wait_for(page, f"{POSE}.inspect && {POSE}.inspect.component === '{comps[0]['id']}'", 8)
+        # the list follows the discovery catalogue; pick its first part that is a separate 3-D piece (data-part)
+        part = await page.get_attribute("[data-testid=site-inspector] .site-parts button[data-part]", 'data-part')
+        await page.click("[data-testid=site-inspector] .site-parts button[data-part]")
+        ok = await wait_for(page, f"{POSE}.inspect && {POSE}.inspect.component === '{part}'", 8)
         await asyncio.sleep(1.8)
-        await page.screenshot(path=str(out / f'{sid}_04_component_{comps[0]["id"]}.png'))
-        check(f'{sid} S7 component {comps[0]["id"]} framed and highlighted on the model', ok)
+        await page.screenshot(path=str(out / f'{sid}_04_component_{part}.png'))
+        check(f'{sid} S7 component {part} framed and highlighted on the model', ok and part in [c['id'] for c in comps])
     else:
         rep['checks'].append({'check': f'{sid} S7 component highlight', 'pass': None, 'detail': 'SKIP: this model has no separately named parts (whole-vehicle inspection only)'})
         print(f'[SKIP] {sid} S7 component highlight - model has no separate parts', flush=True)
@@ -203,6 +205,9 @@ async def main(base, out: Path, only):
         logs: list = []
         page.on('console', lambda m: logs.append(f'{m.type}: {m.text[:400]}'))
         page.on('pageerror', lambda e: logs.append(f'PAGEERROR {str(e)[:300]}'))
+        # which Unity player the browser really fetched (proves a fresh local build, not a stale/cached one)
+        player_reqs: list = []
+        page.on('response', lambda r: player_reqs.append({'url': r.url, 'status': r.status}) if '/unity/mars/' in r.url else None)
         await page.goto(base, wait_until='domcontentloaded')
         await wait_for(page, 'window.__store && window.__input', 60)
         await asyncio.sleep(3)
@@ -215,6 +220,12 @@ async def main(base, out: Path, only):
                     await page.goto(base); await wait_for(page, 'window.__store', 60); await asyncio.sleep(2)
                 except Exception:
                     pass
+        try:
+            rep['player'] = {'buildInfo': await page.evaluate("async () => (await fetch('/unity/mars/build-info.json', {cache: 'no-store'})).json()"),
+                             'served': sorted({(x['url'].split('?')[0].split('/unity/mars/')[1], x['status']) for x in player_reqs})}
+            print('PLAYER', json.dumps(rep['player'])[:600], flush=True)
+        except Exception as e:
+            rep['player'] = {'error': repr(e)[:200]}
         await b.close()
     passed = sum(c['pass'] is True for c in rep['checks'])
     skipped = sum(c['pass'] is None for c in rep['checks'])

@@ -183,7 +183,7 @@ function Help() {
       <div className="surf-pause glass surf-help">
         <h2>Controls</h2>
         {/* generated from the input manager's bindings: it can only list controls that work */}
-        <ControlsPanel mode="PLANETARY_EXPLORATION" extra={[{ keys: 'Mouse', label: 'Look around: click the view to capture the mouse, or drag' }]} />
+        <ControlsPanel mode="PLANETARY_EXPLORATION" hide={['catalogue']} extra={[{ keys: 'Mouse', label: 'Look around: click the view to capture the mouse, or drag' }]} />
         <p className="muted small">Walking is relative to where the camera looks. The arrow keys only turn the camera; they never move you.</p>
         <p className="muted small">
           Gravity on the {planet.name} is {g.value} m/s² (NASA NSSDCA fact sheet): Earth's {EARTH_G} m/s² is about {(EARTH_G / (g.value ?? EARTH_G)).toFixed(1)} times stronger, so the same push carries you about that many times higher. Walking speeds are gameplay tuning, not measured astronaut data.

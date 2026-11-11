@@ -115,10 +115,11 @@
   "headingDeg": -120
  },
  "origin": {
-  "latDeg": 19.095,
-  "lonEastDeg": -33.252999999999986,
-  "source": "PDS ODE (Folkner et al. 1997)",
-  "registration": "Catalogue coordinate; the hardware has NOT been identified in the HiRISE orthoimage yet. Historical coordinate frames can differ from the HiRISE/MOLA-controlled frame by up to hundreds of metres, so the true spot may be elsewhere in this terrain or beyond it."
+  "latDeg": 19.073883,
+  "lonEastDeg": -33.258628999999985,
+  "source": "HiRISE-identified lander, PSP_001890_1995 controlled orthoimage (this project, M5)",
+  "registration": "Lander identified by eye in the USGS controlled orthoimage PSP_001890_1995: a bright object with its shadow about 1.95 km south of North Knob and 1 km east-north-east of Twin Peaks, with the bright backshell/parachute 260 m to the south-south-east, as in the HiRISE team's annotated images (uahirise.org/PSP_001890_1995). Measured in this controlled frame; 1.25 km south and 315 m west of the catalogue coordinate (19.095 N, 326.747 E; Folkner et al. 1997). Sojourner's position beside the lander is ILLUSTRATIVE.",
+  "located": true
  },
  "terrain": {
   "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_002391_1995_001890_1995_A01 (collection mro_hirise_socet_dtms)",

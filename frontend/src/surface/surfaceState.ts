@@ -10,6 +10,8 @@ export interface SurfaceUI {
   paused: boolean
   mapOpen: boolean
   helpOpen: boolean
+  /** Mars: the discovery catalogue (J) */
+  catalogueOpen: boolean
   driving?: boolean
   camMode: CamMode
   discovered: string[]
@@ -40,6 +42,7 @@ const initial = {
   paused: false,
   mapOpen: false,
   helpOpen: false,
+  catalogueOpen: false,
   driving: false,
   camMode: 'third' as CamMode,
   discovered: [] as string[],

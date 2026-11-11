@@ -91,8 +91,8 @@ useRelive.subscribe((s) => {
 
 function land(siteId: string) {
   const moonSite = SITE_BY_ID[siteId]
-  // Moon: the surface plays the final descent (pending arrival); Mars: the flight has already landed and deployed
-  pendingArrival = moonSite ? siteId : null
+  // the surface plays the final descent: the Moon's lander, or the Mars carrier landing with THEIA (E3)
+  pendingArrival = siteId
   useExpedition.getState().set({ stage: 'arrival', progress: 1 })
   const st = useStore.getState()
   st.set({ phase: 'explore' })
@@ -151,6 +151,10 @@ export const expedition = {
       return
     }
     fly()
+  },
+  /** a Mars landing site entered straight from the catalogue also lands its carrier (no interplanetary flight) */
+  markArrival(siteId: string) {
+    pendingArrival = siteId
   },
   /** true when the surface opening now is the end of an expedition (it plays its landing). Read-only (StrictMode). */
   peekArrival: (siteId: string): boolean => pendingArrival === siteId,

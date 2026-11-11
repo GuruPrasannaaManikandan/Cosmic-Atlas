@@ -133,6 +133,39 @@ namespace CosmicAtlas.Rendering.Mars
             for (int v = 0; v < Variants; v++) _pebbles[v] = new List<Matrix4x4>(pebbleCap);
         }
 
+        readonly List<Vector3> _clear = new List<Vector3>();
+
+        /// <summary>remove the ILLUSTRATIVE rocks (and pebbles) inside a disc of the site frame, e.g. a landing pad; returns how many</summary>
+        public int ClearDisc(Vector2 c, float r)
+        {
+            _clear.Add(new Vector3(c.x, c.y, r));
+            int removed = 0;
+            foreach (var cell in _cells.Values)
+                for (int ci = 1; ci < 4; ci++)
+                {
+                    if (cell[ci] == null) continue;
+                    for (int v = 0; v < Variants; v++)
+                    {
+                        var src = cell[ci][v];
+                        var keep = new List<Matrix4x4>(src.Length);
+                        foreach (var m in src)
+                        {
+                            float dx = m.m03 - c.x, dz = m.m23 - c.y;
+                            if (dx * dx + dz * dz < r * r) removed++; else keep.Add(m);
+                        }
+                        if (keep.Count != src.Length) cell[ci][v] = keep.ToArray();
+                    }
+                }
+            _lastCam = new Vector3(1e9f, 0, 0); _lastPebbleCam = new Vector3(1e9f, 0, 0);
+            return removed;
+        }
+
+        bool Cleared(float e, float n)
+        {
+            foreach (var d in _clear) { float dx = e - d.x, dz = n - d.y; if (dx * dx + dz * dz < d.z * d.z) return true; }
+            return false;
+        }
+
         static long Key(float e, float n) => ((long)Mathf.FloorToInt(e / Cell) << 32) ^ (uint)Mathf.FloorToInt(n / Cell);
         static float Hash(int x)
         {
@@ -237,6 +270,7 @@ namespace CosmicAtlas.Rendering.Mars
                     float e = (c + Hash(id)) * PebbleStep, n = (r + Hash(id + 1)) * PebbleStep;
                     float dx = e - cam.x, dz = n - cam.z;
                     if (dx * dx + dz * dz > PebbleRange * PebbleRange) continue;
+                    if (_clear.Count > 0 && Cleared(e, n)) continue;
                     float bright = MaskAt(e, n);
                     if (bright < 0) continue;
                     if (Hash(id + 2) > 0.28f + 0.5f * bright) continue;

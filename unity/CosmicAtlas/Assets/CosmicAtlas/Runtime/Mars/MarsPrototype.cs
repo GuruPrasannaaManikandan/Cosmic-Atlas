@@ -218,6 +218,7 @@ namespace CosmicAtlas.Rendering.Mars
             skyMaterial.SetFloat("_Steps", Mathf.Clamp(p.SkyTransmittance / 8, 8, 32));
             _terrain.Build(_world, _siteMode ? _siteTerrainMat : terrainMaterial, p.TerrainStride, p.Cascades > 0);
             _horizon?.Build(_world, _horizonMat, 1, false); // site mode: mid-range horizon from the same DTM, no shadows
+            _far?.Build(_world, _farMat, 1, false, 100);     // site mode: far ring from controlled CTX DTMs (where built)
             if (_dust) { var main = _dust.main; main.maxParticles = Mathf.RoundToInt(3000 * p.DustFraction); }
             Report("profile", $"{{\"id\":{MiniJson.Q(p.Id)},\"terrainTriangles\":{_terrain.Triangles},\"chunks\":{_terrain.Chunks.Count}}}");
         }
@@ -330,7 +331,7 @@ namespace CosmicAtlas.Rendering.Mars
                    $"\"utc\":{MiniJson.Q(_utc.ToString("yyyy-MM-ddTHH:mm:ssZ", inv))},\"sol\":{_sol},\"ltst\":{MiniJson.N(new MarsTime(_utc).LtstHours(_siteLon))}," +
                    $"\"sunElevation\":{MiniJson.N(_sunEl)},\"sunAzimuth\":{MiniJson.N(_sunAz)},\"tau\":{MiniJson.N(_tau)},\"tauLabel\":{MiniJson.Q(_tauLabel)}," +
                    $"\"terrainTriangles\":{_terrain.Triangles},\"chunks\":{_terrain.Chunks.Count},\"rover\":{MiniJson.Q(_roverNote)},\"roverCalibration\":{MiniJson.Q(_calNote)},\"loadMs\":{MiniJson.N(Time.realtimeSinceStartup * 1000)}," +
-                   (_siteMode ? SiteReadyJson() : ExplorerReadyJson()) +
+                   (_siteMode ? SiteReadyJson() : ExplorerReadyJson() + ",\"carrier\":" + CarrierJson()) +
                    ",\"heightCheck\":" + (_siteMode ? SiteHeightCheckJson() : HeightCheckJson()) + "}";
         }
 

@@ -50,6 +50,10 @@ export interface MarsReady {
   siteId?: string
   siteKind?: 'rover' | 'lander'
   horizon?: { triangles: number; chunks: number } | null
+  /** landing sites: the tiled sub-metre ground grain (procedural, ILLUSTRATIVE) */
+  groundDetail?: { tileM: number; px: number; buildMs: number; provenance: string }
+  /** E3: the conceptual THEIA carrier (landed position, heading, ramp, how the spot was chosen) */
+  carrier?: { label: string; x: number; z: number; heading: number; radius: number; rampDeg: number; arrivalSec: number; pick: { tested: number; valid: number; distFromStart: number; footprintReliefM: number; laneReliefM: number } | null } | null
   loadMs?: number
   site: { latDeg: number; lonEastDeg: number; extentEastM: [number, number]; extentNorthM: [number, number] }
   mode: string
@@ -76,6 +80,8 @@ export interface MarsPose {
   oppDist: number
   near: string | null
   arrivalT: number
+  /** E3 arrival: 'descent' | 'touchdown' | 'door' | 'deploy' ('' once exploring) */
+  arrivalPhase?: string
   sol: number
   replaySol: number
   utc: string

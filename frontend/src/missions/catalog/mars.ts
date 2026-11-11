@@ -1,5 +1,6 @@
 import type { Mission, MissionClass, PhysicalObject } from '../schema'
 import { v, u, c, marsPos } from './facts'
+import { SITE_OBJECTS, EXTRA_COMPONENTS, OPPORTUNITY_PARTS, OPPORTUNITY_EXTRA, SITE_OBJECT_IDS } from './marsHardware'
 import type { Milestone } from '../schema'
 
 const ODE = 'pds-ode-mars-sites'
@@ -237,3 +238,21 @@ MARS_OBJECTS.push(
   { ...rover('viking-1-lander', 'viking-1', 'Viking 1 lander', 'lander', v('six-sided base with alternate 1.09 m and 0.56 m sides on three legs; footpads 2.21 m apart (equilateral triangle)', ['nssdca-viking1-lander']), v(572, ['nssdca-viking1-lander']), 'Three-legged lander with RTG power, a high-gain antenna and a surface sampler arm.', 'nasa:viking-lander', 'Official NASA 3D Resources model, scaled to the NSSDCA footpad triangle (2.21 m sides).', v('silent since 13 Nov 1982', ['nssdca-viking1-lander']), v(marsPos(22.27, 312.05, 'planetocentric (NSSDCA)'), ['nssdca-viking1-lander']), ['nssdca-viking1-lander']), builtBy: 'NASA' },
   rover('insight-lander', 'insight', 'InSight lander', 'lander', u('overall dimensions not on the NASA page read'), u('not on the NASA page read'), 'Stationary lander with two round solar arrays, a 1.8 m robotic arm, a seismometer and a heat probe.', 'nasa:insight', 'Official NASA 3D Resources model (metric); not yet validated - no sourced overall dimension.', v('mission ended 15 Dec 2022', ['nasa-insight']), v(marsPos(4.5, 135.9, 'approximate (NASA: "centered at about")'), ['nasa-insight']), ['nasa-insight']),
 )
+
+// ---- universal discovery (E1): the landing-site vehicles and their instruments (catalog/marsHardware.ts) ----
+MARS_OBJECTS.push(...SITE_OBJECTS)
+for (const [id, comps] of Object.entries(EXTRA_COMPONENTS)) {
+  const o = MARS_OBJECTS.find((x) => x.id === id)
+  if (o) o.components = comps
+}
+{
+  const opp = MARS_OBJECTS.find((x) => x.id === 'opportunity-rover')
+  if (opp) {
+    opp.components = [...opp.components.map((k) => ({ ...k, ...(OPPORTUNITY_PARTS[k.id] ?? {}) })), ...OPPORTUNITY_EXTRA]
+    opp.sources = [...new Set([...opp.sources, 'nssdca-mer-b'])]
+  }
+}
+for (const [mid, ids] of Object.entries(SITE_OBJECT_IDS)) {
+  const m = MARS_MISSIONS.find((x) => x.id === mid)
+  if (m) m.objectIds = [...new Set([...m.objectIds, ...ids])]
+}

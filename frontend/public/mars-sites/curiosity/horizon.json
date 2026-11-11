@@ -8,13 +8,13 @@
  ],
  "gridEastOfOriginM": -9000.0,
  "gridNorthOfOriginM": 9000.0,
- "upMinM": -17.13550514652306,
- "upMaxM": 368.1438666279056,
- "quantStepM": 0.005879076079202073,
+ "upMinM": -20.823067326463246,
+ "upMaxM": 104.50615684021363,
+ "quantStepM": 0.0019124305576750523,
  "nodata": 65535,
- "validCells": 135770,
+ "validCells": 101471,
  "cells": 564001,
- "source": "DTEEC_018854_1755_018920_1755_U01 decimated to ~24 m (same controlled DTM)",
+ "source": "DTEEC_010573_1755_010639_1755_U01 decimated to ~24 m (same controlled DTM)",
  "decimation": 24,
  "cutout": "nodes within 652 m of the origin are left out (the local terrain is drawn there)"
 }

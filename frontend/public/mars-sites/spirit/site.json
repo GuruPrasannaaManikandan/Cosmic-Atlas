@@ -81,7 +81,7 @@
    "z": 0,
    "yawDeg": 0,
    "radius": 2.2,
-   "provenance": "SIMPLIFIED MODEL \u2014 no NASA model of the MER lander exists. Base, three opened petals, deflated airbags and egress aids; shapes and dimensions ILLUSTRATIVE. Placed at the sourced landing coordinate.",
+   "provenance": "SIMPLIFIED MODEL \u2014 no NASA model of the MER lander exists. Base, three opened petals, deflated airbags and egress aids; shapes and dimensions ILLUSTRATIVE. Placed where the lander is identified in the HiRISE orthoimage.",
    "components": [
     {
      "id": "petals",
@@ -107,10 +107,11 @@
   "headingDeg": 60
  },
  "origin": {
-  "latDeg": -14.5692,
-  "lonEastDeg": 175.4729,
-  "source": "PDS ODE (Arvidson et al. 2004), landing site",
-  "registration": "Catalogue coordinate; the hardware has NOT been identified in the HiRISE orthoimage yet. Historical coordinate frames can differ from the HiRISE/MOLA-controlled frame by up to hundreds of metres, so the true spot may be elsewhere in this terrain or beyond it."
+  "latDeg": -14.565818,
+  "lonEastDeg": 175.475472,
+  "source": "HiRISE-identified lander, PSP_001513_1655 controlled orthoimage (this project, M5)",
+  "registration": "Lander identified by eye in the USGS controlled orthoimage PSP_001513_1655: a bright, petalled object about 3 m across, 400 m south-west of the centre of Bonneville crater (the HiRISE team's area \"B\", uahirise.org/PSP_001513_1655). Measured in this controlled frame; 200 m north and 148 m east of the catalogue coordinate (14.5692 S, 175.4729 E; Arvidson et al. 2004). The rover beside the lander is the early-mission scene (offset ILLUSTRATIVE); in this 2006 image Spirit itself was 3 km away at Home Plate.",
+  "located": true
  },
  "terrain": {
   "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_001513_1655_001777_1650_U01 (collection mro_hirise_socet_dtms)",

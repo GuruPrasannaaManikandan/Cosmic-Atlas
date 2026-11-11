@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useStore } from '../store/store'
 import { nav, distanceTo } from '../store/nav'
 import { BY_ID } from '../data/catalog'
-import { sitesForBody, unitySitesForBody, catalogueSitesFor, SURFACE_BODIES } from './sites'
+import { sitesForBody, unitySitesForBody, catalogueSitesFor, SURFACE_BODIES, UNITY_SITE_BY_ID } from './sites'
 import { MISSION_BY_ID } from '../missions'
 import { expedition } from '../expedition/expedition'
 
@@ -48,6 +48,8 @@ export function ExploreSurfaceButton({ hidden }: { hidden?: boolean }) {
  *  overlay would keep owning the keyboard on the new surface */
 function enterSite(id: string) {
   if (expedition.active()) expedition.cancel()
+  // Mars: THEIA arrives in its carrier, which lands on the measured terrain (E3)
+  if (UNITY_SITE_BY_ID[id]?.bodyId === 'mars') expedition.markArrival(id)
   useStore.getState().enterSurface(id)
 }
 
@@ -97,7 +99,7 @@ export function SitePicker({ bodyId, onClose }: { bodyId: string; onClose: () =>
                 <b className="site-card-title">{m?.name ?? s.name}</b>
                 <span className="site-card-meta">
                   {s.name.split(' — ')[1] ?? s.name} · {latLonText(s.origin.latDeg, s.origin.lonEastDeg)}
-                  {m?.landing?.value ? ` · landed ${m.landing.value.slice(0, 10)}` : ''}
+                  {m?.landing?.value ? <> · <span className="nowrap">landed {m.landing.value.slice(0, 10)}</span></> : ''}
                 </span>
                 <span className="site-card-text">{s.summary}</span>
                 {s.hardware && <span className="site-card-hw">{s.hardware}</span>}
@@ -122,10 +124,12 @@ export function SitePicker({ bodyId, onClose }: { bodyId: string; onClose: () =>
             </ul>
           </>
         )}
-        <p className="muted small">Mars environments run in the embedded Unity player (one ~90 MB download, then each site's terrain package of ~11 MB). Terrain: USGS controlled HiRISE products; every model is labelled as a NASA model, a documented reconstruction or a simplified model inside the site.</p>
-        <p className="muted small">
-          Chandrayaan-3 (ISRO) is catalogued as a labelled non-NASA exception; its measured landing position is not sourced yet, so it is not placed on the map.
-        </p>
+        {bodyId === 'mars' && <p className="muted small">Mars environments run in the embedded Unity player (one ~90 MB download, then each site's terrain package of ~11 MB). Terrain: USGS controlled HiRISE products; every model is labelled as a NASA model, a documented reconstruction or a simplified model inside the site.</p>}
+        {bodyId === 'moon' && (
+          <p className="muted small">
+            Chandrayaan-3 (ISRO) is catalogued as a labelled non-NASA exception; its measured landing position is not sourced yet, so it is not placed on the map.
+          </p>
+        )}
       </div>
     </div>
   )

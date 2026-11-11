@@ -21,7 +21,7 @@ export function resolveMode(): InputMode {
   if (useRelive.getState().id) return 'UI_INTERACTION'
   if (st.surfaceSiteId) {
     const S = useSurface.getState()
-    if (S.paused || S.mapOpen || S.helpOpen || S.intro) return 'UI_INTERACTION'
+    if (S.paused || S.mapOpen || S.helpOpen || S.catalogueOpen || S.intro) return 'UI_INTERACTION'
     if (S.replay) return 'HISTORICAL_REPLAY'
     if (S.panel) return 'HARDWARE_INSPECTION'
     if (S.driving) return 'VEHICLE_EXPLORATION'

@@ -3,11 +3,15 @@ import { useStore } from '../store/store'
 import { useSurface } from '../surface/surfaceState'
 import { UNITY_SITE_BY_ID } from '../surface/sites'
 import { planetFor } from '../surface/planets'
-import { MISSION_BY_ID, SOURCES, dateMs } from '../missions'
+import { MISSION_BY_ID, OBJECT_BY_ID, SOURCES, dateMs, type Component } from '../missions'
+import { DiscoveryCatalogue } from '../discovery/DiscoveryCatalogue'
+import { ComponentRecord } from '../discovery/ComponentRecord'
+import { useDiscoveryTracking, noteRecordTab, resolveObject } from '../discovery/tracking'
 import { ControlsPanel } from '../input/ControlsPanel'
 import { input } from '../input/appInput'
 import { startMars, stopMars, onMars, send, addPointer, marsLast, type MarsPose, type MarsReady } from './marsBridge'
 import { MarsMiniMap } from './MarsMiniMap'
+import { TheiaArrival } from './TheiaArrival'
 import { expedition } from '../expedition/expedition'
 import '../input/controls.css'
 import './mars.css'
@@ -35,7 +39,7 @@ export interface SiteDef {
   hardware: SiteHardwareDef[]
   start: { x: number; z: number; headingDeg: number }
   origin: { latDeg: number; lonEastDeg: number; source: string; registration: string }
-  terrain: { dtm: string; spacingM: number; sizeM: number; validFraction: number; albedo: string; horizon: string }
+  terrain: { dtm: string; spacingM: number; sizeM: number; validFraction: number; albedo: string; horizon: string; far?: { spacingM: number[]; extentKm: number; datumOffsetM: number; validFraction: number; provenance: string } }
 }
 
 const deg = (r: number) => (r * 180) / Math.PI
@@ -76,18 +80,24 @@ function SiteMap({ ready, pose, def, onClose }: { ready: MarsReady; pose: MarsPo
         <h2>{def.name} — site map</h2>
         <svg viewBox={`0 0 ${W} ${H}`} className="mars-map-svg" role="img" aria-label="Map of the explorable terrain">
           <rect x={0} y={0} width={W} height={H} className="mm-extent" />
-          {ready.objects.map((o) => (
-            <g key={o.id} transform={`translate(${X(o.x)} ${Y(o.z)})`}>
-              <circle r={10} className="mm-opp" />
-              <text y={-18} className="mm-label" textAnchor="middle">{o.label}</text>
-            </g>
-          ))}
+          {ready.siteId && <image href={`/mars-sites/${ready.siteId}/albedo.jpg`} x={0} y={0} width={W} height={H} preserveAspectRatio="none" opacity={0.92} />}
+          {ready.objects.map((o, i) => {
+            // hardware a few metres apart (a lander and its rover) shares one label instead of printing on top of each other
+            const lead = ready.objects.findIndex((p) => Math.hypot(p.x - o.x, p.z - o.z) < 60)
+            const label = lead === i ? ready.objects.filter((p) => Math.hypot(p.x - o.x, p.z - o.z) < 60).map((p) => p.label).join(' · ') : null
+            return (
+              <g key={o.id} transform={`translate(${X(o.x)} ${Y(o.z)})`}>
+                <circle r={10} className="mm-opp" />
+                {label && <text y={-18} className="mm-label" textAnchor="middle">{label}</text>}
+              </g>
+            )
+          })}
           <g transform={`translate(${X(pose.x)} ${Y(pose.z)}) rotate(${deg(pose.heading)})`}>
             <path d="M0,-16 L10,12 L0,6 L-10,12 Z" className="mm-rover" />
           </g>
         </svg>
         <p className="muted small">
-          North up · {Math.round(W)} × {Math.round(H)} m of measured terrain ({def.terrain.dtm}) · origin {latLon(def.origin.latDeg, def.origin.lonEastDeg)}.
+          North up · {Math.round(W)} × {Math.round(H)} m of measured terrain ({def.terrain.dtm}) · origin {latLon(def.origin.latDeg, def.origin.lonEastDeg)}. Background: the site's ground shade ({def.terrain.albedo}).
           {def.terrain.validFraction < 0.99 && ` ${Math.round((1 - def.terrain.validFraction) * 100)} % of this square lies outside the DTM and is left empty.`}
         </p>
         <p className="muted small mars-honest">{def.origin.registration}</p>
@@ -97,12 +107,25 @@ function SiteMap({ ready, pose, def, onClose }: { ready: MarsReady; pose: MarsPo
   )
 }
 
-function Inspector({ def, ready, hwId, component, onComponent, onClose }: { def: SiteDef; ready: MarsReady; hwId: string; component: string | null; onComponent: (c: string | null) => void; onClose: () => void }) {
+const INSPECTOR_TABS = ['overview', 'parts', 'timeline', 'sources'] as const
+
+/** the scene part to frame for a catalogue component ('' = the whole vehicle) */
+export function framePart(comp: Component | undefined, present: Set<string>): string {
+  if (!comp?.part || !present.has(comp.part)) return ''
+  return comp.placement === 'not-modelled' ? '' : comp.part
+}
+
+function Inspector({ siteId, def, ready, hwId, component, onComponent, onClose }: { siteId: string; def: SiteDef; ready: MarsReady; hwId: string; component: string | null; onComponent: (c: string | null) => void; onClose: () => void }) {
   const hw = def.hardware.find((h) => h.id === hwId) ?? def.hardware[0]
   const rep = ready.objects.find((o) => o.id === hw.id)
   const mission = MISSION_BY_ID[def.missionId]
-  const [tab, setTab] = useState<'overview' | 'parts' | 'timeline' | 'sources'>('overview')
+  const objectId = resolveObject(siteId, hw.id)
+  const obj = objectId ? OBJECT_BY_ID[objectId] : undefined
+  const [tab, setTab] = useState<(typeof INSPECTOR_TABS)[number]>('overview')
+  useEffect(() => noteRecordTab(siteId, objectId, tab, INSPECTOR_TABS), [siteId, objectId, tab])
   const present = new Set((rep?.components ?? []).filter((c) => c.renderers > 0).map((c) => c.id))
+  const comps = obj?.components ?? []
+  const sel = comps.find((c) => c.id === component)
   const srcIds = useMemo(() => [...new Set([...(mission?.milestones.flatMap((m) => m.sources) ?? []), ...(mission?.landing?.sources ?? []), ...(mission?.end?.sources ?? [])])].filter((s) => SOURCES[s]), [mission])
   return (
     <aside className="discovery-panel glass site-inspector" role="dialog" aria-label={`${hw.label} record`} data-testid="site-inspector">
@@ -124,6 +147,10 @@ function Inspector({ def, ready, hwId, component, onComponent, onClose }: { def:
         {tab === 'overview' && (
           <>
             {mission?.summary && <p>{mission.summary}</p>}
+            {obj?.design && <p>{obj.design}</p>}
+            {obj?.findings && obj.findings.length > 0 && (
+              <ul className="cr-findings" data-testid="vehicle-findings">{obj.findings.map((f) => <li key={f.text}>{f.text}</li>)}</ul>
+            )}
             <dl className="site-facts">
               <dt>Status</dt><dd>{mission?.status.value ?? 'unknown'}{mission?.end?.value ? ` · ended ${mission.end.value}` : ''}</dd>
               <dt>Landed</dt><dd>{mission?.landing?.value ?? '—'}</dd>
@@ -136,18 +163,23 @@ function Inspector({ def, ready, hwId, component, onComponent, onClose }: { def:
         )}
         {tab === 'parts' && (
           <>
-            <p className="muted small">Drag the view or use the arrow keys to orbit; wheel to zoom. A part lights up only where the model has it as a separate piece — nothing is drawn on top of the model.</p>
+            <p className="muted small">Pick an instrument or part: the camera frames it and its record opens. Drag the view or use the arrow keys to orbit; wheel to zoom. A part lights up only where the model has it as a separate piece — nothing is drawn on top of the model.</p>
             <ul className="site-parts">
               <li><button className={component === null ? 'on' : ''} onClick={() => onComponent(null)}>Whole {hw.kind === 'rover' ? 'rover' : 'lander'}</button></li>
-              {hw.components.map((c) => (
-                <li key={c.id}>
-                  <button className={component === c.id ? 'on' : ''} disabled={!present.has(c.id)} onClick={() => onComponent(c.id)} title={present.has(c.id) ? '' : 'not a separate part in this model'}>
-                    {c.label}{!present.has(c.id) && ' (not a separate part)'}
-                  </button>
-                </li>
-              ))}
+              {comps.map((c) => {
+                const f = framePart(c, present)
+                return (
+                  <li key={c.id}>
+                    <button className={component === c.id ? 'on' : ''} onClick={() => onComponent(c.id)} data-part={f || undefined}
+                      title={f ? 'framed and highlighted on the model' : c.placement === 'inside' ? 'inside the body' : 'the view frames the whole vehicle'}>
+                      {c.name}{f ? '' : c.placement === 'inside' ? ' · inside' : ' · whole view'}
+                    </button>
+                  </li>
+                )
+              })}
             </ul>
-            {hw.components.length === 0 && <p className="muted small">This NASA model has no separately named parts, so the view frames the whole vehicle.</p>}
+            {comps.length === 0 && <p className="muted small">No catalogue records for the parts of this vehicle yet.</p>}
+            {sel && obj && <ComponentRecord siteId={siteId} objectId={obj.id} comp={sel} framed={!!framePart(sel, present)} />}
             {rep?.note && <p className="muted small">{rep.note}</p>}
           </>
         )}
@@ -160,7 +192,7 @@ function Inspector({ def, ready, hwId, component, onComponent, onClose }: { def:
         )}
         {tab === 'sources' && (
           <ul className="site-sources">
-            {srcIds.map((s) => <li key={s}><a href={SOURCES[s].url} target="_blank" rel="noreferrer">{SOURCES[s].title}</a> <span className="muted small">— {SOURCES[s].organisation}</span></li>)}
+            {[...new Set([...srcIds, ...(obj?.sources ?? [])])].filter((s) => SOURCES[s]).map((s) => <li key={s}><a href={SOURCES[s].url} target="_blank" rel="noreferrer">{SOURCES[s].title}</a> <span className="muted small">— {SOURCES[s].organisation}</span></li>)}
             <li className="muted small">Terrain: {def.terrain.dtm} (USGS Astrogeology controlled HiRISE products). Ground shade: {def.terrain.albedo}.</li>
           </ul>
         )}
@@ -180,10 +212,18 @@ export default function MarsSiteExperience() {
   const [ready, setReady] = useState<MarsReady | null>(null)
   const [pose, setPose] = useState<MarsPose | null>(null)
   const [component, setComponent] = useState<string | null>(null)
+  // the scene caption is read on arrival, then folds to a small chip so it does not cover the horizon (hardware sits there)
+  const [sceneOpen, setSceneOpen] = useState(true)
   const embedded = useRef(false)
   const bannerTimer = useRef<number | null>(null)
   const rover = def?.mode === 'rover'
 
+  useEffect(() => {
+    if (S.intro || !ready) return
+    setSceneOpen(true)
+    const t = window.setTimeout(() => setSceneOpen(false), 12000)
+    return () => window.clearTimeout(t)
+  }, [S.intro, ready?.siteId])
   useEffect(() => {
     let alive = true
     fetch(`/mars-sites/${site.site}/site.json`).then((r) => r.json()).then((d) => alive && setDef(d)).catch((e) => alive && setLoad({ state: 'error', progress: 0, error: `site description: ${e}` }))
@@ -194,7 +234,8 @@ export default function MarsSiteExperience() {
   useEffect(() => {
     const arrival = expedition.peekArrival(siteId)
     useSurface.getState().reset(siteId)
-    useSurface.getState().set({ driving: site.mode === 'rover', intro: arrival, panel: null })
+    // THEIA (conceptual rover) explores every site, rover and lander missions alike (E3)
+    useSurface.getState().set({ driving: true, intro: arrival, panel: null })
     embedded.current = false
     const off = onMars((kind, data) => {
       if (kind === 'ready') {
@@ -237,10 +278,17 @@ export default function MarsSiteExperience() {
   const panelId = S.panel?.objectId ?? null
   useEffect(() => {
     if (load.state !== 'running' || !embedded.current || !ready) return
-    if (panelId) send('Inspect', component ? `${panelId}/${component}` : panelId)
-    else if (S.paused || S.mapOpen || S.helpOpen) send('SetExplorerMode', 'paused')
+    if (panelId) {
+      const oid = resolveObject(siteId, panelId)
+      const comp = oid ? OBJECT_BY_ID[oid]?.components.find((c) => c.id === component) : undefined
+      const rep = ready.objects.find((o) => o.id === panelId)
+      const part = framePart(comp, new Set((rep?.components ?? []).filter((c) => c.renderers > 0).map((c) => c.id)))
+      send('Inspect', part ? `${panelId}/${part}` : panelId)
+    } else if (S.paused || S.mapOpen || S.helpOpen || S.catalogueOpen) send('SetExplorerMode', 'paused')
     else send('SetExplorerMode', S.intro ? 'resume' : 'explore')
-  }, [load.state, ready, panelId, component, S.paused, S.mapOpen, S.helpOpen, S.intro])
+  }, [load.state, ready, panelId, component, S.paused, S.mapOpen, S.helpOpen, S.catalogueOpen, S.intro, siteId])
+
+  useDiscoveryTracking(siteId, pose)
 
   useEffect(() => {
     const open = () => {
@@ -252,9 +300,11 @@ export default function MarsSiteExperience() {
       input.on('interact', open, 'PLANETARY_EXPLORATION'),
       input.on('map', () => useSurface.getState().set({ mapOpen: !useSurface.getState().mapOpen })),
       input.on('help', () => useSurface.getState().set({ helpOpen: true })),
+      input.on('catalogue', () => useSurface.getState().set({ catalogueOpen: !useSurface.getState().catalogueOpen })),
       input.on('back', () => {
         const st = useSurface.getState()
-        if (st.helpOpen) st.set({ helpOpen: false })
+        if (st.catalogueOpen) st.set({ catalogueOpen: false })
+        else if (st.helpOpen) st.set({ helpOpen: false })
         else if (st.mapOpen) st.set({ mapOpen: false })
         else if (st.panel) st.set({ panel: null })
         else if (st.intro) send('SkipArrival')
@@ -310,13 +360,7 @@ export default function MarsSiteExperience() {
         )}
 
         {load.state === 'running' && ready && S.intro && (
-          <div className="surf-intro mars-arrival" role="status" aria-live="polite">
-            <span className="eyebrow">ARRIVAL</span>
-            <b>{site.name}</b>
-            <span className="muted small">{latLon(site.origin.latDeg, site.origin.lonEastDeg)} · Mars</span>
-            <span className="muted small mars-honest">Illustrative arrival: a camera descent to the site — not a reconstruction of {mission?.name}'s entry, descent and landing.</span>
-            <button className="btn ghost small" onClick={() => send('SkipArrival')}>Skip <kbd>Esc</kbd></button>
-          </div>
+          <TheiaArrival siteName={site.name} latLonText={latLon(site.origin.latDeg, site.origin.lonEastDeg)} pose={pose} ready={ready} onSkip={() => send('SkipArrival')} />
         )}
 
         {load.state === 'running' && ready && def && !S.intro && pose && (
@@ -328,6 +372,7 @@ export default function MarsSiteExperience() {
                 <span className="surf-top-meta">{sceneMeta}</span>
               </div>
               <nav className="surf-top-actions" aria-label="Surface actions">
+                <button className="btn ghost" onClick={() => S.set({ catalogueOpen: true })} data-testid="open-catalogue">◈ Discoveries <kbd>J</kbd></button>
                 <button className="btn ghost" onClick={() => S.set({ mapOpen: true })}>🗺 Map <kbd>M</kbd></button>
                 <button className="btn ghost" onClick={() => S.set({ helpOpen: true })} aria-label="Controls help">? <kbd>H</kbd></button>
                 <button className="btn" onClick={() => expedition.returnToOrbit()} data-testid="return-to-orbit">⤴ Return to orbit</button>
@@ -340,7 +385,12 @@ export default function MarsSiteExperience() {
                   ◎ {nearest.label} · <b>{pose.oppDist.toFixed(0)} m</b> · bearing {bearing(pose.x, pose.z, nearest.x, nearest.z).toFixed(0)}°
                 </div>
               )}
-              {!inspecting && <div className="surf-chip mars-scene-note" title={def.origin.registration}>🕰 Scene: {def.scene.label}</div>}
+              {!inspecting && (
+                <button className="surf-chip mars-scene-note" data-open={sceneOpen ? 'on' : 'off'} data-testid="mars-scene-note" aria-expanded={sceneOpen}
+                  title={sceneOpen ? def.origin.registration : `Scene: ${def.scene.label}`} onClick={() => setSceneOpen(!sceneOpen)}>
+                  🕰 {sceneOpen ? <>Scene: {def.scene.label}</> : 'Scene ▸'}
+                </button>
+              )}
             </div>
             <div className="surf-center">
               {S.banner && !inspecting && (
@@ -358,22 +408,22 @@ export default function MarsSiteExperience() {
                 <div className="surf-bottom-left mars-bottom-left">
                   <MarsMiniMap onOpen={() => S.set({ mapOpen: true })} />
                   <div className="mars-telemetry" data-testid="mars-telemetry">
-                    <span className="eyebrow">{rover ? 'EXPEDITION ROVER · ILLUSTRATIVE' : 'ON FOOT · FIRST PERSON'}</span>
-                    <b>{Math.abs(pose.speed).toFixed(1)} m/s{rover && pose.speed < -0.05 ? ' reverse' : ''}</b>
+                    <span className="eyebrow">THEIA · CONCEPTUAL EXPEDITION ROVER</span>
+                    <b>{Math.abs(pose.speed).toFixed(1)} m/s{pose.speed < -0.05 ? ' reverse' : ''}</b>
                     <span className="muted small" data-testid="mars-coords">
                       {pose.x.toFixed(0)} m E, {pose.z.toFixed(0)} m N of the site origin · {latLon(def.origin.latDeg + (pose.z / 3396190) * (180 / Math.PI), def.origin.lonEastDeg + (pose.x / (3396190 * Math.cos((def.origin.latDeg * Math.PI) / 180))) * (180 / Math.PI))}
-                      {rover && ` · pitch ${pose.pitchDeg.toFixed(0)}° roll ${pose.rollDeg.toFixed(0)}°`}
+                      {` · pitch ${pose.pitchDeg.toFixed(0)}° roll ${pose.rollDeg.toFixed(0)}°`}
                     </span>
-                    {pose.blocked && <span className="mars-blocked">{rover ? 'Too steep or blocked — back up or turn' : 'Blocked — hardware or the edge of the measured terrain'}</span>}
+                    {pose.blocked && <span className="mars-blocked">Too steep or blocked — back up or turn</span>}
                   </div>
                 </div>
                 <p className="surf-provenance">
-                  Terrain: {def.terrain.dtm} ({def.terrain.spacingM} m, USGS controlled HiRISE). Ground shade: {def.terrain.albedo}. Sun: Mars24 at an ILLUSTRATIVE {def.scene.ltst}:00 local solar time. {def.scene.tauLabel}. Hardware: see each record (NASA model / documented reconstruction / simplified).
+                  Terrain: {def.terrain.dtm} ({def.terrain.spacingM} m, USGS controlled HiRISE). Ground shade: {def.terrain.albedo}; grain finer than the data (under 0.5 m) ILLUSTRATIVE.{def.terrain.far && ` Far horizon: USGS controlled CTX DTMs at ${def.terrain.far.spacingM[0]} m over ${def.terrain.far.extentKm} km (${Math.round(def.terrain.far.validFraction * 100)} % covered), haze extent ILLUSTRATIVE.`} Sun: Mars24 at an ILLUSTRATIVE {def.scene.ltst}:00 local solar time. {def.scene.tauLabel}. Hardware: see each record (NASA model / documented reconstruction / simplified).
                   {marsLast.build && <span className="mars-build" data-testid="mars-build"> · Unity player {marsLast.build.id}</span>}
                 </p>
                 <div className="surf-bottom-right">
                   <div className="surf-keys">
-                    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> {rover ? 'drive' : 'walk'} · <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> look · <kbd>Shift</kbd> faster · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> pause
+                    <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> drive · <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> look · <kbd>Shift</kbd> faster · <kbd>E</kbd> inspect · <kbd>M</kbd> map · <kbd>Esc</kbd> pause
                   </div>
                 </div>
               </div>
@@ -382,15 +432,26 @@ export default function MarsSiteExperience() {
         )}
       </div>
       {S.panel && def && ready && (
-        <Inspector def={def} ready={ready} hwId={S.panel.objectId} component={component} onComponent={setComponent} onClose={() => S.set({ panel: null })} />
+        <Inspector siteId={siteId} def={def} ready={ready} hwId={S.panel.objectId} component={component} onComponent={setComponent} onClose={() => S.set({ panel: null })} />
       )}
       {S.mapOpen && ready && pose && def && <SiteMap ready={ready} pose={pose} def={def} onClose={() => S.set({ mapOpen: false })} />}
+      {S.catalogueOpen && ready && def && (
+        <DiscoveryCatalogue
+          siteId={siteId}
+          siteName={site.name}
+          missionId={def.missionId}
+          pose={pose}
+          hardware={ready.objects.map((o) => ({ id: o.id, x: o.x, z: o.z, parts: (o.components ?? []).filter((c) => c.renderers > 0).map((c) => c.id) }))}
+          onOpenRecord={(hw) => { setComponent(null); S.set({ catalogueOpen: false, panel: { objectId: hw, tab: 'overview' }, banner: null }) }}
+          onClose={() => S.set({ catalogueOpen: false })}
+        />
+      )}
       {S.helpOpen && (
         <div className="surf-overlay" role="dialog" aria-modal="true" aria-label="Controls">
           <div className="surf-pause glass surf-help">
             <h2>Controls</h2>
-            <ControlsPanel mode={rover ? 'VEHICLE_EXPLORATION' : 'PLANETARY_EXPLORATION'} extra={[{ keys: 'Mouse drag', label: 'Turn the view' }, { keys: 'Wheel', label: rover ? 'Camera distance' : 'Zoom (field of view)' }]} />
-            <p className="muted small">{rover ? `You drive an ILLUSTRATIVE expedition rover (not a NASA design). ${mission?.name}'s own rover stays where the scene places it.` : 'You explore on foot in first person; the lander stays where it landed. Walking speeds are gameplay values.'}</p>
+            <ControlsPanel mode="VEHICLE_EXPLORATION" extra={[{ keys: 'Mouse drag', label: 'Turn the view' }, { keys: 'Wheel', label: 'Camera distance' }]} />
+            <p className="muted small">You drive THEIA, a CONCEPTUAL expedition rover (not a NASA design; speeds and slope limit are gameplay values). {mission?.name}'s own {rover ? 'rover' : 'lander'} is historical hardware: it never moves. The THEIA carrier you landed in is parked nearby.</p>
             <button className="btn" onClick={() => S.set({ helpOpen: false })}>Close</button>
           </div>
         </div>

@@ -56,7 +56,7 @@ namespace CosmicAtlas.Rendering.Mars
         Vector3 _camPos, _camLook; bool _camInit;
 
         // arrival
-        float _arrivalT; const float ArrivalDur = 9f; bool _arrivalDone;
+        float _arrivalT; float ArrivalDur => CarrierArrivalTotal; bool _arrivalDone;
 
         // inspection
         float _insYaw = 0.6f, _insPitch = 0.35f, _insDist = 5f; string _insAnchor = "whole";
@@ -129,6 +129,8 @@ namespace CosmicAtlas.Rendering.Mars
 
             _player = BuildExpeditionRoverDetailed();
             _player.SetActive(false);
+            SetupCarrier(_startPos, opp, p => (p - opp).magnitude >= OppRadius + 16f);
+            _startPos = _pos; _startHeading = _heading;
             Contact(_pos, _heading, out _bodyY, out _pitch, out _roll);
 
             BuildTrail();
@@ -261,6 +263,7 @@ namespace CosmicAtlas.Rendering.Mars
         bool HitsOpportunity(Vector2 p)
         {
             if (_siteMode) return HitsHardware(p, PlayerRadius);
+            if (CarrierBlocks(p, PlayerRadius)) return true;
             var o = new Vector2(_rover.transform.localPosition.x, _rover.transform.localPosition.z);
             float d = (p - o).magnitude, d0 = (_pos - o).magnitude;
             return d < OppRadius + PlayerRadius && d < d0;
@@ -363,20 +366,9 @@ namespace CosmicAtlas.Rendering.Mars
             switch (_mode)
             {
                 case ExplorerMode.Arrival:
-                {
-                    float u = Mathf.Clamp01(_arrivalT / ArrivalDur);
-                    float e = 1 - Mathf.Pow(1 - u, 3);
-                    float dist = Mathf.Exp(Mathf.Lerp(Mathf.Log(700f), Mathf.Log(_camDist), e));
-                    float pitch = Mathf.Lerp(1.52f, _camPitch, Mathf.SmoothStep(0, 1, u));
-                    float yaw = _heading + Mathf.Lerp(1.4f, 0f, e);
-                    // the rover is lowered for the last third (ILLUSTRATIVE): it settles onto the terrain at touchdown
-                    float drop = Mathf.SmoothStep(30f, 0f, Mathf.InverseLerp(0.45f, 0.82f, u));
-                    _player.transform.localPosition = new Vector3(_pos.x, _bodyY + drop, _pos.y);
-                    pos = Orbit(pivot, yaw, pitch, dist); look = pivot;
-                    _camYaw = yaw;
-                    SetCamera(pos, look, 1f);
+                    // E3: the conceptual carrier lands, opens its ramp and THEIA drives out (MarsPrototype.Carrier.cs)
+                    CarrierArrivalLate(dt);
                     return;
-                }
                 case ExplorerMode.Inspect:
                 {
                     var anchor = _rover.transform.TransformPoint(AnchorLocal()) - _world.position; // world-frame (site) point
@@ -598,6 +590,7 @@ namespace CosmicAtlas.Rendering.Mars
               .Append(",\"oppDist\":").Append(MiniJson.N(DistToOpp()))
               .Append(",\"near\":").Append(_mode == ExplorerMode.Explore && DistToOpp() < InteractM + PlayerRadius ? "\"opportunity-rover\"" : "null")
               .Append(",\"arrivalT\":").Append(MiniJson.N(_mode == ExplorerMode.Arrival ? _arrivalT / ArrivalDur : 1))
+              .Append(",\"arrivalPhase\":").Append(MiniJson.Q(_mode == ExplorerMode.Arrival ? _arrivalPhase : ""))
               .Append(",\"sol\":").Append(_sol).Append(",\"replaySol\":").Append(MiniJson.N(_replaySol))
               .Append(",\"utc\":").Append(MiniJson.Q(_utc.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)))
               .Append(",\"sunElevation\":").Append(MiniJson.N(_sunEl)).Append(",\"sunAzimuth\":").Append(MiniJson.N(_sunAz))
@@ -612,6 +605,9 @@ namespace CosmicAtlas.Rendering.Mars
             var prev = _mode;
             _mode = m;
             if (prev == ExplorerMode.Inspect) { if (_siteMode) SiteHighlight(-1); else ClearHighlight(); }
+            // landing sites: the expedition rover steps out of the picture while hardware is inspected (it otherwise sits
+            // inside the inspection frame); it is back, unmoved, when inspection ends
+            if (_siteMode && _player && (m == ExplorerMode.Inspect || prev == ExplorerMode.Inspect)) _player.SetActive(m != ExplorerMode.Inspect);
             if (m != ExplorerMode.Explore) _speed = 0;
             Report("mode", $"{{\"mode\":{MiniJson.Q(m.ToString())},\"prev\":{MiniJson.Q(prev.ToString())}}}");
             Report("pose", _siteMode ? SitePoseJson() : PoseJson());
@@ -620,7 +616,7 @@ namespace CosmicAtlas.Rendering.Mars
         void FinishArrival()
         {
             _arrivalDone = true;
-            if (!_siteMode || _siteKind == "rover") _player.transform.localPosition = new Vector3(_pos.x, _bodyY, _pos.y);
+            CarrierFinal(); // landed, ramp open, THEIA at the foot of the ramp (also when the arrival is skipped)
             SetMode(ExplorerMode.Explore);
             Report("arrived", "{}");
         }
@@ -636,6 +632,7 @@ namespace CosmicAtlas.Rendering.Mars
             _player.SetActive(true);
             _camInit = false;
             _arrivalT = 0; _arrivalDone = false;
+            if (!arrival) CarrierFinal();
             SetMode(arrival ? ExplorerMode.Arrival : ExplorerMode.Explore);
             if (!arrival) _arrivalDone = true;
             Report("ready", ReadyJson());

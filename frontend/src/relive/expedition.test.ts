@@ -59,16 +59,18 @@ describe('Explore expeditions (M3): conceptual flights on the Relive engine', ()
     expect(horiz).toBeGreaterThan(0)
   })
 
-  it('the Mars flight lands and deploys the rover before the surface opens', () => {
+  it('the Mars flight descends to the hand-off; the landing and deployment happen on the measured terrain (Unity)', () => {
     const s = SCRIPTS[2]
     const end = s.segments[s.segments.length - 1].t1
     const f = s.frame!(end)
     expect(f.env).toBe('mars-local')
-    const rover = f.objects.find((o) => o.model === 'exp-rover')!
     const lander = f.objects.find((o) => o.model === 'exp-mlander')!
-    expect(rover.pos[1]).toBeLessThan(0.1) // on the ground
-    expect(Math.hypot(rover.pos[0] - lander.pos[0], rover.pos[2] - lander.pos[2])).toBeGreaterThan(5) // off the lander
-    expect(s.events.map((e) => e.id)).toEqual(expect.arrayContaining(['entry', 'chute', 'touchdown', 'ramp', 'drive']))
+    expect(lander).toBeDefined()
+    expect(lander.pos[1]).toBeGreaterThan(200) // in powered descent ~300 m above the site
+    expect(lander.pos[1]).toBeLessThan(400)
+    expect(lander.thrust).toBe(1)
+    expect(s.events.map((e) => e.id)).toEqual(expect.arrayContaining(['entry', 'chute', 'powered', 'handoff']))
+    expect(s.events.map((e) => e.id)).not.toContain('touchdown')
   })
 
   it('the Moon return climbs from the surface hand-off and ends back near Earth', () => {

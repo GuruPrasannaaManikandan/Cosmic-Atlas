@@ -42,6 +42,7 @@ ap.add_argument('--out', default=str(Path(__file__).resolve().parents[2] / 'fron
 ap.add_argument('--check-dir', default=None, help='also write the stretched orthoimage here (hardware location checks)')
 a = ap.parse_args()
 
+ROCK_CLEAR_M = 6.0  # no rocks within this distance of the site origin (the main hardware)
 MARS_GEO = CRS.from_proj4(f'+proj=longlat +R={R} +no_defs')
 RAMP_T = np.array([0.0, 0.35, 0.65, 1.0])
 RAMP_C = np.array([[0.20, 0.13, 0.09], [0.43, 0.27, 0.17], [0.66, 0.47, 0.32], [0.86, 0.71, 0.53]])  # victoria_surface.py
@@ -133,6 +134,9 @@ def build(sid):
     out.mkdir(parents=True, exist_ok=True)
     item = stac_item(s['dtm'])
     fr = Frame(lat0, lon0)
+    # productShiftM: where this HiRISE product draws a feature, relative to the CTX/MOLA-controlled frame the origin is
+    # given in (measured by co-registration); the DTM and orthoimage are sampled with it so the terrain lines up
+    sh_e, sh_n = s.get('productShiftM', (0.0, 0.0))
     print(f'[{sid}] origin {lat0:.6f}, {lon0:.6f}  DTM {item["id"]}', flush=True)
 
     # ---- 1. local terrain, exact ENU grid ----
@@ -140,14 +144,14 @@ def build(sid):
     n_cells = int(round(a.size / a.spacing)) + 1
     ax = -half + np.arange(n_cells) * a.spacing
     ee, nn = np.meshgrid(ax, ax[::-1])  # rows run north -> south
-    lat, lon = fr.latlon(ee, nn)
+    lat, lon = fr.latlon(ee + sh_e, nn + sh_n)
     h, info = sample(dtm_href(item), lat, lon)
     h0 = float(np.nanmedian(h))
     up = fr.up(ee, nn, h - h0)
     q, lo, step = write_grid(out / 'height.bin', out / 'terrain.json', up, a.spacing, float(ax[0]), float(ax[-1]), {
         'source': f'USGS Astrogeology controlled HiRISE DTM {item["id"]} (collection mro_hirise_socet_dtms)',
         'dtmUrl': dtm_href(item), 'dtmNativeM': info['native'], 'dtmCrs': info['crs'],
-        'originLatLon': [lat0, lon0], 'originSource': s['source'],
+        'originLatLon': [lat0, lon0], 'originSource': s['source'], 'productShiftM': [sh_e, sh_n],
         'elevationReferenceM': h0, 'elevationDatum': 'as in the DTM (USGS ARD: Mars 2015 sphere, R 3396190 m)',
         'curvature': f'up includes the sphere curvature about the origin (R {R / 1000:.2f} km)',
     })
@@ -162,7 +166,7 @@ def build(sid):
     na = int(round(a.size / a.albedo)) + 1
     axa = -half + np.arange(na) * a.albedo
     ea, nb = np.meshgrid(axa, axa[::-1])
-    lat_a, lon_a = fr.latlon(ea, nb)
+    lat_a, lon_a = fr.latlon(ea + sh_e, nb + sh_n)
     oh = ortho_href(item, 'RED_A')
     g, oinfo = sample(oh, lat_a, lon_a, res=a.albedo, fill=np.nan)
     g = np.where(g <= 0, np.nan, g)
@@ -204,6 +208,8 @@ def build(sid):
         ok = ~np.isnan(zz)
         rocks.append(np.stack([e_[ok], n_[ok], zz[ok], sc[ok], (rng.random(len(rr_)) * 360)[ok], np.full(ok.sum(), cat)], -1))
     rocks = np.concatenate(rocks).astype('<f4')
+    # keep the hardware's footprint clear: the origin is the lander, and the lander itself is a bright spot in the image
+    rocks = rocks[np.hypot(rocks[:, 0], rocks[:, 1]) > ROCK_CLEAR_M]
     rocks.tofile(out / 'rocks.bin')
     print(f'[{sid}] rocks {[(k, int((rocks[:, 5] == k).sum())) for k in (1, 2, 3)]}', flush=True)
 
@@ -212,7 +218,7 @@ def build(sid):
     nh_ = int(round(2 * a.horizon / hs)) + 1
     axh = -a.horizon + np.arange(nh_) * hs
     eh, nh2 = np.meshgrid(axh, axh[::-1])
-    lat_h, lon_h = fr.latlon(eh, nh2)
+    lat_h, lon_h = fr.latlon(eh + sh_e, nh2 + sh_n)
     hh, hinfo = sample(dtm_href(item), lat_h, lon_h, res=hs)
     uph = fr.up(eh, nh2, hh - h0) - 0.5  # 0.5 m below the local terrain where they overlap (no z-fighting)
     inner = (np.abs(eh) < half - 2 * hs) & (np.abs(nh2) < half - 2 * hs)  # the local square replaces the horizon here

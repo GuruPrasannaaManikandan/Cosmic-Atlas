@@ -25,7 +25,7 @@ export type Action =
   | 'moveForward' | 'moveBack' | 'moveLeft' | 'moveRight'
   | 'lookUp' | 'lookDown' | 'lookLeft' | 'lookRight'
   | 'ascend' | 'descend' | 'rollLeft' | 'rollRight'
-  | 'sprint' | 'jump' | 'interact' | 'board' | 'camera' | 'back' | 'map' | 'help'
+  | 'sprint' | 'jump' | 'interact' | 'board' | 'camera' | 'back' | 'map' | 'help' | 'catalogue'
   | 'brake' | 'pilotMode' | 'stabilisation' | 'flightModel' | 'gear1' | 'gear2' | 'gear3' | 'gear4'
   | 'playPause' | 'prevEvent' | 'nextEvent'
 
@@ -69,6 +69,7 @@ export const DEFAULT_BINDINGS: Record<InputMode, Binding[]> = {
     // (no 'board' binding yet: rover driving is not implemented, and the panel must only list working controls)
     { action: 'camera', codes: ['KeyC', 'KeyV'], label: 'First / third person' },
     { action: 'map', codes: ['KeyM'], label: 'Site map' },
+    { action: 'catalogue', codes: ['KeyJ'], label: 'Discovery catalogue' },
     { action: 'help', codes: ['KeyH'], label: 'Controls' },
     { action: 'back', codes: ['Escape'], label: 'Pause' },
   ],
@@ -78,6 +79,7 @@ export const DEFAULT_BINDINGS: Record<InputMode, Binding[]> = {
     { action: 'sprint', codes: ['ShiftLeft', 'ShiftRight'], label: 'Higher speed limit while held', held: true },
     { action: 'interact', codes: ['KeyE'], label: 'Inspect nearby hardware' },
     { action: 'map', codes: ['KeyM'], label: 'Site map' },
+    { action: 'catalogue', codes: ['KeyJ'], label: 'Discovery catalogue' },
     { action: 'help', codes: ['KeyH'], label: 'Controls' },
     { action: 'back', codes: ['Escape'], label: 'Pause' },
   ],

@@ -289,7 +289,9 @@ export const MARS_LANDING_LOCAL: V3 = [0, 0, 0]
 export function marsOutbound(tg: ExpeditionTarget, landingMs: number): MissionScript {
   const C = Math.max(30, tg.cruiseDays) * 86400
   const T_E = C - 600 // entry interface, 10 minutes before the end
-  const T_CHUTE = T_E + 240, T_PWR = T_E + 330, T_TD = T_E + 372, T_RAMP = T_TD + 12, T_DRIVE = T_TD + 24, END = T_TD + 60
+  // E3: the flight hands over to the Unity view about 300 m above the site (1500 m x (1 - 0.52)^2.2), where the carrier
+  // finishes its powered descent onto the measured terrain, opens its ramp and THEIA drives out (MarsPrototype.Carrier.cs)
+  const T_CHUTE = T_E + 240, T_PWR = T_E + 330, T_TD = T_E + 372, END = T_PWR + 22
   const epoch = landingMs - END * 1000
   const ms = (t: number) => epoch + t * 1000
   const SITE = llUnit(tg.latDeg, tg.lonEastDeg)
@@ -385,11 +387,9 @@ export function marsOutbound(tg: ExpeditionTarget, landingMs: number): MissionSc
     objs.push({ key: 'backshell', model: 'exp-capsule', pos: back, fwd: up, side: [1, 0, 0], p: { backOnly: 1 }, fade: t > shellCut ? 1 - smooth((t - shellCut - 10) / 10) : 1 })
     objs.push({ key: 'chute', model: 'mer-chute', pos: v3.add(back, [0, 3, 0]), fwd: up, side: [1, 0, 0], p: { open: smooth(ramp(t, T_CHUTE, T_CHUTE + 2)) }, fade: t > shellCut ? 1 - smooth((t - shellCut - 10) / 10) : 1 })
     if (t < T_CHUTE + 30) objs.push({ key: 'heatshield', model: 'exp-heatshield', pos: v3.add(p, [0, -0.4 - 0.5 * 3.71 * Math.pow(Math.max(0, t - T_CHUTE - 8), 2) * 0.3, 0]), fwd: up, side: [1, 0, 0], fade: 1 - smooth((t - T_CHUTE - 20) / 10) })
-    objs.push({ key: 'craft', model: 'exp-mlander', pos: p, fwd: up, side: [1, 0, 0], thrust: t > T_PWR - 2 && t < T_TD ? 1 : 0, p: { ramp: smooth(ramp(t, T_TD + 4, T_RAMP)), legs: smooth(ramp(t, T_PWR - 30, T_PWR)) } })
-    const drive = smooth(ramp(t, T_DRIVE, END - 8))
-    objs.push({ key: 'rover', model: 'exp-rover', pos: v3.add(p, [0, 1.25 * (1 - smooth(ramp(t, T_RAMP + 2, T_DRIVE + 8))) + 0.02, 1.2 + 7 * drive]), fwd: up, side: [1, 0, 0], p: { drive } })
+    objs.push({ key: 'craft', model: 'exp-mlander', pos: p, fwd: up, side: [1, 0, 0], thrust: t > T_PWR - 2 && t < T_TD ? 1 : 0, p: { ramp: 0, legs: smooth(ramp(t, T_PWR - 30, T_PWR)) } })
     return {
-      env: 'mars-local', focus: v3.add(p, [0, 1.4, t > T_DRIVE ? 4 * drive : 0]), axis: up, vel, up, alt: p[1], sun: v3.norm([sp[0], sp[2], -sp[1]]), objects: objs, bodies: [],
+      env: 'mars-local', focus: v3.add(p, [0, 1.4, 0]), axis: up, vel, up, alt: p[1], sun: v3.norm([sp[0], sp[2], -sp[1]]), objects: objs, bodies: [],
       site: { pos: [0, 0, 0], up, e: [1, 0, 0], n: [0, 0, -1], kind: 'mars' },
     }
   }
@@ -403,8 +403,7 @@ export function marsOutbound(tg: ExpeditionTarget, landingMs: number): MissionSc
       { id: 'cruise', t0: 2 * 3600, t1: T_E - 900, env: 'interplanetary', title: 'Cruise to Mars', summary: `${tg.cruiseDays.toFixed(0)} days, as long as ${tg.cruiseMission} took` },
       { id: 'approach', t0: T_E - 900, t1: T_E, env: 'mars-near', title: 'Mars approach', summary: 'Straight into the atmosphere from the approach path' },
       { id: 'entry', t0: T_E, t1: T_CHUTE, env: 'mars-near', title: 'Entry', summary: 'Heat shield first through the thin atmosphere' },
-      { id: 'landing', t0: T_CHUTE, t1: T_TD, env: 'mars-descent', title: 'Parachute and powered landing', summary: `Down to ${tg.name}` },
-      { id: 'deploy', t0: T_TD, t1: END, env: 'mars-surface', title: 'Rover deployment', summary: 'The ramp comes down and the rover drives off' },
+      { id: 'landing', t0: T_CHUTE, t1: END, env: 'mars-descent', title: 'Parachute and powered descent', summary: `Down toward ${tg.name}; the carrier lands on the measured terrain next` },
     ],
     events: [
       ev('leo', 0, 'In low Earth orbit', 'The expedition entry capsule, with the rover inside, waits on its departure stage.', 'orbit'),
@@ -414,13 +413,11 @@ export function marsOutbound(tg: ExpeditionTarget, landingMs: number): MissionSc
       ev('entry', T_E, 'Atmospheric entry', 'Into the atmosphere at about 5.6 km/s, heat shield first.', 'entry'),
       ev('chute', T_CHUTE, 'Parachute', 'The parachute opens 10 km up; the heat shield falls away.', 'parachute', { cue: 'chute' }),
       ev('powered', T_PWR, 'Powered landing', 'The lander drops from the backshell and flies down on its engines.', 'ignition', { cue: 'ignition' }),
-      ev('touchdown', T_TD, 'Touchdown', `On the ground at ${tg.name}.`, 'landing', { cue: 'touchdown' }),
-      ev('ramp', T_RAMP, 'Ramp down', 'The ramp unfolds to the ground.', 'deploy', { cue: 'pyro' }),
-      ev('drive', T_DRIVE, 'Rover drives off', 'The expedition rover rolls onto Mars — the camera rover you explore with.', 'surface', { cue: 'touchdown' }),
+      ev('handoff', END - 1, 'Final descent', `About 300 m above ${tg.name}: the carrier finishes its landing on the measured terrain, opens its ramp and THEIA drives out.`, 'landing'),
     ],
     segments: [
       { t0: 0, t1: BURN1 + 120, play: 12 }, { t0: BURN1 + 120, t1: 2 * 3600, play: 4 }, { t0: 2 * 3600, t1: T_E - 900, play: 16 },
-      { t0: T_E - 900, t1: T_E, play: 6 }, { t0: T_E, t1: T_CHUTE, play: 12 }, { t0: T_CHUTE, t1: T_TD, play: 16 }, { t0: T_TD, t1: END, play: 14 },
+      { t0: T_E - 900, t1: T_E, play: 6 }, { t0: T_E, t1: T_CHUTE, play: 12 }, { t0: T_CHUTE, t1: END, play: 16 },
     ],
     telemetry: [],
     shots: [
@@ -431,12 +428,11 @@ export function marsOutbound(tg: ExpeditionTarget, landingMs: number): MissionSc
       { t: T_E - 120, shot: { kind: 'chase', dist: 30, elev: 14, azim: 200, fov: 45 }, label: 'Entry' },
       { t: T_CHUTE, shot: { kind: 'side', dist: 60, elev: 4, azim: 90, fov: 45 }, label: 'Parachute' },
       { t: T_PWR - 5, shot: { kind: 'low', dist: 40, elev: 10, azim: 150, fov: 48 }, label: 'Landing' },
-      { t: T_TD + 2, shot: { kind: 'low', dist: 14, elev: 14, azim: 140, fov: 46 }, label: 'Deployment' },
     ],
     illustrative: [
-      'The expedition capsule, lander, rover and the whole flight sequence are CONCEPTUAL — not a NASA spacecraft and not a real mission.',
+      'The expedition capsule, the THEIA carrier, the THEIA rover and the whole flight sequence are CONCEPTUAL — not a NASA spacecraft and not a real mission.',
       'Earth and Mars are at their computed positions; the cruise path is an illustrative arc and the entry track is illustrative.',
-      'The terrain of this landing scene is illustrative; the surface you explore next is the measured HiRISE terrain in the embedded Unity view.',
+      'The terrain under the descent here is illustrative; the landing itself happens on the measured HiRISE terrain in the embedded Unity view.',
       'Sound is synthesised sound design, not archival audio.',
     ],
     conclusion: { title: 'Landed', text: '', sources: [] },

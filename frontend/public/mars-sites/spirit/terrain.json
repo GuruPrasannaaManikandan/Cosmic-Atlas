@@ -8,9 +8,9 @@
  ],
  "gridEastOfOriginM": -700.0,
  "gridNorthOfOriginM": 700.0,
- "upMinM": -9.12314827584052,
- "upMaxM": 7.572716572137892,
- "quantStepM": 0.0002547664547864988,
+ "upMinM": -8.505838563899797,
+ "upMaxM": 6.2033759487139655,
+ "quantStepM": 0.00022445165124383926,
  "nodata": 65535,
  "validCells": 1962801,
  "cells": 1962801,
@@ -19,11 +19,11 @@
  "dtmNativeM": 1.0148881802050282,
  "dtmCrs": "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs=True",
  "originLatLon": [
-  -14.5692,
-  175.4729
+  -14.565818,
+  175.475472
  ],
- "originSource": "PDS ODE (Arvidson et al. 2004), landing site",
- "elevationReferenceM": -1944.8669227908276,
+ "originSource": "HiRISE-identified lander, PSP_001513_1655 controlled orthoimage (this project, M5)",
+ "elevationReferenceM": -1945.4530662629684,
  "elevationDatum": "as in the DTM (USGS ARD: Mars 2015 sphere, R 3396190 m)",
  "curvature": "up includes the sphere curvature about the origin (R 3396.19 km)"
 }

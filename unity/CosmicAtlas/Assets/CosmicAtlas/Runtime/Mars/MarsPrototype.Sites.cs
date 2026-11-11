@@ -48,13 +48,15 @@ namespace CosmicAtlas.Rendering.Mars
             public readonly Dictionary<string, List<Renderer>> Groups = new Dictionary<string, List<Renderer>>();
             public readonly Dictionary<Renderer, Color> Base = new Dictionary<Renderer, Color>();
             public Vector2 XZ => new Vector2(Go.transform.localPosition.x, Go.transform.localPosition.z);
+            /// <summary>world-space bounds of the model, cached (hardware never moves)</summary>
+            public Bounds? B;
         }
 
         bool _siteMode, _siteReady;
         string _siteId = "", _siteBase = "/mars-sites/", _siteKind = "lander", _siteError;
         Dictionary<string, object> _siteDef;
-        MarsTerrain _horizon;
-        Material _siteTerrainMat, _horizonMat;
+        MarsTerrain _horizon, _far;
+        Material _siteTerrainMat, _horizonMat, _farMat;
         Texture2D _siteAlbedo;
         readonly List<Hw> _hw = new List<Hw>();
         readonly List<UnityEngine.Object> _siteOwned = new List<UnityEngine.Object>(); // runtime meshes / materials / textures to free
@@ -120,7 +122,16 @@ namespace CosmicAtlas.Rendering.Mars
             yield return Fetch(dir + "ground_mask.bin", r => maskBin = r.downloadHandler.data);
             yield return Fetch(dir + "horizon.json", r => horizonMeta = r.downloadHandler.text);
             yield return Fetch(dir + "horizon.bin", r => horizonBytes = r.downloadHandler.data);
-            _siteError = null; // the horizon is optional
+            // far ring (build_far.py: controlled CTX DTMs out to tens of km), only where the site file lists one
+            string farMeta = null; byte[] farBytes = null, farAlbedo = null;
+            var terrDef = _siteDef.TryGetValue("terrain", out var td) ? MiniJson.O(td) : null;
+            if (terrDef != null && terrDef.TryGetValue("far", out var fo) && fo is Dictionary<string, object>)
+            {
+                yield return Fetch(dir + "far.json", r => farMeta = r.downloadHandler.text);
+                yield return Fetch(dir + "far.bin", r => farBytes = r.downloadHandler.data);
+                yield return Fetch(dir + "far_albedo.jpg", r => farAlbedo = r.downloadHandler.data);
+            }
+            _siteError = null; // the horizon and the far ring are optional
 
             _terrain = MarsTerrain.Load(heights, terrainMeta);
             heights = null;
@@ -129,6 +140,11 @@ namespace CosmicAtlas.Rendering.Mars
                 try { _horizon = MarsTerrain.Load(horizonBytes, horizonMeta); } catch (Exception e) { Debug.LogWarning("[Mars] horizon: " + e.Message); }
             }
             horizonBytes = null;
+            if (farMeta != null && farBytes != null)
+            {
+                try { _far = MarsTerrain.Load(farBytes, farMeta); } catch (Exception e) { Debug.LogWarning("[Mars] far ring: " + e.Message); }
+            }
+            farBytes = null;
             // rocks: placement from HiRISE brightness + DTM slope (build_site.py), shapes ILLUSTRATIVE (MarsRocks)
             if (rocksBin != null && rocksBin.Length >= 24 && rockMaterial)
             {
@@ -150,12 +166,28 @@ namespace CosmicAtlas.Rendering.Mars
             _siteTerrainMat.SetTexture("_BaseMap", _siteAlbedo);
             _siteTerrainMat.SetTexture("_BumpMap", Texture2D.normalTexture);
             _siteOwned.Add(_siteTerrainMat);
+            ApplyGroundDetail(_siteTerrainMat);
             var tone = new Texture2D(4, 4, TextureFormat.RGB24, false) { name = "horizon tone" };
             var px = new Color32[16]; for (int k = 0; k < 16; k++) px[k] = new Color32(118, 82, 58, 255); // ILLUSTRATIVE regolith tone
             tone.SetPixels32(px); tone.Apply(false, true);
             _horizonMat = new Material(terrainMaterial) { name = _siteId + " horizon" };
             _horizonMat.SetTexture("_BaseMap", tone); _horizonMat.SetTexture("_BumpMap", Texture2D.normalTexture);
             _siteOwned.Add(tone); _siteOwned.Add(_horizonMat);
+            if (_far != null)
+            {
+                var ft = new Texture2D(2, 2, TextureFormat.RGB24, true) { name = _siteId + " far albedo" };
+                if (farAlbedo != null) ft.LoadImage(farAlbedo); else ft = tone;
+                ft.wrapMode = TextureWrapMode.Clamp; ft.anisoLevel = 4; ft.filterMode = FilterMode.Trilinear;
+                if (ft != tone) { ft.Apply(true, true); _siteOwned.Add(ft); }
+                _farMat = new Material(terrainMaterial) { name = _siteId + " far" };
+                _farMat.SetTexture("_BaseMap", ft); _farMat.SetTexture("_BumpMap", Texture2D.normalTexture);
+                _siteOwned.Add(_farMat);
+                // tens of km in view: the ILLUSTRATIVE haze reaches further (a far ring would otherwise be fogged out) and
+                // the near plane moves out a little so the depth buffer still separates ridges 40 km away
+                _look.FogStart = 2000f; _look.FogEnd = 110000f;
+                cam.nearClipPlane = 0.25f; cam.farClipPlane = 90000f;
+            }
+            farAlbedo = null;
 
             // time: the scene's documented date at an ILLUSTRATIVE local time; the mission sol from the landing
             var scene = MiniJson.O(_siteDef["scene"]);
@@ -183,19 +215,14 @@ namespace CosmicAtlas.Rendering.Mars
             _siteStartHeading = Num(st, "headingDeg") * Mathf.Deg2Rad;
             _pos = _siteStart; _heading = _siteStartHeading; _camYaw = _heading; _camYawOffset = 0;
             _rover = _hw.Count > 0 ? _hw[0].Go : new GameObject("no hardware");
-            if (_siteKind == "rover")
-            {
-                _player = BuildExpeditionRoverDetailed();
-                Contact(_pos, _heading, out _bodyY, out _pitch, out _roll);
-                _camPitch = 0.24f; _camDist = 7.5f;
-            }
-            else
-            {
-                _player = new GameObject("Explorer on foot (camera only)");
-                _player.transform.SetParent(_world, false);
-                _bodyY = SafeHeight(_pos.x, _pos.y);
-                _camPitch = 0.05f; _camDist = 0;
-            }
+            // E3: THEIA (the conceptual expedition rover) explores every site; it lands in the conceptual carrier near the
+            // site's start point, the ramp facing the main hardware, well clear of every historical object
+            _player = BuildExpeditionRoverDetailed();
+            var face = _hw.Count > 0 ? _hw[0].XZ : _siteStart + Vector2.up * 30f;
+            SetupCarrier(_siteStart, face, p => _hw.All(h => (p - h.XZ).magnitude >= h.Radius + 14f));
+            _siteStart = _pos; _siteStartHeading = _heading;
+            Contact(_pos, _heading, out _bodyY, out _pitch, out _roll);
+            _camPitch = 0.24f; _camDist = 7.5f;
             _player.SetActive(false);
             cam.fieldOfView = _fov;
 
@@ -236,7 +263,7 @@ namespace CosmicAtlas.Rendering.Mars
                 yield return Fetch(_siteBase + "models/" + name + ".json", r => json = r.downloadHandler.text);
                 yield return Fetch(_siteBase + "models/" + name + ".bin", r => bin = r.downloadHandler.data);
                 if (json == null || bin == null) { Debug.LogError("[Mars] model " + name + ": " + _siteError); _siteError = null; yield break; }
-                go = BuildGlbModel(hw.Label, json, bin, out hw.Note);
+                go = BuildGlbModel(hw.Label, json, bin, out hw.Note, ModelRegions(d));
             }
             else if (hw.Model == "mer")
             {
@@ -285,6 +312,7 @@ namespace CosmicAtlas.Rendering.Mars
                     }
                     hw.Groups[cid] = list.Distinct().ToList();
                 }
+            DeployComponents(hw, d);
             _hw.Add(hw);
         }
 
@@ -292,7 +320,59 @@ namespace CosmicAtlas.Rendering.Mars
         /// A NASA 3D Resources model converted by scripts/mars/convert_glb.py: one mesh per named part, flat PBR colours from
         /// the model's own materials, metres, glTF axes (z mirrored here, with the triangle winding flipped to match).
         /// </summary>
-        GameObject BuildGlbModel(string label, string json, byte[] bin, out string note)
+        /// <summary>
+        /// Deployed configuration (site.json: a component with "deployTo": [x, z] in the model frame, metres): the
+        /// component's pieces of the model are moved, unchanged, from where the model stows them to that spot, resting on
+        /// the measured terrain (e.g. InSight's SEIS, its shield and HP3 on the ground in front of the lander).
+        /// </summary>
+        void DeployComponents(Hw hw, Dictionary<string, object> d)
+        {
+            if (!d.TryGetValue("components", out var comps) || comps == null) return;
+            foreach (var c in MiniJson.A(comps))
+            {
+                var co = MiniJson.O(c);
+                if (!co.TryGetValue("deployTo", out var to) || to == null) continue;
+                var t = MiniJson.A(to);
+                if (t.Count < 2 || !hw.Groups.TryGetValue(Str(co, "id"), out var rs) || rs.Count == 0) continue;
+                // bounds of the group in the model frame (the model root's children carry identity transforms)
+                Bounds b = default; bool any = false;
+                foreach (var r in rs)
+                {
+                    var mf = r.GetComponent<MeshFilter>();
+                    if (!mf || !mf.sharedMesh) continue;
+                    var mb = mf.sharedMesh.bounds; mb.center += r.transform.localPosition;
+                    if (!any) { b = mb; any = true; } else b.Encapsulate(mb);
+                }
+                if (!any) continue;
+                var target = new Vector3(MiniJson.F(t[0]), 0, MiniJson.F(t[1]));
+                var site = hw.Go.transform.localPosition + hw.Go.transform.localRotation * target;
+                float g = _terrain.Sample(site.x, site.z);
+                if (float.IsNaN(g)) g = hw.Go.transform.localPosition.y;
+                var delta = new Vector3(target.x - b.center.x, (g - hw.Go.transform.localPosition.y) - b.min.y, target.z - b.center.z);
+                foreach (var r in rs) r.transform.localPosition += delta;
+            }
+        }
+
+        /// <summary>
+        /// Component regions of a NASA model that has no separately named parts (site.json: a component with "boxes",
+        /// model frame = glTF with z mirrored, metres, base at y = 0). Identified on the model's own geometry by this project
+        /// (scripts/mars/model_views.py); nothing is added to the model — its triangles are only grouped.
+        /// </summary>
+        static List<(string id, float[][] boxes)> ModelRegions(Dictionary<string, object> d)
+        {
+            var list = new List<(string, float[][])>();
+            if (!d.TryGetValue("components", out var comps) || comps == null) return list;
+            foreach (var c in MiniJson.A(comps))
+            {
+                var co = MiniJson.O(c);
+                if (!co.TryGetValue("boxes", out var bo) || bo == null) continue;
+                var boxes = MiniJson.A(bo).Select(b => MiniJson.A(b).Select(MiniJson.F).ToArray()).Where(b => b.Length == 6).ToArray();
+                if (boxes.Length > 0) list.Add((Str(co, "id"), boxes));
+            }
+            return list;
+        }
+
+        GameObject BuildGlbModel(string label, string json, byte[] bin, out string note, List<(string id, float[][] boxes)> regions = null)
         {
             var doc = MiniJson.O(MiniJson.Parse(json));
             var root = new GameObject(label);
@@ -317,11 +397,25 @@ namespace CosmicAtlas.Rendering.Mars
                     idx[i + 1] = (int)BitConverter.ToUInt32(bin, io0 + (i + 2) * 4); // mirrored z: swap to keep front faces outward
                     idx[i + 2] = (int)BitConverter.ToUInt32(bin, io0 + (i + 1) * 4);
                 }
-                var mesh = new Mesh { name = Str(p, "name"), indexFormat = vc > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16 };
-                mesh.vertices = v; mesh.normals = n; mesh.triangles = idx; mesh.RecalculateBounds();
-                mesh.UploadMeshData(true);
-                _siteOwned.Add(mesh);
                 tris += ic / 3;
+                // split the part's triangles by component region (first box containing the triangle's centroid wins)
+                var buckets = new Dictionary<string, List<int>>();
+                for (int t = 0; t + 2 < ic; t += 3)
+                {
+                    string region = "";
+                    if (regions != null && regions.Count > 0)
+                    {
+                        var cen = (v[idx[t]] + v[idx[t + 1]] + v[idx[t + 2]]) / 3f;
+                        foreach (var (rid, boxes) in regions)
+                        {
+                            foreach (var b in boxes)
+                                if (cen.x >= b[0] && cen.y >= b[1] && cen.z >= b[2] && cen.x <= b[3] && cen.y <= b[4] && cen.z <= b[5]) { region = rid; break; }
+                            if (region.Length > 0) break;
+                        }
+                    }
+                    if (!buckets.TryGetValue(region, out var bl)) buckets[region] = bl = new List<int>();
+                    bl.Add(idx[t]); bl.Add(idx[t + 1]); bl.Add(idx[t + 2]);
+                }
                 var col = MiniJson.A(p["color"]);
                 string key = Str(p, "material") + "|" + string.Join(",", col.Select(c => Convert.ToString(c, CultureInfo.InvariantCulture)));
                 if (!mats.TryGetValue(key, out var m))
@@ -333,10 +427,18 @@ namespace CosmicAtlas.Rendering.Mars
                     m.SetFloat("_Smoothness", Mathf.Clamp01(1f - Num(p, "roughness", 0.6f)) * 0.8f);
                     mats[key] = m; _siteOwned.Add(m);
                 }
-                var go = new GameObject(Str(p, "name"));
-                go.transform.SetParent(root.transform, false);
-                go.AddComponent<MeshFilter>().sharedMesh = mesh;
-                go.AddComponent<MeshRenderer>().sharedMaterial = m;
+                foreach (var kv in buckets)
+                {
+                    var mesh = new Mesh { name = Str(p, "name") + (kv.Key.Length > 0 ? "/" + kv.Key : ""), indexFormat = vc > 65000 ? IndexFormat.UInt32 : IndexFormat.UInt16 };
+                    mesh.vertices = v; mesh.normals = n; mesh.triangles = kv.Value.ToArray(); mesh.RecalculateBounds();
+                    mesh.UploadMeshData(true);
+                    _siteOwned.Add(mesh);
+                    // region pieces are named "region:<component>" so the component's parts list can select them
+                    var go = new GameObject(kv.Key.Length > 0 ? "region:" + kv.Key : Str(p, "name"));
+                    go.transform.SetParent(root.transform, false);
+                    go.AddComponent<MeshFilter>().sharedMesh = mesh;
+                    go.AddComponent<MeshRenderer>().sharedMaterial = m;
+                }
             }
             var cal = MiniJson.O(doc["calibration"]);
             note = $"{Str(doc, "source")}; {Str(cal, "method")}; {tris} triangles";
@@ -584,8 +686,7 @@ namespace CosmicAtlas.Rendering.Mars
                     if (_arrivalT >= ArrivalDur && !_arrivalDone) FinishArrival();
                     break;
                 case ExplorerMode.Explore:
-                    if (_siteKind == "rover") { StepVehicle(dt, mx, my, sprint); LookExplore(dt); }
-                    else StepWalker(dt, mx, my, sprint);
+                    StepVehicle(dt, mx, my, sprint); LookExplore(dt);
                     SiteDiscovery();
                     break;
                 case ExplorerMode.Inspect:
@@ -595,7 +696,7 @@ namespace CosmicAtlas.Rendering.Mars
                     SiteHighlight(0.5f + 0.5f * Mathf.Sin(Time.time * 4f));
                     break;
             }
-            if (_player && _player.activeSelf && _siteKind == "rover") PlacePlayer();
+            if (_player && _player.activeSelf && _mode != ExplorerMode.Arrival) PlacePlayer();
             _poseTimer += dt;
             if (_poseTimer >= 0.1f) { _poseTimer = 0; Report("pose", SitePoseJson()); }
         }
@@ -632,6 +733,7 @@ namespace CosmicAtlas.Rendering.Mars
 
         bool HitsHardware(Vector2 p, float r)
         {
+            if (CarrierBlocks(p, r)) return true;
             foreach (var h in _hw)
             {
                 float d = (p - h.XZ).magnitude, d0 = (_pos - h.XZ).magnitude;
@@ -659,24 +761,14 @@ namespace CosmicAtlas.Rendering.Mars
         void SiteLateUpdate()
         {
             float dt = Mathf.Min(Time.deltaTime, 0.1f);
-            bool rover = _siteKind == "rover";
-            var pivot = rover ? new Vector3(_pos.x, _bodyY + 1.3f, _pos.y) : new Vector3(_pos.x, _bodyY + Eye, _pos.y);
+            // THEIA at every site (E3): the chase camera pivots above the rover
+            const bool rover = true;
+            var pivot = new Vector3(_pos.x, _bodyY + 1.3f, _pos.y);
             switch (_mode)
             {
                 case ExplorerMode.Arrival:
-                {
-                    float u = Mathf.Clamp01(_arrivalT / ArrivalDur), e = 1 - Mathf.Pow(1 - u, 3);
-                    float dist = Mathf.Exp(Mathf.Lerp(Mathf.Log(700f), Mathf.Log(rover ? _camDist : 6f), e));
-                    float pitch = Mathf.Lerp(1.52f, rover ? _camPitch : 0.3f, Mathf.SmoothStep(0, 1, u));
-                    float yaw = _heading + Mathf.Lerp(1.4f, 0f, e);
-                    if (rover)
-                    {
-                        float drop = Mathf.SmoothStep(30f, 0f, Mathf.InverseLerp(0.45f, 0.82f, u)); // ILLUSTRATIVE touchdown
-                        _player.transform.localPosition = new Vector3(_pos.x, _bodyY + drop, _pos.y);
-                    }
-                    SetCamera(Orbit(pivot, yaw, pitch, dist), pivot, 1f);
+                    CarrierArrivalLate(dt); // E3: carrier landing, ramp, THEIA drives out
                     return;
-                }
                 case ExplorerMode.Inspect:
                 {
                     var b = InspectBounds();
@@ -692,7 +784,13 @@ namespace CosmicAtlas.Rendering.Mars
                     {
                         float k = 1 - Mathf.Exp(-dt * 4f);
                         _camYaw = _camYaw + WrapPi(_heading + _camYawOffset - _camYaw) * k;
-                        SetCamera(Orbit(pivot, _camYaw, _camPitch, _camDist), pivot, _mode == ExplorerMode.Paused ? 0 : 1 - Mathf.Exp(-dt * 12f));
+                        // next to hardware that lies ahead, the chase camera rises and aims between the rover and the
+                        // hardware, so the expedition rover does not hide what the user drove up to (camera framing only)
+                        float wTarget = NearFrameWeight(pivot, out var aim);
+                        _nearW += (wTarget - _nearW) * (1 - Mathf.Exp(-dt * 2.5f));
+                        if (wTarget > 0.01f) _nearAim = aim;
+                        var piv = Vector3.Lerp(pivot, _nearAim, 0.45f * _nearW);
+                        SetCamera(Orbit(piv, _camYaw, _camPitch + 0.40f * _nearW, _camDist + 3.2f * _nearW), piv, _mode == ExplorerMode.Paused ? 0 : 1 - Mathf.Exp(-dt * 12f));
                     }
                     else
                     {
@@ -706,6 +804,112 @@ namespace CosmicAtlas.Rendering.Mars
         }
 
         float _insYawBase; bool _insDistAuto;
+        float _nearW; Vector3 _nearAim;
+
+        /// <summary>0..1: how much the chase camera re-frames for the nearest hardware (close AND ahead of the camera)</summary>
+        float NearFrameWeight(Vector3 pivot, out Vector3 aim)
+        {
+            aim = pivot;
+            var h = Nearest(out float d);
+            if (h == null || h.Go == null) return 0;
+            if (h.B == null) h.B = RendererBounds(h.All);
+            aim = h.B.Value.center - _world.position;
+            float prox = 1 - Mathf.Clamp01((d - 2f) / 9f);
+            prox = prox * prox * (3 - 2 * prox);
+            var to = h.XZ - _pos;
+            float diff = WrapPi(Mathf.Atan2(to.x, to.y) - _camYaw);
+            float ahead = Mathf.Clamp01((Mathf.Cos(diff) - 0.35f) / 0.65f);
+            return prox * ahead;
+        }
+
+        // Sub-metre ground grain. The HiRISE DTM (1 m) and orthoimage (0.5 m) carry nothing finer, so up close the measured
+        // surface reads as smooth: a tiled, ILLUSTRATIVE grain (procedural, not data) adds texture within a few metres of
+        // the camera and averages out (mipmaps) further away. Reported as ILLUSTRATIVE in the ready report and the HUD.
+        const float GrainTileM = 3.5f;
+        const int GrainPx = 512;
+        float _grainMs;
+
+        void ApplyGroundDetail(Material m)
+        {
+            var t0 = Time.realtimeSinceStartup;
+            int n = GrainPx;
+            var h = new float[n * n];   // micro-relief in metres
+            var peb = new float[n * n]; // pebble coverage 0..1 (darker albedo)
+            float texel = GrainTileM / n;
+            // periodic value-noise fBm (tiles seamlessly), self-affine roughness: amplitude ~ 5 % of each wavelength,
+            // wavelengths 0.9 m down to ~3 cm
+            var rng = new System.Random(1976);
+            var lat = new float[128 * 128];
+            for (int i = 0; i < lat.Length; i++) lat[i] = (float)rng.NextDouble() - 0.5f;
+            int[] periods = { 4, 8, 16, 32, 64, 128 };
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++)
+                {
+                    float v = 0;
+                    for (int o = 0; o < periods.Length; o++)
+                    {
+                        int pp = periods[o];
+                        float amp = 0.05f * GrainTileM / pp;
+                        float fx = x * pp / (float)n, fy = y * pp / (float)n;
+                        int xi = (int)fx, yi = (int)fy;
+                        float tx = fx - xi, ty = fy - yi;
+                        tx = tx * tx * (3 - 2 * tx); ty = ty * ty * (3 - 2 * ty);
+                        int x0 = xi % pp, x1 = (xi + 1) % pp, y0 = yi % pp, y1 = (yi + 1) % pp, off = o * 17;
+                        float la = lat[((y0 + off) & 127) * 128 + ((x0 + off) & 127)], lb = lat[((y0 + off) & 127) * 128 + ((x1 + off) & 127)];
+                        float lc = lat[((y1 + off) & 127) * 128 + ((x0 + off) & 127)], ld = lat[((y1 + off) & 127) * 128 + ((x1 + off) & 127)];
+                        v += amp * (la + (lb - la) * tx + (lc - la) * ty + (la - lb - lc + ld) * tx * ty);
+                    }
+                    h[y * n + x] = v;
+                }
+            // pebbles (ILLUSTRATIVE): small half-buried caps, ~1-5 cm, mostly small, slightly elongated, wrapped across tile edges
+            for (int k = 0; k < 220; k++)
+            {
+                float r = Mathf.Lerp(0.008f, 0.05f, Mathf.Pow((float)rng.NextDouble(), 2.6f));
+                float cx = (float)rng.NextDouble() * n, cy = (float)rng.NextDouble() * n, rp = r / texel, ht = r * 0.5f, el = 0.6f + 0.8f * (float)rng.NextDouble();
+                int R = Mathf.CeilToInt(rp) + 1;
+                for (int dy = -R; dy <= R; dy++)
+                    for (int dx = -R; dx <= R; dx++)
+                    {
+                        float px = Mathf.Floor(cx) + dx, py = Mathf.Floor(cy) + dy;
+                        float q = ((px - cx) * (px - cx) * el + (py - cy) * (py - cy) / el) / (rp * rp);
+                        if (q >= 1) continue;
+                        int ix = ((int)px % n + n) % n, iy = ((int)py % n + n) % n, id = iy * n + ix;
+                        h[id] = Mathf.Max(h[id], h[id] * 0.3f + ht * Mathf.Sqrt(1 - q));
+                        peb[id] = Mathf.Max(peb[id], Mathf.Clamp01((1 - q) * 3f));
+                    }
+            }
+            var alb = new Color32[n * n];
+            var nrm = new Color32[n * n];
+            for (int y = 0; y < n; y++)
+                for (int x = 0; x < n; x++)
+                {
+                    int id = y * n + x;
+                    float hx = (h[y * n + (x + 1) % n] - h[y * n + (x + n - 1) % n]) / (2 * texel);
+                    float hy = (h[((y + 1) % n) * n + x] - h[((y + n - 1) % n) * n + x]) / (2 * texel);
+                    // cavity tone: hollows slightly darker than crests (local height vs. the 4-texel neighbourhood)
+                    float nb = 0.25f * (h[y * n + (x + 4) % n] + h[y * n + (x + n - 4) % n] + h[((y + 4) % n) * n + x] + h[((y + n - 4) % n) * n + x]);
+                    float cav = Mathf.Clamp((h[id] - nb) / 0.004f, -1f, 1f);
+                    // URP Lit scaled detail at scale 1: albedo x 2d (d = 0.5 keeps the HiRISE shade unchanged)
+                    float d = 0.5f + 0.06f * cav - 0.10f * peb[id];
+                    byte g = (byte)Mathf.Clamp(Mathf.RoundToInt(d * 255f), 0, 255);
+                    alb[id] = new Color32(g, g, g, 255);
+                    var nv = new Vector3(-hx, -hy, 1).normalized;
+                    // RGB = xyz, A = 1: decodes the same with or without DXT5nm unpacking
+                    nrm[id] = new Color32((byte)Mathf.RoundToInt((nv.x * 0.5f + 0.5f) * 255), (byte)Mathf.RoundToInt((nv.y * 0.5f + 0.5f) * 255), (byte)Mathf.RoundToInt((nv.z * 0.5f + 0.5f) * 255), 255);
+                }
+            var ta = new Texture2D(n, n, TextureFormat.RGBA32, true, true) { name = "Ground grain (ILLUSTRATIVE)", wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Trilinear, anisoLevel = 4 };
+            ta.SetPixels32(alb); ta.Apply(true, true);
+            var tn = new Texture2D(n, n, TextureFormat.RGBA32, true, true) { name = "Ground grain normal (ILLUSTRATIVE)", wrapMode = TextureWrapMode.Repeat, filterMode = FilterMode.Trilinear, anisoLevel = 4 };
+            tn.SetPixels32(nrm); tn.Apply(true, true);
+            _siteOwned.Add(ta); _siteOwned.Add(tn);
+            float spanE = (_terrain.Width - 1) * _terrain.SpacingE, spanN = (_terrain.Height - 1) * _terrain.SpacingN;
+            m.SetTexture("_DetailAlbedoMap", ta);
+            m.SetTextureScale("_DetailAlbedoMap", new Vector2(spanE / GrainTileM, spanN / GrainTileM));
+            m.SetFloat("_DetailAlbedoMapScale", 1f);
+            m.SetTexture("_DetailNormalMap", tn);
+            m.SetFloat("_DetailNormalMapScale", 1f);
+            _grainMs = (Time.realtimeSinceStartup - t0) * 1000f;
+        }
 
         Bounds InspectBounds()
         {
@@ -755,6 +959,9 @@ namespace CosmicAtlas.Rendering.Mars
             sb.Append(",\"site\":{\"latDeg\":").Append(MiniJson.N(_siteLat)).Append(",\"lonEastDeg\":").Append(MiniJson.N(_siteLon))
               .Append(",\"extentEastM\":[").Append(MiniJson.N(_terrain.East0)).Append(',').Append(MiniJson.N(_terrain.East0 + (_terrain.Width - 1) * _terrain.SpacingE))
               .Append("],\"extentNorthM\":[").Append(MiniJson.N(_terrain.North0 - (_terrain.Height - 1) * _terrain.SpacingN)).Append(',').Append(MiniJson.N(_terrain.North0)).Append("]}");
+            sb.Append(",\"carrier\":").Append(CarrierJson());
+            sb.Append(",\"groundDetail\":{\"tileM\":").Append(MiniJson.N(GrainTileM)).Append(",\"px\":").Append(GrainPx).Append(",\"buildMs\":").Append(MiniJson.N(_grainMs)).Append(",\"provenance\":\"ILLUSTRATIVE\"}");
+            sb.Append(",\"far\":").Append(_far != null ? $"{{\"triangles\":{_far.Triangles},\"chunks\":{_far.Chunks.Count},\"near\":{MiniJson.N(cam.nearClipPlane)},\"farClip\":{MiniJson.N(cam.farClipPlane)},\"fogEnd\":{MiniJson.N(_look.FogEnd)}}}" : "null");
             sb.Append(",\"horizon\":").Append(_horizon != null ? $"{{\"triangles\":{_horizon.Triangles},\"chunks\":{_horizon.Chunks.Count}}}" : "null");
             sb.Append(",\"mode\":").Append(MiniJson.Q(_mode.ToString())).Append(",\"embedded\":").Append(_embedded ? "true" : "false");
             return sb.ToString();
@@ -791,6 +998,7 @@ namespace CosmicAtlas.Rendering.Mars
               .Append(",\"nearestId\":").Append(MiniJson.Q(near?.Id))
               .Append(",\"near\":").Append(_mode == ExplorerMode.Explore && near != null && nd < InteractM ? MiniJson.Q(near.Id) : "null")
               .Append(",\"arrivalT\":").Append(MiniJson.N(_mode == ExplorerMode.Arrival ? _arrivalT / ArrivalDur : 1))
+              .Append(",\"arrivalPhase\":").Append(MiniJson.Q(_mode == ExplorerMode.Arrival ? _arrivalPhase : ""))
               .Append(",\"sol\":").Append(_sol).Append(",\"replaySol\":0")
               .Append(",\"utc\":").Append(MiniJson.Q(_utc.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)))
               .Append(",\"sunElevation\":").Append(MiniJson.N(_sunEl)).Append(",\"sunAzimuth\":").Append(MiniJson.N(_sunAz))
@@ -806,7 +1014,8 @@ namespace CosmicAtlas.Rendering.Mars
         {
             _embedded = true;
             bool arrival = json != null && json.Contains("\"arrival\":true");
-            _player.SetActive(_siteKind == "rover");
+            _player.SetActive(true);
+            if (!arrival) CarrierFinal();
             _camInit = false; _arrivalT = 0; _arrivalDone = !arrival;
             SetMode(arrival ? ExplorerMode.Arrival : ExplorerMode.Explore);
             Report("ready", ReadyJson());
@@ -841,8 +1050,8 @@ namespace CosmicAtlas.Rendering.Mars
                 if (o.TryGetValue("camYawOffset", out var cy)) _camYawOffset = MiniJson.F(cy);
                 if (o.TryGetValue("camPitch", out var cp)) _camPitch = MiniJson.F(cp);
                 if (o.TryGetValue("camDist", out var cd)) _camDist = MiniJson.F(cd);
-                if (_siteKind == "rover") { if (Contact(_pos, _heading, out var by, out var bp, out var br)) { _bodyY = by; _pitch = bp; _roll = br; Settle(by, bp, br, 1f); } _camYaw = _heading + _camYawOffset; }
-                else { _camYaw = _heading; _bodyY = SafeHeight(_pos.x, _pos.y); }
+                if (Contact(_pos, _heading, out var by, out var bp, out var br)) { _bodyY = by; _pitch = bp; _roll = br; Settle(by, bp, br, 1f); }
+                _camYaw = _heading + _camYawOffset;
                 _camInit = false;
                 SetMode(ExplorerMode.Explore);
                 Report("restored", SitePoseJson());
@@ -853,7 +1062,8 @@ namespace CosmicAtlas.Rendering.Mars
         /// <summary>Free everything this site created (the player is quit on leave; this also runs on destroy).</summary>
         void SiteUnload()
         {
-            _terrain?.Destroy(); _horizon?.Destroy();
+            _terrain?.Destroy(); _horizon?.Destroy(); _far?.Destroy();
+            if (_carrier) Destroy(_carrier);
             foreach (var h in _hw) if (h.Go) Destroy(h.Go);
             _hw.Clear();
             foreach (var o in _siteOwned) if (o) Destroy(o);

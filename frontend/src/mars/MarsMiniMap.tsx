@@ -9,7 +9,7 @@ const writePref = (shown: boolean) => { try { window.localStorage.setItem(KEY, s
  * Persistent Mars minimap (parity with the Moon's): north up, centred on the rover, drawn every animation frame from
  * the latest bridge pose (outside React state, so it costs no re-renders). Shows the measured terrain tile's edge,
  * a guide to Victoria's ~800 m rim (NASA diameter; centre fitted to the DTM rim crest), Opportunity, the rover and the
- * camera's view direction. Click (or M) opens the full site map; the collapse choice is remembered per browser.
+ * camera's view direction (landing sites: over the site's HiRISE ground image). Click (or M) opens the full site map; the collapse choice is remembered per browser.
  */
 export function MarsMiniMap({ onOpen }: { onOpen: () => void }) {
   const [shown, setShown] = useState(readPref)
@@ -17,6 +17,8 @@ export function MarsMiniMap({ onOpen }: { onOpen: () => void }) {
   useEffect(() => {
     if (!shown) return
     let raf = 0
+    // landing sites: the site's own ground image (HiRISE orthoimage shade over the measured square, north up) under the map
+    let ground: { id: string; img: HTMLImageElement; ok: boolean } | null = null
     const draw = () => {
       const c = ref.current
       const pose = marsLast.pose
@@ -34,8 +36,22 @@ export function MarsMiniMap({ onOpen }: { onOpen: () => void }) {
         ctx.fillStyle = '#0a0705'; ctx.fillRect(0, 0, w, h)
         // the measured terrain tile (outside it: no data)
         const [e0, e1] = ready.site.extentEastM, [n0, n1] = ready.site.extentNorthM
-        ctx.fillStyle = 'rgba(176, 116, 78, 0.38)'
-        ctx.fillRect(sx(e0), sy(n1), (e1 - e0) / mpp, (n1 - n0) / mpp)
+        const sid = ready.siteId
+        if (sid && ground?.id !== sid) {
+          const img = new Image()
+          const g = { id: sid, img, ok: false }
+          img.onload = () => { g.ok = true }
+          img.src = `/mars-sites/${sid}/albedo.jpg`
+          ground = g
+        }
+        if (sid && ground?.ok) {
+          ctx.globalAlpha = 0.9
+          ctx.drawImage(ground.img, sx(e0), sy(n1), (e1 - e0) / mpp, (n1 - n0) / mpp)
+          ctx.globalAlpha = 1
+        } else {
+          ctx.fillStyle = 'rgba(176, 116, 78, 0.38)'
+          ctx.fillRect(sx(e0), sy(n1), (e1 - e0) / mpp, (n1 - n0) / mpp)
+        }
         // Victoria rim guide (the Victoria scene only; M4 landing sites report a siteId)
         if (!ready.siteId) {
           ctx.strokeStyle = 'rgba(253, 186, 116, 0.75)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4])

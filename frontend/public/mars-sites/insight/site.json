@@ -10,9 +10,9 @@
   "solNote": ""
  },
  "scene": {
-  "date": "2018-11-26",
+  "date": "2019-02-13",
   "ltst": 14.0,
-  "label": "Landing day, 26 November 2018: SEIS and HP3 still on the deck, as in NASA's model (the arm later placed them on the ground; not shown). Local time ILLUSTRATIVE",
+  "label": "13 February 2019, after deployment: SEIS under its Wind and Thermal Shield and HP3 on the ground in front of the lander (JPL). Offsets RECONSTRUCTED; lander heading ASSUMED; local time ILLUSTRATIVE",
   "tau": 0.5,
   "tauLabel": "tau 0.5 ASSUMED (no sourced optical depth for this sol in the scene)"
  },
@@ -26,13 +26,17 @@
    "z": 0,
    "yawDeg": 0,
    "radius": 3.1,
-   "provenance": "NASA MODEL (NASA 3D Resources: InSight Cruise Lander), native metres, instruments in their stowed (landing-day) positions. Position: HiRISE-located lander (Golombek et al. 2020). Heading ILLUSTRATIVE.",
+   "provenance": "NASA MODEL (NASA 3D Resources: InSight Cruise Lander), native metres. SEIS, its Wind and Thermal Shield and HP3 are moved from the deck (where the model stows them) to the ground in front of the lander, in their deployed configuration: SEIS about 1.636 m away, about as far as the arm reaches (JPL, 19 Dec 2018), the shield placed over it, HP3 on the east side of the workspace (JPL). RECONSTRUCTED offsets: the 1.636 m is taken from the deck centre and HP3 is placed 1 m east of SEIS (not sourced); lander heading ASSUMED with the workspace (the arm side) to the south. Position: HiRISE-located lander (Golombek et al. 2020).",
    "components": [
     {
      "id": "seis",
      "label": "Seismic Experiment for Interior Structure (SEIS)",
      "parts": [
       "SEIS"
+     ],
+     "deployTo": [
+      0.0,
+      -1.876
      ]
     },
     {
@@ -40,6 +44,10 @@
      "label": "Wind and Thermal Shield (WTS) for SEIS",
      "parts": [
       "WTS"
+     ],
+     "deployTo": [
+      0.0,
+      -1.876
      ]
     },
     {
@@ -47,6 +55,10 @@
      "label": "Heat Flow and Physical Properties Package (HP3)",
      "parts": [
       "HP3"
+     ],
+     "deployTo": [
+      1.0,
+      -1.876
      ]
     },
     {
@@ -115,7 +127,8 @@
   "latDeg": 4.502384,
   "lonEastDeg": 135.623447,
   "source": "Golombek et al. 2020 (HiRISE-located lander)",
-  "registration": "HiRISE-located lander position (Golombek et al. 2020); RISE radio tracking places it ~220 m further west."
+  "registration": "HiRISE-located lander position (Golombek et al. 2020); RISE radio tracking places it ~220 m further west.",
+  "located": true
  },
  "terrain": {
   "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_037262_1845_036761_1845_U01 (collection mro_hirise_socet_dtms)",

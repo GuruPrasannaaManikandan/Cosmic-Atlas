@@ -4277,6 +4277,7 @@ option { background: #070d1e; color: #fff; }
 .site-badge.kind.lander { color: #fcd34d; border-color: rgba(252, 211, 77, 0.4); }
 .site-card-title { font-size: 15px; line-height: 1.25; }
 .site-card-meta { font-size: 12px; color: var(--txt-dim); }
+.site-card-meta .nowrap { white-space: nowrap; }
 .site-card-text { font-size: 12.5px; color: var(--txt-dim); line-height: 1.45; }
 .site-card-hw { font-size: 11.5px; color: var(--mut); }
 .site-card-scene { font-size: 11.5px; color: var(--mut); font-style: italic; }

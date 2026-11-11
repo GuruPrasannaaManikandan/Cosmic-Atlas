@@ -111,11 +111,52 @@ export type ObjectCategory =
   | 'helicopter'
   | 'orbiter'
 
+/** universal discovery classification (vehicles, their parts and site landmarks) */
+export type DiscoveryCategory =
+  | 'historical-spacecraft'
+  | 'historical-rover'
+  | 'stationary-lander'
+  | 'mobility'
+  | 'instrument'
+  | 'camera'
+  | 'communication'
+  | 'power'
+  | 'sampling'
+  | 'environmental'
+  | 'geological'
+  | 'landmark'
+
+/** a sourced statement (every sentence shown in a discovery record carries its source ids) */
+export interface SourcedText {
+  text: string
+  sources: string[]
+}
+
+/**
+ * Where a part is in the 3-D scene:
+ *   model-part    a separate piece of the model (NASA model or documented reconstruction): highlighted and framed itself
+ *   model-region  identified on the model by this project (the NASA mesh has no such piece): framed as a region
+ *   inside        housed inside the body (not visible on any exterior model): the record says so, the body is framed
+ *   not-modelled  exterior hardware the current model does not separate yet: the whole vehicle is framed
+ */
+export type PartPlacement = 'model-part' | 'model-region' | 'inside' | 'not-modelled'
+
 export interface Component {
   id: string
   name: string
   description: string
   sources: string[]
+  /** full form of an acronym name (MAHLI -> Mars Hand Lens Imager) */
+  fullName?: string
+  category?: DiscoveryCategory
+  howItWorks?: SourcedText
+  measures?: SourcedText
+  location?: SourcedText
+  specs?: { label: string; value: string; sources: string[] }[]
+  findings?: SourcedText[]
+  placement?: PartPlacement
+  /** the scene's part id for this component (Unity site component group / Victoria inspection anchor) */
+  part?: string
 }
 
 export interface PhysicalObject {
@@ -135,4 +176,6 @@ export interface PhysicalObject {
   /** procedural reconstruction id in src/surface/models, or null when no model exists yet */
   model: { id: string | null; provenance: string }
   sources: string[]
+  /** mission findings tied to this vehicle (sourced) */
+  findings?: SourcedText[]
 }
