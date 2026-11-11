@@ -20,6 +20,7 @@ import { ControlsPanel } from '../input/ControlsPanel'
 import '../input/controls.css'
 import { MoonReplay, beginMoonReplay } from './MoonReplay'
 import { replayFor } from '../replay/replay'
+import { expedition } from '../expedition/expedition'
 
 function Compass() {
   const site = SITE_BY_ID[useSurface((s) => s.siteId)!]
@@ -101,7 +102,7 @@ function Hud({ touch }: { touch: boolean }) {
             {S.camMode === 'third' ? '👁 First person' : '🧑‍🚀 Third person'} <kbd>V</kbd>
           </button>
           <button className="btn ghost" onClick={() => S.set({ helpOpen: true })} aria-label="Controls help">? <kbd>H</kbd></button>
-          <button className="btn" onClick={() => useStore.getState().exitSurface()}>⤴ Return to orbit</button>
+          <button className="btn" onClick={() => expedition.returnToOrbit()} data-testid="return-to-orbit">⤴ Return to orbit</button>
         </nav>
       </header>
       <div className="surf-status" ref={statusRef}>
@@ -166,7 +167,7 @@ function PauseMenu() {
         <button className="btn big" onClick={() => set({ paused: false })}>Resume exploration</button>
         <button className="btn ghost" onClick={() => set({ helpOpen: true })}>Controls</button>
         <button className="btn ghost" onClick={() => set({ mapOpen: true, paused: false })}>Surface map</button>
-        <button className="btn" onClick={() => useStore.getState().exitSurface()}>⤴ Return to orbit</button>
+        <button className="btn" onClick={() => expedition.returnToOrbit()} data-testid="return-to-orbit">⤴ Return to orbit</button>
       </div>
     </div>
   )
@@ -182,7 +183,7 @@ function Help() {
       <div className="surf-pause glass surf-help">
         <h2>Controls</h2>
         {/* generated from the input manager's bindings: it can only list controls that work */}
-        <ControlsPanel mode="PLANETARY_EXPLORATION" extra={[{ keys: 'Mouse', label: 'Look around: click the view to capture the mouse, or drag' }]} />
+        <ControlsPanel mode="PLANETARY_EXPLORATION" hide={['catalogue']} extra={[{ keys: 'Mouse', label: 'Look around: click the view to capture the mouse, or drag' }]} />
         <p className="muted small">Walking is relative to where the camera looks. The arrow keys only turn the camera; they never move you.</p>
         <p className="muted small">
           Gravity on the {planet.name} is {g.value} m/s² (NASA NSSDCA fact sheet): Earth's {EARTH_G} m/s² is about {(EARTH_G / (g.value ?? EARTH_G)).toFixed(1)} times stronger, so the same push carries you about that many times higher. Walking speeds are gameplay tuning, not measured astronaut data.
@@ -202,6 +203,9 @@ export default function SurfaceExperience() {
   useEffect(() => {
     preloadNasaModel('apollo-lm')
     useSurface.getState().reset(siteId)
+    // the end of an expedition: the lander flies its last few hundred metres onto the measured terrain
+    // (read-only here: a StrictMode re-mount must see the same answer; cleared once the landing has finished)
+    if (siteId && expedition.peekArrival(siteId)) useSurface.getState().set({ intro: true, lander: { phase: 'descent', t0: performance.now() + 900 } })
     useGuide.getState().reset()
     useNarrator.getState().stop()
     const site = siteId ? SITE_BY_ID[siteId] : null
@@ -215,9 +219,15 @@ export default function SurfaceExperience() {
     } else if (site) setDtm({ siteId: site.id, data: null })
     return () => {
       live = false
+      // a real exit (not a StrictMode re-mount) forgets a pending landing
+      window.setTimeout(() => { if (siteId && useStore.getState().surfaceSiteId !== siteId) expedition.clearArrival() }, 0)
       useSurface.getState().reset(null)
     }
   }, [siteId])
+  // the landing has finished: later visits to this site open without it
+  useEffect(() => {
+    if (siteId && S.siteId === siteId && S.lander.phase === 'parked' && !S.intro) expedition.clearArrival()
+  }, [siteId, S.siteId, S.lander.phase, S.intro])
   const site = siteId ? SITE_BY_ID[siteId] : null
   if (!site || S.siteId !== siteId) return null
   if (!dtm || dtm.siteId !== site.id)
@@ -242,7 +252,13 @@ export default function SurfaceExperience() {
           <SurfaceScene site={site} dtm={dtm.data} />
         </div>
         {dtm.error && <p className="surf-terrain-error" role="status">Measured terrain could not be loaded ({dtm.error}); showing illustrative terrain instead.</p>}
-        {S.intro ? (
+        {S.lander.phase !== 'parked' ? (
+          <div className="surf-intro" role="status" data-testid="surface-lander" data-phase={S.lander.phase}>
+            <span className="eyebrow">{S.lander.phase === 'descent' ? 'LANDING' : 'LIFTOFF'} · CONCEPTUAL EXPEDITION LANDER</span>
+            <b>{site.name}</b>
+            <span className="muted">{S.lander.phase === 'descent' ? 'Touchdown on the measured LROC terrain, beside the historic hardware' : 'Leaving the surface; the historic hardware stays where it was left'}</span>
+          </div>
+        ) : S.intro ? (
           <div className="surf-intro" role="status">
             <span className="eyebrow">DESCENT</span>
             <b>{site.name}</b>

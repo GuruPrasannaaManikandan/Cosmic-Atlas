@@ -1,0 +1,72 @@
+{
+ "views": [
+  {
+   "view": "01_crater_overview",
+   "file": "before_01_crater_overview.png",
+   "note": "arrival camera ~700 m above the expedition landing point"
+  },
+  {
+   "view": "02_wide_landscape",
+   "file": "before_02_wide_landscape.png",
+   "note": "rim of Victoria, looking across the crater"
+  },
+  {
+   "view": "03_expedition_rover_medium",
+   "file": "before_03_expedition_rover_medium.png",
+   "note": "the illustrative expedition vehicle"
+  },
+  {
+   "view": "04_ground_level",
+   "file": "before_04_ground_level.png",
+   "note": "low camera near the ground"
+  },
+  {
+   "view": "05_opportunity_medium",
+   "file": "before_05_opportunity_medium.png",
+   "note": "inspection camera, component \"whole\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "06_opportunity_closeup_mast",
+   "file": "before_06_opportunity_closeup_mast.png",
+   "note": "inspection camera, component \"mast\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "07_wheels_rocker_bogie",
+   "file": "before_07_wheels_rocker_bogie.png",
+   "note": "inspection camera, component \"mobility\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "08_solar_array",
+   "file": "before_08_solar_array.png",
+   "note": "inspection camera, component \"solar\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "09_instrument_arm",
+   "file": "before_09_instrument_arm.png",
+   "note": "inspection camera, component \"arm\" (highlight pulses on the NASA model part)"
+  },
+  {
+   "view": "10_high_gain_antenna",
+   "file": "before_10_high_gain_antenna.png",
+   "note": "inspection camera, component \"hga\" (highlight pulses on the NASA model part)"
+  }
+ ],
+ "metrics": {
+  "loadToReadySec": 5.62,
+  "roverCalibration": "footprint scale 0.1754; height deviation -17% vs PDS 1.54 m",
+  "terrainTriangles": 979844,
+  "msP50": 17,
+  "msP95": 17,
+  "drawCalls": 181,
+  "triangles": 398788,
+  "setPass": 28,
+  "backbuffer": [
+   1366,
+   768
+  ],
+  "profile": "balanced",
+  "look": null,
+  "jsHeapMB": 76
+ },
+ "consoleErrors": []
+}

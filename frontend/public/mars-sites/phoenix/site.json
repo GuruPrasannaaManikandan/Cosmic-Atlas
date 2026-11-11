@@ -1,0 +1,103 @@
+{
+ "id": "phoenix",
+ "name": "Phoenix \u2014 Vastitas Borealis",
+ "missionId": "phoenix",
+ "mode": "lander",
+ "landing": {
+  "utc": "2008-05-25T23:53:44Z",
+  "landingSol": 0,
+  "source": "nssdca (23:53:44 UT); Phoenix landing sol = Sol 0 (Mars24 notes)",
+  "solNote": ""
+ },
+ "scene": {
+  "date": "2008-05-26",
+  "ltst": 14.0,
+  "label": "First days after landing, 25-26 May 2008 (arm pose and local time ILLUSTRATIVE)",
+  "tau": 0.5,
+  "tauLabel": "tau 0.5 ASSUMED (no sourced optical depth for this sol in the scene)"
+ },
+ "hardware": [
+  {
+   "id": "phoenix-lander",
+   "label": "Phoenix lander",
+   "model": "proc:phoenix",
+   "kind": "lander",
+   "x": 0,
+   "z": 0,
+   "yawDeg": 0,
+   "radius": 2.9,
+   "provenance": "DOCUMENTED RECONSTRUCTION \u2014 NASA publishes no 3D model. Deck 1.5 m, solar-array span 5.52 m, robotic arm 2.35 m, top of the meteorology mast 2.2 m (NASA Phoenix press kit). Array outline many-sided (NSSDCA: \"octagonal\"; drawn with 10 sides, not sourced). Instrument positions SIMPLIFIED.",
+   "components": [
+    {
+     "id": "solar",
+     "label": "Solar arrays (5.52 m span)",
+     "parts": [
+      "solar"
+     ]
+    },
+    {
+     "id": "arm",
+     "label": "Robotic arm (2.35 m) and scoop",
+     "parts": [
+      "arm"
+     ]
+    },
+    {
+     "id": "tega",
+     "label": "Thermal and Evolved Gas Analyzer (TEGA)",
+     "parts": [
+      "tega"
+     ]
+    },
+    {
+     "id": "meca",
+     "label": "Microscopy, Electrochemistry and Conductivity Analyzer (MECA)",
+     "parts": [
+      "meca"
+     ]
+    },
+    {
+     "id": "ssi",
+     "label": "Surface Stereo Imager (SSI)",
+     "parts": [
+      "ssi"
+     ]
+    },
+    {
+     "id": "met",
+     "label": "Meteorological station (MET) mast",
+     "parts": [
+      "met mast"
+     ]
+    },
+    {
+     "id": "legs",
+     "label": "Three landing legs",
+     "parts": [
+      "legs"
+     ]
+    }
+   ]
+  }
+ ],
+ "start": {
+  "x": -16,
+  "z": -20,
+  "headingDeg": 40
+ },
+ "origin": {
+  "latDeg": 68.217789,
+  "lonEastDeg": -125.750032,
+  "source": "HiRISE-identified lander, PSP_008591_2485 controlled orthoimage (this project, M5)",
+  "registration": "Lander identified by eye in the USGS controlled orthoimage PSP_008591_2485 (taken 22 hours after landing): the bright lander deck at the centre of the ~25 m dark zone scoured by its descent engines; a second dark spot with a streak ~200 m away is consistent with the heat shield (uahirise.org/PSP_008591_2485). Measured in this controlled frame; 131 m south of the catalogue coordinate (68.22 N, 234.25 E; Smith et al. 2009).",
+  "located": true
+ },
+ "terrain": {
+  "dtm": "USGS Astrogeology controlled HiRISE DTM DTEPC_008591_2485_008644_2485_U01 (collection mro_hirise_socet_dtms)",
+  "spacingM": 1.0,
+  "sizeM": 1400.0,
+  "validFraction": 1.0,
+  "albedo": "HiRISE orthoimage (RED band, single channel) at 0.5 m, colourised with an ILLUSTRATIVE soil ramp",
+  "horizon": "same DTM, decimated to ~24 m, out to ~9 km where the DTM covers it"
+ }
+}

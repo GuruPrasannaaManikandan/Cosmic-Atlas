@@ -68,7 +68,7 @@ namespace CosmicAtlas.Rendering.Mars
         float _reportTimer;
         List<float> _bench;
         float _benchLeft, _warmLeft;
-        ProfilerRecorder _draw, _tris, _setpass;
+        ProfilerRecorder _draw, _tris, _setpass, _gcUsed, _gcReserved, _totalUsed;
 
         // originals, restored on destroy (runtime edits of the pipeline asset must not leak into the editor)
         float _oScale, _oShadowDist; int _oMsaa, _oCascades, _oShadowRes; RenderPipelineAsset _oPipeline;
@@ -89,11 +89,15 @@ namespace CosmicAtlas.Rendering.Mars
             _draw = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Draw Calls Count");
             _tris = ProfilerRecorder.StartNew(ProfilerCategory.Render, "Triangles Count");
             _setpass = ProfilerRecorder.StartNew(ProfilerCategory.Render, "SetPass Calls Count");
+            _gcUsed = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Used Memory");
+            _gcReserved = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Reserved Memory");
+            _totalUsed = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "Total Used Memory");
         }
 
         void OnDestroy()
         {
-            _draw.Dispose(); _tris.Dispose(); _setpass.Dispose();
+            if (_siteMode) SiteUnload();
+            _draw.Dispose(); _tris.Dispose(); _setpass.Dispose(); _gcUsed.Dispose(); _gcReserved.Dispose(); _totalUsed.Dispose();
             if (pipeline)
             {
                 pipeline.renderScale = _oScale; pipeline.shadowDistance = _oShadowDist; pipeline.msaaSampleCount = _oMsaa;
@@ -105,6 +109,7 @@ namespace CosmicAtlas.Rendering.Mars
 
         void Start()
         {
+            if (TryStartSite()) return; // M4: a landing site package instead of Victoria (MarsPrototype.Sites.cs)
             _world = new GameObject("World (floating origin)").transform;
             _terrain = MarsTerrain.Load(heights, heightMeta);
             var meta = MiniJson.O(MiniJson.Parse(heightMeta.text));
@@ -211,7 +216,9 @@ namespace CosmicAtlas.Rendering.Mars
             if (volume && volume.sharedProfile && volume.sharedProfile.TryGet<Bloom>(out var bloom)) bloom.active = p.Bloom;
             QualitySettings.globalTextureMipmapLimit = Mathf.Max(0, Mathf.RoundToInt(Mathf.Log(4096f / p.MaxTexture, 2)));
             skyMaterial.SetFloat("_Steps", Mathf.Clamp(p.SkyTransmittance / 8, 8, 32));
-            _terrain.Build(_world, terrainMaterial, p.TerrainStride, p.Cascades > 0);
+            _terrain.Build(_world, _siteMode ? _siteTerrainMat : terrainMaterial, p.TerrainStride, p.Cascades > 0);
+            _horizon?.Build(_world, _horizonMat, 1, false); // site mode: mid-range horizon from the same DTM, no shadows
+            _far?.Build(_world, _farMat, 1, false, 100);     // site mode: far ring from controlled CTX DTMs (where built)
             if (_dust) { var main = _dust.main; main.maxParticles = Mathf.RoundToInt(3000 * p.DustFraction); }
             Report("profile", $"{{\"id\":{MiniJson.Q(p.Id)},\"terrainTriangles\":{_terrain.Triangles},\"chunks\":{_terrain.Chunks.Count}}}");
         }
@@ -263,6 +270,7 @@ namespace CosmicAtlas.Rendering.Mars
 
         void LateUpdate()
         {
+            if (_siteMode) { if (_siteReady) SiteLateUpdate(); return; }
             if (_mode != ExplorerMode.Flythrough && _bench == null) { ExplorerLateUpdate(); return; }
             _pathT += Time.deltaTime;
             var p = PathPosition(_pathT, out var look);
@@ -279,7 +287,8 @@ namespace CosmicAtlas.Rendering.Mars
         void Update()
         {
             float dt = Time.unscaledDeltaTime;
-            if (_mode != ExplorerMode.Flythrough && _bench == null) ExplorerUpdate(Mathf.Min(Time.deltaTime, 0.1f));
+            if (_siteMode) { if (_siteReady) SiteUpdate(Mathf.Min(Time.deltaTime, 0.1f)); }
+            else if (_mode != ExplorerMode.Flythrough && _bench == null) ExplorerUpdate(Mathf.Min(Time.deltaTime, 0.1f));
             _ring[_ringN++ % _ring.Length] = dt;
             if (_bench != null)
             {
@@ -303,7 +312,13 @@ namespace CosmicAtlas.Rendering.Mars
               .Append(",\"drawCalls\":").Append(_draw.Valid ? _draw.LastValue.ToString() : "null")
               .Append(",\"triangles\":").Append(_tris.Valid ? _tris.LastValue.ToString() : "null")
               .Append(",\"setPass\":").Append(_setpass.Valid ? _setpass.LastValue.ToString() : "null")
-              .Append(",\"rebases\":").Append(_rebases).Append(",\"pathT\":").Append(MiniJson.N(_pathT)).Append('}');
+              .Append(",\"rebases\":").Append(_rebases).Append(",\"pathT\":").Append(MiniJson.N(_pathT))
+              .Append(",\"msMax\":").Append(MiniJson.N(l.Count > 0 ? l[l.Count - 1] * 1000 : 0))
+              .Append(",\"gcUsedMB\":").Append(_gcUsed.Valid ? MiniJson.N(_gcUsed.LastValue / 1048576.0) : "null")
+              .Append(",\"gcReservedMB\":").Append(_gcReserved.Valid ? MiniJson.N(_gcReserved.LastValue / 1048576.0) : "null")
+              .Append(",\"totalUsedMB\":").Append(_totalUsed.Valid ? MiniJson.N(_totalUsed.LastValue / 1048576.0) : "null")
+              .Append(",\"rockInstances\":").Append(_rocks?.Instances ?? 0).Append(",\"rockDrawCalls\":").Append(_rocks?.DrawCalls ?? 0)
+              .Append(",\"rockTrianglesM\":").Append(MiniJson.N((_rocks?.Triangles ?? 0) / 1e6)).Append(",\"rockRebuildMaxMs\":").Append(MiniJson.N(_rocks?.MaxRebuildMs ?? 0)).Append('}');
             return sb.ToString();
         }
 
@@ -315,9 +330,9 @@ namespace CosmicAtlas.Rendering.Mars
                    $"\"profiles\":[{string.Join(",", _profiles.Select(x => MiniJson.Q(x.Id)))}],\"profile\":{MiniJson.Q(_profile.Id)}," +
                    $"\"utc\":{MiniJson.Q(_utc.ToString("yyyy-MM-ddTHH:mm:ssZ", inv))},\"sol\":{_sol},\"ltst\":{MiniJson.N(new MarsTime(_utc).LtstHours(_siteLon))}," +
                    $"\"sunElevation\":{MiniJson.N(_sunEl)},\"sunAzimuth\":{MiniJson.N(_sunAz)},\"tau\":{MiniJson.N(_tau)},\"tauLabel\":{MiniJson.Q(_tauLabel)}," +
-                   $"\"terrainTriangles\":{_terrain.Triangles},\"chunks\":{_terrain.Chunks.Count},\"rover\":{MiniJson.Q(_roverNote)},\"roverCalibration\":{MiniJson.Q(_calNote)}," +
-                   ExplorerReadyJson() +
-                   ",\"heightCheck\":" + HeightCheckJson() + "}";
+                   $"\"terrainTriangles\":{_terrain.Triangles},\"chunks\":{_terrain.Chunks.Count},\"rover\":{MiniJson.Q(_roverNote)},\"roverCalibration\":{MiniJson.Q(_calNote)},\"loadMs\":{MiniJson.N(Time.realtimeSinceStartup * 1000)}," +
+                   (_siteMode ? SiteReadyJson() : ExplorerReadyJson() + ",\"carrier\":" + CarrierJson()) +
+                   ",\"heightCheck\":" + (_siteMode ? SiteHeightCheckJson() : HeightCheckJson()) + "}";
         }
 
         /// <summary>
@@ -354,8 +369,9 @@ namespace CosmicAtlas.Rendering.Mars
 
         public void SetUtc(string iso)
         {
+            if (_siteMode && !_siteReady) return;
             if (!DateTime.TryParse(iso, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal | DateTimeStyles.AssumeUniversal, out var t)) { Debug.LogWarning("[Mars] bad utc " + iso); return; }
-            _utc = t; _sol = MissionSol(t); ApplySun();
+            _utc = t; _sol = _siteMode ? SiteSol(t) : MissionSol(t); ApplySun();
             Report("ready", ReadyJson());
         }
 

@@ -56,7 +56,7 @@ namespace CosmicAtlas.Rendering.Mars
         Vector3 _camPos, _camLook; bool _camInit;
 
         // arrival
-        float _arrivalT; const float ArrivalDur = 9f; bool _arrivalDone;
+        float _arrivalT; float ArrivalDur => CarrierArrivalTotal; bool _arrivalDone;
 
         // inspection
         float _insYaw = 0.6f, _insPitch = 0.35f, _insDist = 5f; string _insAnchor = "whole";
@@ -129,6 +129,8 @@ namespace CosmicAtlas.Rendering.Mars
 
             _player = BuildExpeditionRoverDetailed();
             _player.SetActive(false);
+            SetupCarrier(_startPos, opp, p => (p - opp).magnitude >= OppRadius + 16f);
+            _startPos = _pos; _startHeading = _heading;
             Contact(_pos, _heading, out _bodyY, out _pitch, out _roll);
 
             BuildTrail();
@@ -260,6 +262,8 @@ namespace CosmicAtlas.Rendering.Mars
 
         bool HitsOpportunity(Vector2 p)
         {
+            if (_siteMode) return HitsHardware(p, PlayerRadius);
+            if (CarrierBlocks(p, PlayerRadius)) return true;
             var o = new Vector2(_rover.transform.localPosition.x, _rover.transform.localPosition.z);
             float d = (p - o).magnitude, d0 = (_pos - o).magnitude;
             return d < OppRadius + PlayerRadius && d < d0;
@@ -362,20 +366,9 @@ namespace CosmicAtlas.Rendering.Mars
             switch (_mode)
             {
                 case ExplorerMode.Arrival:
-                {
-                    float u = Mathf.Clamp01(_arrivalT / ArrivalDur);
-                    float e = 1 - Mathf.Pow(1 - u, 3);
-                    float dist = Mathf.Exp(Mathf.Lerp(Mathf.Log(700f), Mathf.Log(_camDist), e));
-                    float pitch = Mathf.Lerp(1.52f, _camPitch, Mathf.SmoothStep(0, 1, u));
-                    float yaw = _heading + Mathf.Lerp(1.4f, 0f, e);
-                    // the rover is lowered for the last third (ILLUSTRATIVE): it settles onto the terrain at touchdown
-                    float drop = Mathf.SmoothStep(30f, 0f, Mathf.InverseLerp(0.45f, 0.82f, u));
-                    _player.transform.localPosition = new Vector3(_pos.x, _bodyY + drop, _pos.y);
-                    pos = Orbit(pivot, yaw, pitch, dist); look = pivot;
-                    _camYaw = yaw;
-                    SetCamera(pos, look, 1f);
+                    // E3: the conceptual carrier lands, opens its ramp and THEIA drives out (MarsPrototype.Carrier.cs)
+                    CarrierArrivalLate(dt);
                     return;
-                }
                 case ExplorerMode.Inspect:
                 {
                     var anchor = _rover.transform.TransformPoint(AnchorLocal()) - _world.position; // world-frame (site) point
@@ -417,7 +410,7 @@ namespace CosmicAtlas.Rendering.Mars
             cam.transform.position = _camPos - _origin;
             var d = _camLook - _camPos;
             if (d.sqrMagnitude > 1e-6f) cam.transform.rotation = Quaternion.LookRotation(d.normalized);
-            _rocks?.Draw(_camPos, _origin, true);
+            _rocks?.Draw(_camPos, _origin, true, cam.transform.forward);
         }
 
         Vector3 AnchorLocal()
@@ -490,11 +483,16 @@ namespace CosmicAtlas.Rendering.Mars
 
         // ------------------------------------------------------------------ traverse overlay
 
+        // Traverse overlay at 2 m per texel (a navigation aid): painted INCREMENTALLY — the replay only stamps the drive
+        // segments it has newly reached; a full repaint happens only when the replay seeks backwards or returns to the
+        // present — and uploaded at most twice a second (the first version repainted 2.2 Mpx ~30x a second: 37 fps).
+        const int TrailCell = 2;
+        int _paintedUpTo = -1;
+        bool _paintFade = true;
+
         void BuildTrail()
         {
-            // one texel per DTM cell (~1 m), linear. URP Lit _DETAIL_SCALED with scale 3: factor = 6 d - 2, so 128 is
-            // neutral (x1.01) and the amber track colour (187, 157, 115) is about x(2.4, 1.7, 0.7)
-            _trailW = _terrain.Width; _trailH = _terrain.Height;
+            _trailW = (_terrain.Width + TrailCell - 1) / TrailCell; _trailH = (_terrain.Height + TrailCell - 1) / TrailCell;
             _trail = new Texture2D(_trailW, _trailH, TextureFormat.RGB24, true, true) { name = "Traverse overlay", wrapMode = TextureWrapMode.Clamp, anisoLevel = 4 };
             _trailPx = new Color32[_trailW * _trailH];
             terrainMaterial.SetTexture("_DetailAlbedoMap", _trail);
@@ -503,43 +501,48 @@ namespace CosmicAtlas.Rendering.Mars
             PaintTrail(present: true);
         }
 
+        /// <summary>present = the full traverse with the fade toward today's rover position; otherwise the replay's progress</summary>
         void PaintTrail(bool present)
         {
-            var neutral = new Color32(128, 128, 128, 255);
-            for (int i = 0; i < _trailPx.Length; i++) _trailPx[i] = neutral;
+            bool full = present || _trailUpTo < _paintedUpTo || _paintFade != present;
+            if (full)
+            {
+                var neutral = new Color32(128, 128, 128, 255);
+                for (int i = 0; i < _trailPx.Length; i++) _trailPx[i] = neutral;
+                _paintedUpTo = 0; _paintFade = present;
+            }
             if (_trailVisible)
             {
                 var opp = new Vector2(_rover.transform.localPosition.x, _rover.transform.localPosition.z);
-                for (int i = 1; i <= _trailUpTo && i < _routeE.Length; i++)
+                for (int i = Mathf.Max(1, _paintedUpTo + 1); i <= _trailUpTo && i < _routeE.Length; i++)
                 {
                     var a = new Vector2(_routeE[i - 1], _routeN[i - 1]); var b = new Vector2(_routeE[i], _routeN[i]);
                     float len = (b - a).magnitude; if (len > 60f) continue; // a gap in the records, not a drive
-                    int steps = Mathf.Max(1, Mathf.CeilToInt(len / 0.4f));
-                    for (int s = 0; s <= steps; s++)
+                    int steps = Mathf.Max(1, Mathf.CeilToInt(len / 0.8f));
+                    for (int k = 0; k <= steps; k++)
                     {
-                        var p = Vector2.Lerp(a, b, s / (float)steps);
-                        // tracks fade out in the last 12 m to the rover, so the overlay never covers the close-up
-                        float fade = Mathf.Clamp01(((p - opp).magnitude - 4f) / 12f);
-                        Stamp(p, fade);
+                        var q = Vector2.Lerp(a, b, k / (float)steps);
+                        // present: tracks fade out in the last 12 m to the rover, so the overlay never covers the close-up
+                        Stamp(q, present ? Mathf.Clamp01(((q - opp).magnitude - 4f) / 12f) : 1f);
                     }
                 }
             }
+            _paintedUpTo = Mathf.Max(_paintedUpTo, _trailUpTo);
             _trailDirty = true;
         }
 
         void Stamp(Vector2 p, float w)
         {
             if (w <= 0) return;
-            float fc = (p.x - _terrain.East0) / _terrain.SpacingE, fr = (_terrain.North0 - p.y) / _terrain.SpacingN;
+            float fc = (p.x - _terrain.East0) / (_terrain.SpacingE * TrailCell), fr = (_terrain.North0 - p.y) / (_terrain.SpacingN * TrailCell);
             int c0 = Mathf.FloorToInt(fc), r0 = Mathf.FloorToInt(fr);
-            for (int r = r0 - 1; r <= r0 + 2; r++)
-                for (int c = c0 - 1; c <= c0 + 2; c++)
+            for (int r = r0 - 1; r <= r0 + 1; r++)
+                for (int c = c0 - 1; c <= c0 + 1; c++)
                 {
                     if (c < 0 || r < 0 || c >= _trailW || r >= _trailH) continue;
                     float d = Mathf.Sqrt((c + 0.5f - fc) * (c + 0.5f - fc) + (r + 0.5f - fr) * (r + 0.5f - fr));
-                    float a = Mathf.Clamp01(1.25f - d) * w; if (a <= 0) continue;
-                    int y = _trailH - 1 - r; // texture rows run south to north (uv v = 1 - row / (H - 1))
-                    int idx = y * _trailW + c;
+                    float a = Mathf.Clamp01(1.1f - d) * w; if (a <= 0) continue;
+                    int idx = (_trailH - 1 - r) * _trailW + c; // texture rows run south to north
                     var cur = _trailPx[idx];
                     // a subtle navigation aid: about x(1.45, 1.25, 0.85) at the centre of the track
                     byte R = (byte)Mathf.Max(cur.r, Mathf.Lerp(128, 148, a)), Gc = (byte)Mathf.Max(cur.g, Mathf.Lerp(128, 138, a)), B = (byte)Mathf.Min(cur.b, Mathf.Lerp(128, 119, a));
@@ -549,15 +552,12 @@ namespace CosmicAtlas.Rendering.Mars
 
         void UpdateTrail(float dt)
         {
-            if (_mode == ExplorerMode.Replay && _replayTrail && Mathf.Abs(_replaySol - _replayShownSol) >= 0.5f)
-            {
-                _replayShownSol = _replaySol; PaintTrail(present: false);
-            }
+            if (_mode == ExplorerMode.Replay && _replayTrail && _trailUpTo != _paintedUpTo) PaintTrail(present: false);
             _trailApplyTimer -= dt;
             if (_trailDirty && _trailApplyTimer <= 0)
             {
                 _trail.SetPixels32(_trailPx); _trail.Apply(true, false);
-                _trailDirty = false; _trailApplyTimer = 0.25f;
+                _trailDirty = false; _trailApplyTimer = 0.5f;
             }
         }
 
@@ -590,6 +590,7 @@ namespace CosmicAtlas.Rendering.Mars
               .Append(",\"oppDist\":").Append(MiniJson.N(DistToOpp()))
               .Append(",\"near\":").Append(_mode == ExplorerMode.Explore && DistToOpp() < InteractM + PlayerRadius ? "\"opportunity-rover\"" : "null")
               .Append(",\"arrivalT\":").Append(MiniJson.N(_mode == ExplorerMode.Arrival ? _arrivalT / ArrivalDur : 1))
+              .Append(",\"arrivalPhase\":").Append(MiniJson.Q(_mode == ExplorerMode.Arrival ? _arrivalPhase : ""))
               .Append(",\"sol\":").Append(_sol).Append(",\"replaySol\":").Append(MiniJson.N(_replaySol))
               .Append(",\"utc\":").Append(MiniJson.Q(_utc.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture)))
               .Append(",\"sunElevation\":").Append(MiniJson.N(_sunEl)).Append(",\"sunAzimuth\":").Append(MiniJson.N(_sunAz))
@@ -603,16 +604,19 @@ namespace CosmicAtlas.Rendering.Mars
             if (m == _mode) return;
             var prev = _mode;
             _mode = m;
-            if (prev == ExplorerMode.Inspect) ClearHighlight();
+            if (prev == ExplorerMode.Inspect) { if (_siteMode) SiteHighlight(-1); else ClearHighlight(); }
+            // landing sites: the expedition rover steps out of the picture while hardware is inspected (it otherwise sits
+            // inside the inspection frame); it is back, unmoved, when inspection ends
+            if (_siteMode && _player && (m == ExplorerMode.Inspect || prev == ExplorerMode.Inspect)) _player.SetActive(m != ExplorerMode.Inspect);
             if (m != ExplorerMode.Explore) _speed = 0;
             Report("mode", $"{{\"mode\":{MiniJson.Q(m.ToString())},\"prev\":{MiniJson.Q(prev.ToString())}}}");
-            Report("pose", PoseJson());
+            Report("pose", _siteMode ? SitePoseJson() : PoseJson());
         }
 
         void FinishArrival()
         {
             _arrivalDone = true;
-            _player.transform.localPosition = new Vector3(_pos.x, _bodyY, _pos.y);
+            CarrierFinal(); // landed, ramp open, THEIA at the foot of the ramp (also when the arrival is skipped)
             SetMode(ExplorerMode.Explore);
             Report("arrived", "{}");
         }
@@ -622,15 +626,19 @@ namespace CosmicAtlas.Rendering.Mars
         /// <summary>The host app takes over: '{"arrival":true}' plays the arrival descent first.</summary>
         public void Embed(string json)
         {
+            if (_siteMode) { if (_siteReady) SiteEmbed(json); else _pendingEmbed = json; return; }
             _embedded = true;
             bool arrival = json != null && json.Contains("\"arrival\":true");
             _player.SetActive(true);
             _camInit = false;
             _arrivalT = 0; _arrivalDone = false;
+            if (!arrival) CarrierFinal();
             SetMode(arrival ? ExplorerMode.Arrival : ExplorerMode.Explore);
             if (!arrival) _arrivalDone = true;
             Report("ready", ReadyJson());
         }
+
+        string _pendingEmbed;
 
         public void SkipArrival() { if (_mode == ExplorerMode.Arrival) FinishArrival(); }
 
@@ -648,6 +656,7 @@ namespace CosmicAtlas.Rendering.Mars
         /// <summary>Inspect Opportunity: anchor = whole | mast | solar | mobility (camera framing; solar and mobility also highlight the model's own part).</summary>
         public void Inspect(string anchor)
         {
+            if (_siteMode) { if (_siteReady) SiteInspect(anchor); return; }
             _insAnchor = string.IsNullOrEmpty(anchor) ? "whole" : anchor.Trim().ToLowerInvariant();
             _insDist = _insAnchor == "whole" ? 5f : 2.6f;
             if (_mode != ExplorerMode.Inspect) { _insYaw = 0.6f; _insPitch = 0.35f; SetMode(ExplorerMode.Inspect); }
@@ -656,6 +665,7 @@ namespace CosmicAtlas.Rendering.Mars
         /// <summary>Relive Opportunity's Victoria campaign: the rover moves along its recorded drives; the player rover is hidden.</summary>
         public void ReplayStart(string sol)
         {
+            if (_siteMode) { Debug.LogWarning("[Mars] no recorded traverse replay for this site"); return; }
             _player.SetActive(false);
             _replayTrail = true; _replayShownSol = -1;
             _repYaw = 0.5f; _camPitch = 0.42f; _camDist = 9f;
@@ -665,6 +675,7 @@ namespace CosmicAtlas.Rendering.Mars
 
         public void ReplaySol(string sol)
         {
+            if (_siteMode) return;
             if (!float.TryParse(sol, NumberStyles.Float, CultureInfo.InvariantCulture, out var s)) return;
             _replaySol = Mathf.Clamp(s, _routeU[0], _routeU[_routeU.Length - 1] + 0.999f);
             SetRoverAtSol(_replaySol);
@@ -673,6 +684,7 @@ namespace CosmicAtlas.Rendering.Mars
         /// <summary>Back to the present: Opportunity, the Sun and the full traverse as in the exploration scene.</summary>
         public void ReplayEnd()
         {
+            if (_siteMode) { SetMode(ExplorerMode.Explore); return; }
             _rover.transform.localPosition = _sceneRoverPos; _rover.transform.localRotation = _sceneRoverRot;
             _utc = MarsTime.UtcForLtst(SceneDate, _siteLon, SceneLtst); _sol = MissionSol(_utc); _replaySunSol = -1; ApplySun();
             _replayTrail = false; _trailUpTo = _routeE.Length - 1; PaintTrail(present: true); _hasReplayPos = false;
@@ -686,6 +698,7 @@ namespace CosmicAtlas.Rendering.Mars
         /// </summary>
         public void RestoreState(string json)
         {
+            if (_siteMode) { if (_siteReady) SiteRestore(json); return; }
             try
             {
                 var o = MiniJson.O(MiniJson.Parse(json));
@@ -709,6 +722,7 @@ namespace CosmicAtlas.Rendering.Mars
 
         public void SetTraverse(string on)
         {
+            if (_siteMode) return;
             _trailVisible = on != "0";
             PaintTrail(present: _mode != ExplorerMode.Replay);
         }

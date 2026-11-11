@@ -1,0 +1,1472 @@
+{
+ "checks": [
+  {
+   "check": "viking-1 S1 catalogue card is Available and labelled lander",
+   "pass": true,
+   "detail": "\u2b22 STATIONARY LANDER\nAVAILABLE\nViking 1\nChryse Planitia \u00b7 22.2690\u00b0N, 47.9510\u00b0W \u00b7 landed 1976-07-20\nThe first successful US Mars landing. Walk around the lander o"
+  },
+  {
+   "check": "viking-1 S2 Unity site mode ready",
+   "pass": true,
+   "detail": {
+    "secs": 11.2
+   }
+  },
+  {
+   "check": "viking-1 S2 terrain + horizon built, height check passes",
+   "pass": true,
+   "detail": {
+    "tris": 1103200,
+    "horizon": {
+     "triangles": 379134,
+     "chunks": 18
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.00013505343203235043,
+     "gateM": 0.05,
+     "pass": true
+    }
+   }
+  },
+  {
+   "check": "viking-1 S3 hardware present: ['viking-1-lander']",
+   "pass": true,
+   "detail": {
+    "viking-1-lander": 12
+   }
+  },
+  {
+   "check": "viking-1 S4 input mode PLANETARY_EXPLORATION",
+   "pass": true,
+   "detail": "PLANETARY_EXPLORATION"
+  },
+  {
+   "check": "viking-1 S5 W moves the explorer",
+   "pass": true,
+   "detail": {
+    "moved": 2.26
+   }
+  },
+  {
+   "check": "viking-1 S5 an arrow key turns only the camera",
+   "pass": true,
+   "detail": {
+    "camTurn": 1.291,
+    "moved": 0.0
+   }
+  },
+  {
+   "check": "viking-1 S6 minimap shown by default; coordinates displayed",
+   "pass": true,
+   "detail": {
+    "minimap": "on",
+    "coords": "0 m E, -22 m N of the site origin \u00b7 22.2686\u00b0N, 47.9510\u00b0W"
+   }
+  },
+  {
+   "check": "viking-1 S7 next to viking-1-lander: inspect prompt",
+   "pass": true,
+   "detail": "E\nInspect Viking 1 lander\nInspect"
+  },
+  {
+   "check": "viking-1 S7 E opens the record and Unity frames the hardware",
+   "pass": true,
+   "detail": {
+    "hw": "viking-1-lander",
+    "component": ""
+   }
+  },
+  {
+   "check": "viking-1 S7 inspection owns the keys (HARDWARE_INSPECTION)",
+   "pass": true,
+   "detail": "HARDWARE_INSPECTION"
+  },
+  {
+   "check": "viking-1 S7 component highlight",
+   "pass": null,
+   "detail": "SKIP: this model has no separately named parts (whole-vehicle inspection only)"
+  },
+  {
+   "check": "viking-1 S7 Esc closes the record, back to exploration",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "viking-1 S8 site map opens and closes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "viking-1 S9 frame time recorded (Balanced, Unity msP50)",
+   "pass": true,
+   "detail": {
+    "msP50": 17,
+    "drawCalls": 305,
+    "totalUsedMB": 103.81792831420898,
+    "rocks": 12826
+   }
+  },
+  {
+   "check": "viking-1 no console / Unity errors",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "viking-1 S10 Return to orbit quits the player",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "viking-2 S1 catalogue card is Available and labelled lander",
+   "pass": true,
+   "detail": "\u2b22 STATIONARY LANDER\nAVAILABLE\nViking 2\nUtopia Planitia \u00b7 47.6680\u00b0N, 134.2800\u00b0E \u00b7 landed 1976-09-03\nViking 1's twin, 6,400 km away on the northern plains of Utop"
+  },
+  {
+   "check": "viking-2 S2 Unity site mode ready",
+   "pass": true,
+   "detail": {
+    "secs": 5.3
+   }
+  },
+  {
+   "check": "viking-2 S2 terrain + horizon built, height check passes",
+   "pass": true,
+   "detail": {
+    "tris": 1103200,
+    "horizon": {
+     "triangles": 261924,
+     "chunks": 14
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.0001471347218569008,
+     "gateM": 0.05,
+     "pass": true
+    }
+   }
+  },
+  {
+   "check": "viking-2 S3 hardware present: ['viking-2-lander']",
+   "pass": true,
+   "detail": {
+    "viking-2-lander": 12
+   }
+  },
+  {
+   "check": "viking-2 S4 input mode PLANETARY_EXPLORATION",
+   "pass": true,
+   "detail": "PLANETARY_EXPLORATION"
+  },
+  {
+   "check": "viking-2 S5 W moves the explorer",
+   "pass": true,
+   "detail": {
+    "moved": 2.26
+   }
+  },
+  {
+   "check": "viking-2 S5 an arrow key turns only the camera",
+   "pass": true,
+   "detail": {
+    "camTurn": 1.289,
+    "moved": 0.0
+   }
+  },
+  {
+   "check": "viking-2 S6 minimap shown by default; coordinates displayed",
+   "pass": true,
+   "detail": {
+    "minimap": "on",
+    "coords": "16 m E, -16 m N of the site origin \u00b7 47.6677\u00b0N, 134.2804\u00b0E"
+   }
+  },
+  {
+   "check": "viking-2 S7 next to viking-2-lander: inspect prompt",
+   "pass": true,
+   "detail": "E\nInspect Viking 2 lander\nInspect"
+  },
+  {
+   "check": "viking-2 S7 E opens the record and Unity frames the hardware",
+   "pass": true,
+   "detail": {
+    "hw": "viking-2-lander",
+    "component": ""
+   }
+  },
+  {
+   "check": "viking-2 S7 inspection owns the keys (HARDWARE_INSPECTION)",
+   "pass": true,
+   "detail": "HARDWARE_INSPECTION"
+  },
+  {
+   "check": "viking-2 S7 component highlight",
+   "pass": null,
+   "detail": "SKIP: this model has no separately named parts (whole-vehicle inspection only)"
+  },
+  {
+   "check": "viking-2 S7 Esc closes the record, back to exploration",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "viking-2 S8 site map opens and closes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "viking-2 S9 frame time recorded (Balanced, Unity msP50)",
+   "pass": true,
+   "detail": {
+    "msP50": 17,
+    "drawCalls": 245,
+    "totalUsedMB": 103.18299674987793,
+    "rocks": 10644
+   }
+  },
+  {
+   "check": "viking-2 no console / Unity errors",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "viking-2 S10 Return to orbit quits the player",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "pathfinder S1 catalogue card is Available and labelled rover",
+   "pass": true,
+   "detail": "\u26ed ROVER MISSION\nAVAILABLE\nMars Pathfinder (with Sojourner)\nAres Vallis \u00b7 19.0950\u00b0N, 33.2530\u00b0W \u00b7 landed 1997-07-04\nThe first rover on Mars, 65 cm long, beside it"
+  },
+  {
+   "check": "pathfinder S2 Unity site mode ready",
+   "pass": true,
+   "detail": {
+    "secs": 5.1
+   }
+  },
+  {
+   "check": "pathfinder S2 terrain + horizon built, height check passes",
+   "pass": true,
+   "detail": {
+    "tris": 1103200,
+    "horizon": {
+     "triangles": 237368,
+     "chunks": 12
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.000632703166616011,
+     "gateM": 0.05,
+     "pass": true
+    }
+   }
+  },
+  {
+   "check": "pathfinder S3 hardware present: ['pathfinder-lander', 'sojourner']",
+   "pass": true,
+   "detail": {
+    "pathfinder-lander": 23,
+    "sojourner": 55
+   }
+  },
+  {
+   "check": "pathfinder S4 input mode VEHICLE_EXPLORATION",
+   "pass": true,
+   "detail": "VEHICLE_EXPLORATION"
+  },
+  {
+   "check": "pathfinder S5 W moves the explorer",
+   "pass": true,
+   "detail": {
+    "moved": 3.51
+   }
+  },
+  {
+   "check": "pathfinder S5 an arrow key turns only the camera",
+   "pass": true,
+   "detail": {
+    "camTurn": 1.189,
+    "moved": 0.0
+   }
+  },
+  {
+   "check": "pathfinder S6 minimap shown by default; coordinates displayed",
+   "pass": true,
+   "detail": {
+    "minimap": "on",
+    "coords": "26 m E, 17 m N of the site origin \u00b7 19.0953\u00b0N, 33.2525\u00b0W \u00b7 pitch 1\u00b0 roll 2\u00b0"
+   }
+  },
+  {
+   "check": "pathfinder S7 next to pathfinder-lander: inspect prompt",
+   "pass": true,
+   "detail": "E\nInspect Mars Pathfinder lander (Carl Sagan Memorial Station)\nInspect"
+  },
+  {
+   "check": "pathfinder S7 E opens the record and Unity frames the hardware",
+   "pass": true,
+   "detail": {
+    "hw": "pathfinder-lander",
+    "component": ""
+   }
+  },
+  {
+   "check": "pathfinder S7 inspection owns the keys (HARDWARE_INSPECTION)",
+   "pass": true,
+   "detail": "HARDWARE_INSPECTION"
+  },
+  {
+   "check": "pathfinder S7 component petals framed and highlighted on the model",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "pathfinder S7 Esc closes the record, back to exploration",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "pathfinder S8 site map opens and closes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "pathfinder S9 frame time recorded (Balanced, Unity msP50)",
+   "pass": true,
+   "detail": {
+    "msP50": 17,
+    "drawCalls": 534,
+    "totalUsedMB": 112.32499599456787,
+    "rocks": 9131
+   }
+  },
+  {
+   "check": "pathfinder no console / Unity errors",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "pathfinder S10 Return to orbit quits the player",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "spirit S1 catalogue card is Available and labelled rover",
+   "pass": true,
+   "detail": "\u26ed ROVER MISSION\nAVAILABLE\nSpirit (MER-A)\nGusev crater \u00b7 14.5692\u00b0S, 175.4729\u00b0E \u00b7 landed 2004-01-03\nOpportunity's twin at its landing site inside 160 km-wide Guse"
+  },
+  {
+   "check": "spirit S2 Unity site mode ready",
+   "pass": true,
+   "detail": {
+    "secs": 6.1
+   }
+  },
+  {
+   "check": "spirit S2 terrain + horizon built, height check passes",
+   "pass": true,
+   "detail": {
+    "tris": 1103200,
+    "horizon": {
+     "triangles": 193530,
+     "chunks": 13
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.0001264623538395071,
+     "gateM": 0.05,
+     "pass": true
+    }
+   }
+  },
+  {
+   "check": "spirit S3 hardware present: ['spirit-rover', 'spirit-lander']",
+   "pass": true,
+   "detail": {
+    "spirit-rover": 40,
+    "spirit-lander": 16
+   }
+  },
+  {
+   "check": "spirit S4 input mode VEHICLE_EXPLORATION",
+   "pass": true,
+   "detail": "VEHICLE_EXPLORATION"
+  },
+  {
+   "check": "spirit S5 W moves the explorer",
+   "pass": true,
+   "detail": {
+    "moved": 3.62
+   }
+  },
+  {
+   "check": "spirit S5 an arrow key turns only the camera",
+   "pass": true,
+   "detail": {
+    "camTurn": 1.196,
+    "moved": 0.0
+   }
+  },
+  {
+   "check": "spirit S6 minimap shown by default; coordinates displayed",
+   "pass": true,
+   "detail": {
+    "minimap": "on",
+    "coords": "-35 m E, -22 m N of the site origin \u00b7 14.5696\u00b0S, 175.4723\u00b0E \u00b7 pitch -1\u00b0 roll 3\u00b0"
+   }
+  },
+  {
+   "check": "spirit S7 next to spirit-rover: inspect prompt",
+   "pass": true,
+   "detail": "E\nInspect Spirit rover\nInspect"
+  },
+  {
+   "check": "spirit S7 E opens the record and Unity frames the hardware",
+   "pass": true,
+   "detail": {
+    "hw": "spirit-rover",
+    "component": ""
+   }
+  },
+  {
+   "check": "spirit S7 inspection owns the keys (HARDWARE_INSPECTION)",
+   "pass": true,
+   "detail": "HARDWARE_INSPECTION"
+  },
+  {
+   "check": "spirit S7 component mast framed and highlighted on the model",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "spirit S7 Esc closes the record, back to exploration",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "spirit S8 site map opens and closes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "spirit S9 frame time recorded (Balanced, Unity msP50)",
+   "pass": true,
+   "detail": {
+    "msP50": 17,
+    "drawCalls": 538,
+    "totalUsedMB": 105.59997844696045,
+    "rocks": 13212
+   }
+  },
+  {
+   "check": "spirit no console / Unity errors",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "spirit S10 Return to orbit quits the player",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "phoenix S1 catalogue card is Available and labelled lander",
+   "pass": true,
+   "detail": "\u2b22 STATIONARY LANDER\nAVAILABLE\nPhoenix\nVastitas Borealis \u00b7 68.2200\u00b0N, 125.7500\u00b0W \u00b7 landed 2008-05-25\nThe arctic lander that dug down to water ice at 68\u00b0 north.\nP"
+  },
+  {
+   "check": "phoenix S2 Unity site mode ready",
+   "pass": true,
+   "detail": {
+    "secs": 5.3
+   }
+  },
+  {
+   "check": "phoenix S2 terrain + horizon built, height check passes",
+   "pass": true,
+   "detail": {
+    "tris": 1103200,
+    "horizon": {
+     "triangles": 208724,
+     "chunks": 14
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.0002374408492045177,
+     "gateM": 0.05,
+     "pass": true
+    }
+   }
+  },
+  {
+   "check": "phoenix S3 hardware present: ['phoenix-lander']",
+   "pass": true,
+   "detail": {
+    "phoenix-lander": 17
+   }
+  },
+  {
+   "check": "phoenix S4 input mode PLANETARY_EXPLORATION",
+   "pass": true,
+   "detail": "PLANETARY_EXPLORATION"
+  },
+  {
+   "check": "phoenix S5 W moves the explorer",
+   "pass": true,
+   "detail": {
+    "moved": 2.26
+   }
+  },
+  {
+   "check": "phoenix S5 an arrow key turns only the camera",
+   "pass": true,
+   "detail": {
+    "camTurn": 1.289,
+    "moved": 0.0
+   }
+  },
+  {
+   "check": "phoenix S6 minimap shown by default; coordinates displayed",
+   "pass": true,
+   "detail": {
+    "minimap": "on",
+    "coords": "-15 m E, -18 m N of the site origin \u00b7 68.2197\u00b0N, 125.7507\u00b0W"
+   }
+  },
+  {
+   "check": "phoenix S7 next to phoenix-lander: inspect prompt",
+   "pass": true,
+   "detail": "E\nInspect Phoenix lander\nInspect"
+  },
+  {
+   "check": "phoenix S7 E opens the record and Unity frames the hardware",
+   "pass": true,
+   "detail": {
+    "hw": "phoenix-lander",
+    "component": ""
+   }
+  },
+  {
+   "check": "phoenix S7 inspection owns the keys (HARDWARE_INSPECTION)",
+   "pass": true,
+   "detail": "HARDWARE_INSPECTION"
+  },
+  {
+   "check": "phoenix S7 component solar framed and highlighted on the model",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "phoenix S7 Esc closes the record, back to exploration",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "phoenix S8 site map opens and closes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "phoenix S9 frame time recorded (Balanced, Unity msP50)",
+   "pass": true,
+   "detail": {
+    "msP50": 17,
+    "drawCalls": 226,
+    "totalUsedMB": 102.63590812683105,
+    "rocks": 8644
+   }
+  },
+  {
+   "check": "phoenix no console / Unity errors",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "phoenix S10 Return to orbit quits the player",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "curiosity S1 catalogue card is Available and labelled rover",
+   "pass": true,
+   "detail": "\u26ed ROVER MISSION\nAVAILABLE\nMars Science Laboratory (Curiosity)\nGale crater (Bradbury Landing) \u00b7 4.5900\u00b0S, 137.4400\u00b0E \u00b7 landed 2012-08-06\nThe car-sized nuclear-po"
+  },
+  {
+   "check": "curiosity S2 Unity site mode ready",
+   "pass": true,
+   "detail": {
+    "secs": 5.2
+   }
+  },
+  {
+   "check": "curiosity S2 terrain + horizon built, height check passes",
+   "pass": true,
+   "detail": {
+    "tris": 678786,
+    "horizon": {
+     "triangles": 285938,
+     "chunks": 17
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.00012088540035293249,
+     "gateM": 0.05,
+     "pass": true
+    }
+   }
+  },
+  {
+   "check": "curiosity S3 hardware present: ['curiosity-rover']",
+   "pass": true,
+   "detail": {
+    "curiosity-rover": 9
+   }
+  },
+  {
+   "check": "curiosity S4 input mode VEHICLE_EXPLORATION",
+   "pass": true,
+   "detail": "VEHICLE_EXPLORATION"
+  },
+  {
+   "check": "curiosity S5 W moves the explorer",
+   "pass": true,
+   "detail": {
+    "moved": 3.38
+   }
+  },
+  {
+   "check": "curiosity S5 an arrow key turns only the camera",
+   "pass": true,
+   "detail": {
+    "camTurn": 1.189,
+    "moved": 0.0
+   }
+  },
+  {
+   "check": "curiosity S6 minimap shown by default; coordinates displayed",
+   "pass": true,
+   "detail": {
+    "minimap": "on",
+    "coords": "31 m E, 27 m N of the site origin \u00b7 4.5895\u00b0S, 137.4405\u00b0E \u00b7 pitch 1\u00b0 roll 2\u00b0"
+   }
+  },
+  {
+   "check": "curiosity S7 next to curiosity-rover: inspect prompt",
+   "pass": true,
+   "detail": "E\nInspect Curiosity rover\nInspect"
+  },
+  {
+   "check": "curiosity S7 E opens the record and Unity frames the hardware",
+   "pass": true,
+   "detail": {
+    "hw": "curiosity-rover",
+    "component": ""
+   }
+  },
+  {
+   "check": "curiosity S7 inspection owns the keys (HARDWARE_INSPECTION)",
+   "pass": true,
+   "detail": "HARDWARE_INSPECTION"
+  },
+  {
+   "check": "curiosity S7 component highlight",
+   "pass": null,
+   "detail": "SKIP: this model has no separately named parts (whole-vehicle inspection only)"
+  },
+  {
+   "check": "curiosity S7 Esc closes the record, back to exploration",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "curiosity S8 site map opens and closes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "curiosity S9 frame time recorded (Balanced, Unity msP50)",
+   "pass": true,
+   "detail": {
+    "msP50": 17,
+    "drawCalls": 316,
+    "totalUsedMB": 98.4164686203003,
+    "rocks": 8162
+   }
+  },
+  {
+   "check": "curiosity no console / Unity errors",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "curiosity S10 Return to orbit quits the player",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "insight S1 catalogue card is Available and labelled lander",
+   "pass": true,
+   "detail": "\u2b22 STATIONARY LANDER\nAVAILABLE\nInSight\nElysium Planitia \u00b7 4.5024\u00b0N, 135.6234\u00b0E \u00b7 landed 2018-11-26\nThe geophysics lander that listened for marsquakes. Walk aroun"
+  },
+  {
+   "check": "insight S2 Unity site mode ready",
+   "pass": true,
+   "detail": {
+    "secs": 9.3
+   }
+  },
+  {
+   "check": "insight S2 terrain + horizon built, height check passes",
+   "pass": true,
+   "detail": {
+    "tris": 1103200,
+    "horizon": {
+     "triangles": 280664,
+     "chunks": 15
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.00018268026475709576,
+     "gateM": 0.05,
+     "pass": true
+    }
+   }
+  },
+  {
+   "check": "insight S3 hardware present: ['insight-lander']",
+   "pass": true,
+   "detail": {
+    "insight-lander": 143
+   }
+  },
+  {
+   "check": "insight S4 input mode PLANETARY_EXPLORATION",
+   "pass": true,
+   "detail": "PLANETARY_EXPLORATION"
+  },
+  {
+   "check": "insight S5 W moves the explorer",
+   "pass": true,
+   "detail": {
+    "moved": 2.26
+   }
+  },
+  {
+   "check": "insight S5 an arrow key turns only the camera",
+   "pass": true,
+   "detail": {
+    "camTurn": 1.291,
+    "moved": 0.0
+   }
+  },
+  {
+   "check": "insight S6 minimap shown by default; coordinates displayed",
+   "pass": true,
+   "detail": {
+    "minimap": "on",
+    "coords": "19 m E, -20 m N of the site origin \u00b7 4.5020\u00b0N, 135.6238\u00b0E"
+   }
+  },
+  {
+   "check": "insight S7 next to insight-lander: inspect prompt",
+   "pass": true,
+   "detail": "E\nInspect InSight lander\nInspect"
+  },
+  {
+   "check": "insight S7 E opens the record and Unity frames the hardware",
+   "pass": true,
+   "detail": {
+    "hw": "insight-lander",
+    "component": ""
+   }
+  },
+  {
+   "check": "insight S7 inspection owns the keys (HARDWARE_INSPECTION)",
+   "pass": true,
+   "detail": "HARDWARE_INSPECTION"
+  },
+  {
+   "check": "insight S7 component seis framed and highlighted on the model",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "insight S7 Esc closes the record, back to exploration",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "insight S8 site map opens and closes",
+   "pass": true,
+   "detail": ""
+  },
+  {
+   "check": "insight S9 frame time recorded (Balanced, Unity msP50)",
+   "pass": true,
+   "detail": {
+    "msP50": 17,
+    "drawCalls": 451,
+    "totalUsedMB": 100.56523704528809,
+    "rocks": 5678
+   }
+  },
+  {
+   "check": "insight no console / Unity errors",
+   "pass": true,
+   "detail": []
+  },
+  {
+   "check": "insight S10 Return to orbit quits the player",
+   "pass": true,
+   "detail": ""
+  }
+ ],
+ "sites": {
+  "viking-1": {
+   "site": "viking-1",
+   "readySecs": 11.2,
+   "ready": {
+    "siteId": "viking-1",
+    "siteKind": "lander",
+    "terrainTriangles": 1103200,
+    "chunks": 121,
+    "horizon": {
+     "triangles": 379134,
+     "chunks": 18
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.00013505343203235043,
+     "gateM": 0.05,
+     "pass": true
+    },
+    "profile": "balanced",
+    "sol": 0,
+    "utc": "1976-07-20T10:04:00Z",
+    "sunElevation": 62.6198654603065,
+    "sunAzimuth": 281.7531143211079,
+    "loadMs": 3853
+   },
+   "hardware": [
+    {
+     "id": "viking-1-lander",
+     "model": "glb:viking-lander",
+     "parts": 12,
+     "components": [],
+     "note": "NASA, NASA 3D Resources: Viking Lander; uniform scale so the model foottriangle = 2.21 m (sourced); 99526 triangles",
+     "x": 0,
+     "z": 0,
+     "y": 1.4643480777740479
+    }
+   ],
+   "stats": {
+    "profile": "balanced",
+    "msP50": 17,
+    "msP95": 17,
+    "msP99": 17,
+    "width": 1366,
+    "height": 768,
+    "drawCalls": 305,
+    "triangles": 3057818,
+    "setPass": 56,
+    "rebases": 0,
+    "pathT": 0,
+    "msMax": 20,
+    "gcUsedMB": 25.1484375,
+    "gcReservedMB": 179.74609375,
+    "totalUsedMB": 103.81792831420898,
+    "rockInstances": 12826,
+    "rockDrawCalls": 221,
+    "rockTrianglesM": 1.171712,
+    "rockRebuildMaxMs": 0.7001000046730042
+   },
+   "msP50": 17,
+   "consoleErrors": [],
+   "unityLogLines": [
+    "info: [Mars] Unity player build ff79c67b83fb, built 2026-11-10T23:16:17.245Z (copied into dist by vite build)",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: [Mars] site viking-1 ready in 1.6 s: terrain 1401x1401, 1 hardware\n"
+   ]
+  },
+  "viking-2": {
+   "site": "viking-2",
+   "readySecs": 5.3,
+   "ready": {
+    "siteId": "viking-2",
+    "siteKind": "lander",
+    "terrainTriangles": 1103200,
+    "chunks": 121,
+    "horizon": {
+     "triangles": 261924,
+     "chunks": 14
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.0001471347218569008,
+     "gateM": 0.05,
+     "pass": true
+    },
+    "profile": "balanced",
+    "sol": 0,
+    "utc": "1976-09-03T02:32:00Z",
+    "sunElevation": 54.97157806510501,
+    "sunAzimuth": 233.84912607040206,
+    "loadMs": 3023
+   },
+   "hardware": [
+    {
+     "id": "viking-2-lander",
+     "model": "glb:viking-lander",
+     "parts": 12,
+     "components": [],
+     "note": "NASA, NASA 3D Resources: Viking Lander; uniform scale so the model foottriangle = 2.21 m (sourced); 99526 triangles",
+     "x": 0,
+     "z": 0,
+     "y": 2.524021863937378
+    }
+   ],
+   "stats": {
+    "profile": "balanced",
+    "msP50": 17,
+    "msP95": 17.0000057220459,
+    "msP99": 17.0000057220459,
+    "width": 1366,
+    "height": 768,
+    "drawCalls": 245,
+    "triangles": 2469778,
+    "setPass": 55,
+    "rebases": 0,
+    "pathT": 0,
+    "msMax": 19,
+    "gcUsedMB": 24.63671875,
+    "gcReservedMB": 183.46484375,
+    "totalUsedMB": 103.18299674987793,
+    "rockInstances": 10644,
+    "rockDrawCalls": 187,
+    "rockTrianglesM": 0.993408,
+    "rockRebuildMaxMs": 0.3000999987125397
+   },
+   "msP50": 17,
+   "consoleErrors": [],
+   "unityLogLines": [
+    "info: [Mars] Unity player build ff79c67b83fb, built 2026-11-10T23:16:17.245Z (copied into dist by vite build)",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: [Mars] site viking-2 ready in 0.9 s: terrain 1401x1401, 1 hardware\n"
+   ]
+  },
+  "pathfinder": {
+   "site": "pathfinder",
+   "readySecs": 5.1,
+   "ready": {
+    "siteId": "pathfinder",
+    "siteKind": "rover",
+    "terrainTriangles": 1103200,
+    "chunks": 121,
+    "horizon": {
+     "triangles": 237368,
+     "chunks": 12
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.000632703166616011,
+     "gateM": 0.05,
+     "pass": true
+    },
+    "profile": "balanced",
+    "sol": 2,
+    "utc": "1997-07-06T04:56:00Z",
+    "sunElevation": 60.93211765673911,
+    "sunAzimuth": 265.85772598946784,
+    "loadMs": 3104
+   },
+   "hardware": [
+    {
+     "id": "pathfinder-lander",
+     "model": "proc:pathfinder-lander",
+     "parts": 23,
+     "components": [
+      {
+       "id": "petals",
+       "renderers": 4
+      },
+      {
+       "id": "imp",
+       "renderers": 2
+      },
+      {
+       "id": "met",
+       "renderers": 1
+      },
+      {
+       "id": "ramps",
+       "renderers": 2
+      },
+      {
+       "id": "airbags",
+       "renderers": 9
+      }
+     ],
+     "note": "DOCUMENTED RECONSTRUCTION (no NASA 3D model exists): tetrahedral lander with three solar petals (2.8 m\u00b2 of cells), IMP camera ~1.5 m above the ground, 1 m meteorology mast (NSSDCA; Mars Pathfinder Landing Press Kit). Petal size derived from the cell area; ramps and airbags ILLUSTRATIVE",
+     "x": 0,
+     "z": 0,
+     "y": -0.34817346930503845
+    },
+    {
+     "id": "sojourner",
+     "model": "proc:sojourner",
+     "parts": 55,
+     "components": [
+      {
+       "id": "solar",
+       "renderers": 1
+      },
+      {
+       "id": "wheels",
+       "renderers": 50
+      },
+      {
+       "id": "apxs",
+       "renderers": 1
+      },
+      {
+       "id": "cameras",
+       "renderers": 1
+      }
+     ],
+     "note": "DOCUMENTED RECONSTRUCTION (no NASA 3D model exists): 65 x 48 x 30 cm, six 13 cm wheels, rocker-bogie, 0.2 m\u00b2 solar array (Mars Pathfinder Landing Press Kit); part shapes SIMPLIFIED",
+     "x": 0.30000001192092896,
+     "z": 3.0999999046325684,
+     "y": -0.22303472459316254
+    }
+   ],
+   "stats": {
+    "profile": "balanced",
+    "msP50": 17,
+    "msP95": 17,
+    "msP99": 17.0000057220459,
+    "width": 1366,
+    "height": 768,
+    "drawCalls": 534,
+    "triangles": 2232970,
+    "setPass": 57,
+    "rebases": 0,
+    "pathT": 0,
+    "msMax": 17.0000057220459,
+    "gcUsedMB": 33.0546875,
+    "gcReservedMB": 182.25390625,
+    "totalUsedMB": 112.32499599456787,
+    "rockInstances": 9131,
+    "rockDrawCalls": 166,
+    "rockTrianglesM": 0.899392,
+    "rockRebuildMaxMs": 0.4000000059604645
+   },
+   "msP50": 17,
+   "consoleErrors": [],
+   "unityLogLines": [
+    "info: [Mars] Unity player build ff79c67b83fb, built 2026-11-10T23:16:17.245Z (copied into dist by vite build)",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: [Mars] site pathfinder ready in 1.0 s: terrain 1401x1401, 2 hardware\n"
+   ]
+  },
+  "spirit": {
+   "site": "spirit",
+   "readySecs": 6.1,
+   "ready": {
+    "siteId": "spirit",
+    "siteKind": "rover",
+    "terrainTriangles": 1103200,
+    "chunks": 121,
+    "horizon": {
+     "triangles": 193530,
+     "chunks": 13
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.0001264623538395071,
+     "gateM": 0.05,
+     "pass": true
+    },
+    "profile": "balanced",
+    "sol": 17,
+    "utc": "2004-01-20T14:42:00Z",
+    "sunElevation": 60.224980035350995,
+    "sunAzimuth": 276.0092492431844,
+    "loadMs": 4011.000244140625
+   },
+   "hardware": [
+    {
+     "id": "spirit-rover",
+     "model": "mer",
+     "parts": 40,
+     "components": [
+      {
+       "id": "mast",
+       "renderers": 5
+      },
+      {
+       "id": "solar",
+       "renderers": 5
+      },
+      {
+       "id": "mobility",
+       "renderers": 20
+      },
+      {
+       "id": "arm",
+       "renderers": 6
+      },
+      {
+       "id": "hga",
+       "renderers": 3
+      },
+      {
+       "id": "body",
+       "renderers": 1
+      }
+     ],
+     "note": "NASA 3D Resources articulated MER model (40 parts: 6 wheels, rocker-bogie, 5 solar panel sections, 5-joint arm with instrument turret, Pancam mast, high-gain antenna); scale 0.987 so the solar-panel span = 2.25 m (PDS); measured height 1.43 m vs PDS 1.54 m, length 1.65 m vs PDS 1.51 m",
+     "x": 3.4000000953674316,
+     "z": 2.200000047683716,
+     "y": -1.341247320175171
+    },
+    {
+     "id": "spirit-lander",
+     "model": "proc:mer-lander",
+     "parts": 16,
+     "components": [
+      {
+       "id": "petals",
+       "renderers": 4
+      },
+      {
+       "id": "airbags",
+       "renderers": 9
+      }
+     ],
+     "note": "SIMPLIFIED MODEL: MER lander base, three opened petals, deflated airbags and egress aids; shapes and dimensions ILLUSTRATIVE (not sourced)",
+     "x": 0,
+     "z": 0,
+     "y": -1.3492649793624878
+    }
+   ],
+   "stats": {
+    "profile": "balanced",
+    "msP50": 17,
+    "msP95": 17,
+    "msP99": 17,
+    "width": 1366,
+    "height": 768,
+    "drawCalls": 538,
+    "triangles": 2245032,
+    "setPass": 58,
+    "rebases": 0,
+    "pathT": 0,
+    "msMax": 19,
+    "gcUsedMB": 26.109375,
+    "gcReservedMB": 167.47265625,
+    "totalUsedMB": 105.59997844696045,
+    "rockInstances": 13212,
+    "rockDrawCalls": 227,
+    "rockTrianglesM": 1.161504,
+    "rockRebuildMaxMs": 0.6000000238418579
+   },
+   "msP50": 17,
+   "consoleErrors": [],
+   "unityLogLines": [
+    "info: [Mars] Unity player build ff79c67b83fb, built 2026-11-10T23:16:17.245Z (copied into dist by vite build)",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: [Mars] site spirit ready in 1.8 s: terrain 1401x1401, 2 hardware\n"
+   ]
+  },
+  "phoenix": {
+   "site": "phoenix",
+   "readySecs": 5.3,
+   "ready": {
+    "siteId": "phoenix",
+    "siteKind": "lander",
+    "terrainTriangles": 1103200,
+    "chunks": 121,
+    "horizon": {
+     "triangles": 208724,
+     "chunks": 14
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.0002374408492045177,
+     "gateM": 0.05,
+     "pass": true
+    },
+    "profile": "balanced",
+    "sol": 1,
+    "utc": "2008-05-26T21:40:00Z",
+    "sunElevation": 42.71557969820794,
+    "sunAzimuth": 218.17980924344724,
+    "loadMs": 3118
+   },
+   "hardware": [
+    {
+     "id": "phoenix-lander",
+     "model": "proc:phoenix",
+     "parts": 17,
+     "components": [
+      {
+       "id": "solar",
+       "renderers": 2
+      },
+      {
+       "id": "arm",
+       "renderers": 3
+      },
+      {
+       "id": "tega",
+       "renderers": 1
+      },
+      {
+       "id": "meca",
+       "renderers": 1
+      },
+      {
+       "id": "ssi",
+       "renderers": 2
+      },
+      {
+       "id": "met",
+       "renderers": 1
+      },
+      {
+       "id": "legs",
+       "renderers": 6
+      }
+     ],
+     "note": "DOCUMENTED RECONSTRUCTION (no NASA 3D model exists): deck 1.5 m, solar-array span 5.52 m, robotic arm 2.35 m, meteorology mast top 2.2 m (NASA Phoenix press kit); instrument positions and arm pose SIMPLIFIED",
+     "x": 0,
+     "z": 0,
+     "y": 0.34963762760162354
+    }
+   ],
+   "stats": {
+    "profile": "balanced",
+    "msP50": 17,
+    "msP95": 17,
+    "msP99": 18,
+    "width": 1366,
+    "height": 768,
+    "drawCalls": 226,
+    "triangles": 1719084,
+    "setPass": 56,
+    "rebases": 0,
+    "pathT": 0,
+    "msMax": 20,
+    "gcUsedMB": 23.9609375,
+    "gcReservedMB": 165.734375,
+    "totalUsedMB": 102.63590812683105,
+    "rockInstances": 8644,
+    "rockDrawCalls": 154,
+    "rockTrianglesM": 0.821792,
+    "rockRebuildMaxMs": 0.5
+   },
+   "msP50": 17,
+   "consoleErrors": [],
+   "unityLogLines": [
+    "info: [Mars] Unity player build ff79c67b83fb, built 2026-11-10T23:16:17.245Z (copied into dist by vite build)",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: [Mars] site phoenix ready in 1.0 s: terrain 1401x1401, 1 hardware\n"
+   ]
+  },
+  "curiosity": {
+   "site": "curiosity",
+   "readySecs": 5.2,
+   "ready": {
+    "siteId": "curiosity",
+    "siteKind": "rover",
+    "terrainTriangles": 678786,
+    "chunks": 81,
+    "horizon": {
+     "triangles": 285938,
+     "chunks": 17
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.00012088540035293249,
+     "gateM": 0.05,
+     "pass": true
+    },
+    "profile": "balanced",
+    "sol": 0,
+    "utc": "2012-08-06T03:40:00Z",
+    "sunElevation": 55.56478121320797,
+    "sunAzimuth": 299.48191167565574,
+    "loadMs": 3046
+   },
+   "hardware": [
+    {
+     "id": "curiosity-rover",
+     "model": "glb:curiosity",
+     "parts": 9,
+     "components": [],
+     "note": "NASA/JPL-Caltech, NASA 3D Resources: Curiosity (24584_Curiosity_static.glb); uniform scale so the model height = 2.2 m (sourced); 51305 triangles",
+     "x": 0,
+     "z": 0,
+     "y": 2.2577452659606934
+    }
+   ],
+   "stats": {
+    "profile": "balanced",
+    "msP50": 17,
+    "msP95": 17.0000057220459,
+    "msP99": 17.0000057220459,
+    "width": 1366,
+    "height": 768,
+    "drawCalls": 316,
+    "triangles": 1582508,
+    "setPass": 53,
+    "rebases": 0,
+    "pathT": 0,
+    "msMax": 20,
+    "gcUsedMB": 19.60546875,
+    "gcReservedMB": 150.9453125,
+    "totalUsedMB": 98.4164686203003,
+    "rockInstances": 8162,
+    "rockDrawCalls": 147,
+    "rockTrianglesM": 0.832288,
+    "rockRebuildMaxMs": 0.4000000059604645
+   },
+   "msP50": 17,
+   "consoleErrors": [],
+   "unityLogLines": [
+    "info: [Mars] Unity player build ff79c67b83fb, built 2026-11-10T23:16:17.245Z (copied into dist by vite build)",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: [Mars] site curiosity ready in 0.9 s: terrain 1401x1401, 1 hardware\n"
+   ]
+  },
+  "insight": {
+   "site": "insight",
+   "readySecs": 9.3,
+   "ready": {
+    "siteId": "insight",
+    "siteKind": "lander",
+    "terrainTriangles": 1103200,
+    "chunks": 121,
+    "horizon": {
+     "triangles": 280664,
+     "chunks": 15
+    },
+    "heightCheck": {
+     "samples": 100,
+     "maxAbsErrorM": 0.00018268026475709576,
+     "gateM": 0.05,
+     "pass": true
+    },
+    "profile": "balanced",
+    "sol": 0,
+    "utc": "2018-11-26T20:14:00Z",
+    "sunElevation": 49.94913671120486,
+    "sunAzimuth": 225.68801649823237,
+    "loadMs": 3495
+   },
+   "hardware": [
+    {
+     "id": "insight-lander",
+     "model": "glb:insight",
+     "parts": 143,
+     "components": [
+      {
+       "id": "seis",
+       "renderers": 3
+      },
+      {
+       "id": "wts",
+       "renderers": 6
+      },
+      {
+       "id": "hp3",
+       "renderers": 2
+      },
+      {
+       "id": "arm",
+       "renderers": 19
+      },
+      {
+       "id": "idc",
+       "renderers": 3
+      },
+      {
+       "id": "icc",
+       "renderers": 4
+      },
+      {
+       "id": "solar",
+       "renderers": 19
+      },
+      {
+       "id": "rise",
+       "renderers": 1
+      },
+      {
+       "id": "twins",
+       "renderers": 1
+      },
+      {
+       "id": "uhf",
+       "renderers": 4
+      }
+     ],
+     "note": "NASA/JPL-Caltech, NASA 3D Resources: InSight Cruise Lander (deployed); model is in metres (native); 146890 triangles",
+     "x": 0,
+     "z": 0,
+     "y": -0.1586618423461914
+    }
+   ],
+   "stats": {
+    "profile": "balanced",
+    "msP50": 17,
+    "msP95": 17,
+    "msP99": 17,
+    "width": 1366,
+    "height": 768,
+    "drawCalls": 451,
+    "triangles": 1768772,
+    "setPass": 55,
+    "rebases": 0,
+    "pathT": 0,
+    "msMax": 17,
+    "gcUsedMB": 21.73828125,
+    "gcReservedMB": 184.03515625,
+    "totalUsedMB": 100.56523704528809,
+    "rockInstances": 5678,
+    "rockDrawCalls": 109,
+    "rockTrianglesM": 0.642496,
+    "rockRebuildMaxMs": 0.3000999987125397
+   },
+   "msP50": 17,
+   "consoleErrors": [],
+   "unityLogLines": [
+    "info: [Mars] Unity player build ff79c67b83fb, built 2026-11-10T23:16:17.245Z (copied into dist by vite build)",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: ERROR: Shader ",
+    "log: [Mars] site insight ready in 1.3 s: terrain 1401x1401, 1 hardware\n"
+   ]
+  }
+ },
+ "errors": [],
+ "summary": {
+  "passed": 116,
+  "total": 116,
+  "skipped": 3,
+  "base": "http://localhost:4173"
+ }
+}

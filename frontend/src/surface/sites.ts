@@ -136,7 +136,30 @@ export interface UnitySite {
   objectIds: string[]
   terrainProvenance: string
   summary: string
+  /** M4 landing-site package (frontend/public/mars-sites/<site>/); absent = the Victoria scene built into the player */
+  site?: string
+  /** rover missions drive the illustrative expedition vehicle; stationary landers are explored on foot */
+  mode?: 'rover' | 'lander'
+  /** the historical hardware in the scene, for the catalogue card */
+  hardware?: string
 }
+
+/** M4 landing sites: terrain = USGS controlled HiRISE DTM + orthoimage (scripts/mars/build_site.py, site_defs.py) */
+const m4 = (id: string, missionId: string, name: string, mode: 'rover' | 'lander', lat: number, lon: number, hardware: string, sceneDate: string, sceneLabel: string, summary: string): UnitySite => ({
+  id: `mars-${id}`,
+  bodyId: 'mars',
+  name,
+  missionIds: [missionId],
+  origin: { latDeg: lat, lonEastDeg: lon },
+  build: 'mars',
+  scene: { date: sceneDate, label: sceneLabel, note: 'Hardware at the sourced landing coordinate; see the site record for the registration status.' },
+  objectIds: [],
+  terrainProvenance: 'USGS Astrogeology controlled HiRISE DTM (1 m) and orthoimage; ground colour ILLUSTRATIVE (HiRISE RED is one band).',
+  summary,
+  site: id,
+  mode,
+  hardware,
+})
 
 export const UNITY_SITES: UnitySite[] = [
   {
@@ -155,7 +178,23 @@ export const UNITY_SITES: UnitySite[] = [
     terrainProvenance:
       'Terrain: HiRISE DTM DTEEC_001414_1780_001612_1780 (1.01 m posts; NASA PDS). Ground shade: HiRISE RED band (grayscale) with an ILLUSTRATIVE tint. Sun: Mars24 algorithm (NASA GISS) at an ILLUSTRATIVE 14:00 local solar time. Sky and dust: ILLUSTRATIVE. Opportunity: NASA 3D Resources MER-B model on its recorded traverse (WUSTL / PDS Geosciences Node, locally registered, about 15 m RMS).',
     summary: 'An 800 m crater Opportunity explored for two years. Drive its rim, find the rover, and relive its Victoria campaign drive by drive.',
+    mode: 'rover',
+    hardware: 'Opportunity (NASA articulated MER model)',
   },
+  m4('viking-1', 'viking-1', 'Viking 1 — Chryse Planitia', 'lander', 22.272895, -47.951474, 'Viking 1 lander (NASA model)', '1976-07-20', 'Landing day, 20 July 1976',
+    'The first successful US Mars landing. Walk around the lander on the boulder-strewn plains of Chryse Planitia.'),
+  m4('viking-2', 'viking-2', 'Viking 2 — Utopia Planitia', 'lander', 47.668, 134.28, 'Viking 2 lander (NASA model)', '1976-09-03', 'Landing day, 3 September 1976',
+    "Viking 1's twin, about 6,500 km away on the northern plains of Utopia Planitia."),
+  m4('pathfinder', 'mars-pathfinder', 'Mars Pathfinder and Sojourner — Ares Vallis', 'rover', 19.073883, -33.258629, 'Pathfinder lander + Sojourner (documented reconstructions)', '1997-07-06', 'Just after Sojourner rolled onto Mars',
+    'The first rover on Mars, 65 cm long, beside its airbag-landed lander in an ancient flood channel.'),
+  m4('spirit', 'mer-spirit', 'Spirit (MER-A) — Gusev crater', 'rover', -14.565818, 175.475472, 'Spirit (NASA MER model) + lander (simplified)', '2004-01-20', 'Columbia Memorial Station, early mission',
+    "Opportunity's twin at its landing site inside 160 km-wide Gusev crater."),
+  m4('phoenix', 'phoenix', 'Phoenix — Vastitas Borealis', 'lander', 68.217789, -125.750032, 'Phoenix lander (documented reconstruction)', '2008-05-26', 'First days after landing',
+    'The arctic lander that dug down to water ice at 68° north.'),
+  m4('curiosity', 'msl-curiosity', 'Curiosity — Gale crater (Bradbury Landing)', 'rover', -4.589646, 137.441388, 'Curiosity (NASA model)', '2012-08-06', 'Bradbury Landing, landing day',
+    'The car-sized nuclear-powered rover at its landing site on the floor of Gale crater.'),
+  m4('insight', 'insight', 'InSight — Elysium Planitia', 'lander', 4.502384, 135.623447, 'InSight lander (NASA model) with SEIS and HP3 deployed', '2019-02-13', 'February 2019: SEIS and HP3 deployed on the ground',
+    "The geophysics lander that listened for marsquakes. Walk around its seismometer and heat probe on the ground and its solar arrays."),
 ]
 export const UNITY_SITE_BY_ID: Record<string, UnitySite> = Object.fromEntries(UNITY_SITES.map((s) => [s.id, s]))
 export const unitySitesForBody = (bodyId: string) => UNITY_SITES.filter((s) => s.bodyId === bodyId && isExplorable(bodyId))

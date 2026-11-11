@@ -1,0 +1,194 @@
+{
+ "id": "curiosity",
+ "name": "Curiosity \u2014 Gale crater (Bradbury Landing)",
+ "missionId": "msl-curiosity",
+ "mode": "rover",
+ "landing": {
+  "utc": "2012-08-06T05:17:57Z",
+  "landingSol": 0,
+  "source": "nasa-msl-curiosity (date); MSL landing sol = Sol 0 (Mars24 notes)",
+  "solNote": "UTC time of day used for the sol count is ILLUSTRATIVE"
+ },
+ "scene": {
+  "date": "2012-08-06",
+  "ltst": 14.0,
+  "label": "Bradbury Landing, landing day (local time ILLUSTRATIVE). Mount Sharp and the crater rim on the horizon from controlled CTX terrain",
+  "tau": 0.5,
+  "tauLabel": "tau 0.5 ASSUMED (no sourced optical depth for this sol in the scene)"
+ },
+ "hardware": [
+  {
+   "id": "curiosity-rover",
+   "label": "Curiosity rover",
+   "model": "glb:curiosity",
+   "kind": "rover",
+   "x": 0,
+   "z": 0,
+   "yawDeg": 0,
+   "radius": 2.0,
+   "provenance": "NASA MODEL (NASA 3D Resources: Curiosity), scaled to the sourced 2.2 m height; its length measures 3.92 m vs 3.0 m sourced (+31 %: the model's arm pose extends it). Heading ILLUSTRATIVE. Component regions (mast head, turret, cameras...) are groups of the model's own triangles identified by this project (scripts/mars/model_views.py), not separate NASA parts.",
+   "components": [
+    {
+     "id": "turret",
+     "label": "Arm turret (APXS, MAHLI, drill)",
+     "parts": [
+      "region:turret"
+     ],
+     "boxes": [
+      [
+       -0.2,
+       1.3,
+       -2.1,
+       1.0,
+       2.25,
+       -1.35
+      ]
+     ]
+    },
+    {
+     "id": "arm",
+     "label": "Robotic arm",
+     "parts": [
+      "region:arm"
+     ],
+     "boxes": [
+      [
+       0.15,
+       0.6,
+       -1.35,
+       0.8,
+       2.1,
+       -0.88
+      ]
+     ]
+    },
+    {
+     "id": "mast-head",
+     "label": "Mast head (Mastcam, ChemCam)",
+     "parts": [
+      "region:mast-head"
+     ],
+     "boxes": [
+      [
+       -0.9,
+       1.72,
+       -0.75,
+       -0.1,
+       2.3,
+       -0.1
+      ]
+     ]
+    },
+    {
+     "id": "mast",
+     "label": "Remote sensing mast",
+     "parts": [
+      "region:mast"
+     ],
+     "boxes": [
+      [
+       -0.9,
+       1.2,
+       -0.75,
+       -0.1,
+       1.72,
+       -0.1
+      ]
+     ]
+    },
+    {
+     "id": "mmrtg",
+     "label": "MMRTG (rear)",
+     "parts": [
+      "region:mmrtg"
+     ],
+     "boxes": [
+      [
+       -0.42,
+       0.55,
+       1.05,
+       0.42,
+       1.55,
+       2.0
+      ]
+     ]
+    },
+    {
+     "id": "mobility",
+     "label": "Wheels and rocker-bogie suspension",
+     "parts": [
+      "region:mobility"
+     ],
+     "boxes": [
+      [
+       -1.45,
+       -0.05,
+       -1.1,
+       -0.62,
+       1.0,
+       1.7
+      ],
+      [
+       0.62,
+       -0.05,
+       -1.1,
+       1.45,
+       1.0,
+       1.7
+      ]
+     ]
+    },
+    {
+     "id": "body",
+     "label": "Body (CheMin, SAM inside)",
+     "parts": [
+      "region:body"
+     ],
+     "boxes": [
+      [
+       -0.62,
+       0.55,
+       -0.62,
+       0.62,
+       1.3,
+       1.05
+      ]
+     ]
+    }
+   ]
+  }
+ ],
+ "start": {
+  "x": 35,
+  "z": 30,
+  "headingDeg": -130
+ },
+ "origin": {
+  "latDeg": -4.589646,
+  "lonEastDeg": 137.441388,
+  "source": "HiRISE-identified rover at Bradbury Landing (ESP_028401_1755), in the CTX/MOLA-controlled frame (this project, M5)",
+  "registration": "Rover identified by eye in HiRISE ESP_028401_1755 (17 Aug 2012, eleven days after landing and five days before the first drive): a ~3 m object at the centre of the X-shaped scour left by the engines of the sky crane. That observation is uncontrolled, so its position was carried into controlled products by phase correlation of the surrounding terrain (consistent to ~2 m over nine sub-areas). The USGS HiRISE products here turned out to be offset from the CTX/MOLA-controlled frame (ESP_018854_1755 by 177 m, PSP_010573_1755 by 571 m, measured against the CTX controlled orthoimage), so the position is given in the CTX/MOLA frame: 20 m from NASA\u2019s published Bradbury Landing coordinate (4.5895 S, 137.4417 E) and 85 m from the catalogue coordinate (4.59 S, 137.44 E; Seelos et al. 2014). The terrain under the rover is PSP_010573_1755 (2008, the only controlled HiRISE DTM covering this spot), sampled with its measured shift; being pre-landing, its ground image shows no blast marks.",
+  "located": true
+ },
+ "terrain": {
+  "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_010573_1755_010639_1755_U01 (collection mro_hirise_socet_dtms)",
+  "spacingM": 1.0,
+  "sizeM": 1400.0,
+  "validFraction": 1.0,
+  "albedo": "HiRISE orthoimage (RED band, single channel) at 0.5 m, colourised with an ILLUSTRATIVE soil ramp",
+  "horizon": "same DTM, decimated to ~24 m, out to ~9 km where the DTM covers it",
+  "far": {
+   "source": "USGS Astrogeology controlled CTX DTMs (collection mro_ctx_controlled_usgs_dtms), mosaicked: P22_009650_1772_XI_02S222W__G04_019698_1747_XI_05S222W, P18_008002_1748_XN_05S222W__K06_055578_1749_XN_05S222W, T01_000881_1752_XI_04S223W__F21_043816_1748_XN_05S223W, T01_000881_1752_XI_04S223W__J02_045504_1745_XN_05S223W, P21_009149_1752_XI_04S222W__J01_045293_1746_XN_05S222W, P18_008002_1748_XN_05S222W__P01_001620_1749_XI_05S222W, T01_000881_1752_XI_04S223W__J22_053587_1751_XN_04S223W",
+   "spacingM": [
+    250,
+    250
+   ],
+   "datumOffsetM": -8.706785542378839,
+   "datumResidualP90M": 11.939370265304667,
+   "provenance": "MEASURED (CTX DTM, ~20 m posts, sampled at 250 m)",
+   "extentKm": 100,
+   "albedo": "CTX orthoimages of the same DTMs, colourised with an ILLUSTRATIVE soil ramp",
+   "validFraction": 0.623
+  }
+ }
+}

@@ -6,6 +6,8 @@ import { useGuide, componentLine } from './guide'
 import { useStore } from '../store/store'
 import { useSurface, PanelTab } from './surfaceState'
 import { VALID_FROM, VALID_TO } from '../astro/ephemeris'
+import { ComponentRecord } from '../discovery/ComponentRecord'
+import { noteRecordTab } from '../discovery/tracking'
 
 /** short visible labels; the accessible name always contains the visible label (WCAG 2.5.3) */
 const TABS: { id: PanelTab; label: string; name: string }[] = [
@@ -184,6 +186,8 @@ export function DiscoveryPanel({ inspectNote, clockButtons = true, onRelive }: {
   }
   const tab = panel.tab
   const loc = obj.location.value
+  const siteId = useStore((s) => s.surfaceSiteId)
+  useEffect(() => noteRecordTab(siteId, obj.id, tab, TABS.map((t) => t.id)), [siteId, obj.id, tab])
 
   return (
     <aside className="discovery" aria-label={`${obj.name} record`} data-collapsed={collapsed ? 'true' : undefined}>
@@ -240,10 +244,8 @@ export function DiscoveryPanel({ inspectNote, clockButtons = true, onRelive }: {
                 </button>
               ))}
             </div>
-            {component && (
-              <p>
-                {obj.components.find((c) => c.id === component)?.description} <Cite ids={obj.components.find((c) => c.id === component)?.sources ?? []} />
-              </p>
+            {component && obj.components.find((c) => c.id === component) && (
+              <ComponentRecord siteId={siteId} objectId={obj.id} comp={obj.components.find((c) => c.id === component)!} />
             )}
             {component && compParts.length > 0 && (
               <div className="comp-story" data-testid="component-story">

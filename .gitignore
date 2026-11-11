@@ -22,3 +22,7 @@ backend/data/
 
 # logs
 *.log
+
+# local qa test runs
+docs/qa/local-verify/
+

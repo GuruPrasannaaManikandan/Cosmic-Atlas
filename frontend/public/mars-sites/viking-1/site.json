@@ -1,0 +1,164 @@
+{
+ "id": "viking-1",
+ "name": "Viking 1 \u2014 Chryse Planitia",
+ "missionId": "viking-1",
+ "mode": "lander",
+ "landing": {
+  "utc": "1976-07-20T11:53:06Z",
+  "landingSol": 0,
+  "source": "nssdca-viking1-lander",
+  "solNote": "sol count from landing (convention: landing day = sol 0, not sourced here)"
+ },
+ "scene": {
+  "date": "1976-07-20",
+  "ltst": 14.0,
+  "label": "Landing day, 20 July 1976 (local time of day ILLUSTRATIVE)",
+  "tau": 0.5,
+  "tauLabel": "tau 0.5 ASSUMED (no sourced optical depth for this sol in the scene)"
+ },
+ "hardware": [
+  {
+   "id": "viking-1-lander",
+   "label": "Viking 1 lander",
+   "model": "glb:viking-lander",
+   "kind": "lander",
+   "x": 0,
+   "z": 0,
+   "yawDeg": 0,
+   "radius": 1.9,
+   "provenance": "NASA MODEL (NASA 3D Resources: Viking Lander), scaled so the footpad triangle is 2.21 m (NSSDCA). Orientation ILLUSTRATIVE (not sourced). Component regions (mast head, turret, cameras...) are groups of the model's own triangles identified by this project (scripts/mars/model_views.py), not separate NASA parts.",
+   "components": [
+    {
+     "id": "cameras",
+     "label": "Lander cameras",
+     "parts": [
+      "region:cameras"
+     ],
+     "boxes": [
+      [
+       -0.36,
+       0.85,
+       0.26,
+       -0.1,
+       1.3,
+       0.52
+      ],
+      [
+       -0.05,
+       0.85,
+       -0.5,
+       0.19,
+       1.3,
+       -0.24
+      ]
+     ]
+    },
+    {
+     "id": "sampler",
+     "label": "Surface sampler arm",
+     "parts": [
+      "region:sampler"
+     ],
+     "boxes": [
+      [
+       0.05,
+       0.4,
+       -0.32,
+       1.8,
+       1.15,
+       0.06
+      ]
+     ]
+    },
+    {
+     "id": "met",
+     "label": "Meteorology boom",
+     "parts": [
+      "region:met"
+     ],
+     "boxes": [
+      [
+       -0.72,
+       1.08,
+       0.55,
+       -0.38,
+       1.68,
+       1.28
+      ]
+     ]
+    },
+    {
+     "id": "hga",
+     "label": "High-gain antenna",
+     "parts": [
+      "region:hga"
+     ],
+     "boxes": [
+      [
+       -1.3,
+       1.1,
+       -0.5,
+       -0.8,
+       1.9,
+       0.0
+      ]
+     ]
+    },
+    {
+     "id": "legs",
+     "label": "Landing legs and footpads",
+     "parts": [
+      "region:legs"
+     ],
+     "boxes": [
+      [
+       -1.8,
+       -0.05,
+       -1.4,
+       1.8,
+       0.45,
+       1.4
+      ]
+     ]
+    },
+    {
+     "id": "body",
+     "label": "Lander body (biology, GCMS, XRFS inside)",
+     "parts": [
+      "region:body"
+     ],
+     "boxes": [
+      [
+       -1.0,
+       0.45,
+       -0.8,
+       0.35,
+       1.0,
+       0.8
+      ]
+     ]
+    }
+   ]
+  }
+ ],
+ "start": {
+  "x": 0,
+  "z": -24,
+  "headingDeg": 0
+ },
+ "origin": {
+  "latDeg": 22.272895,
+  "lonEastDeg": -47.95147400000002,
+  "source": "HiRISE-identified lander, PSP_001521_2025 controlled orthoimage (this project, M5)",
+  "registration": "Lander identified by eye in the USGS controlled orthoimage PSP_001521_2025 (22 Nov 2006, the frame in which the HiRISE team located it): a bright lander with its shadow just south-east of a shallow crater, matching the HiRISE team's annotated cutouts (uahirise.org/PSP_001521_2025). Measured in this controlled frame; 231 m north and 26 m west of the catalogue coordinate (22.269 N, 312.049 E; Folkner et al. 1997).",
+  "located": true
+ },
+ "terrain": {
+  "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_001521_2025_001719_2025_U01 (collection mro_hirise_socet_dtms)",
+  "spacingM": 1.0,
+  "sizeM": 1400.0,
+  "validFraction": 1.0,
+  "albedo": "HiRISE orthoimage (RED band, single channel) at 0.5 m, colourised with an ILLUSTRATIVE soil ramp",
+  "horizon": "same DTM, decimated to ~24 m, out to ~9 km where the DTM covers it"
+ }
+}

@@ -1,0 +1,33 @@
+{
+ "width": 1401,
+ "height": 1401,
+ "rowOrder": "north-to-south",
+ "spacingM": [
+  1.0,
+  1.0
+ ],
+ "gridEastOfOriginM": -700.0,
+ "gridNorthOfOriginM": 700.0,
+ "upMinM": -21.000011274130074,
+ "upMaxM": 9.267390127325086,
+ "quantStepM": 0.00046185798824206,
+ "nodata": 65535,
+ "validCells": 1962521,
+ "cells": 1962801,
+ "source": "USGS Astrogeology controlled HiRISE DTM DTEEC_010573_1755_010639_1755_U01 (collection mro_hirise_socet_dtms)",
+ "dtmUrl": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/PSP_010573_1755_PSP_010639_1755/DTEEC_010573_1755_010639_1755_U01.tif",
+ "dtmNativeM": 1.0117648673517987,
+ "dtmCrs": "+proj=eqc +lat_ts=0 +lat_0=0 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs=True",
+ "originLatLon": [
+  -4.589646,
+  137.441388
+ ],
+ "originSource": "HiRISE-identified rover at Bradbury Landing (ESP_028401_1755), in the CTX/MOLA-controlled frame (this project, M5)",
+ "productShiftM": [
+  537.0,
+  -195.0
+ ],
+ "elevationReferenceM": -4503.773850354831,
+ "elevationDatum": "as in the DTM (USGS ARD: Mars 2015 sphere, R 3396190 m)",
+ "curvature": "up includes the sphere curvature about the origin (R 3396.19 km)"
+}

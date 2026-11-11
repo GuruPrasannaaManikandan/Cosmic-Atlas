@@ -34,3 +34,7 @@
   .exp-launchers { grid-template-columns: 1fr; }
   .expedition { bottom: 12px; }
 }
+
+/* homepage: entry to the landing-site catalogues (every explorable Moon and Mars environment) */
+.exp-sites-row { grid-column: 1 / -1; flex-basis: 100%; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.exp-sites { font-size: 13px; }

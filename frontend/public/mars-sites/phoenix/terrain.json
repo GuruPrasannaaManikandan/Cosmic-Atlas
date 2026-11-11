@@ -1,0 +1,29 @@
+{
+ "width": 1401,
+ "height": 1401,
+ "rowOrder": "north-to-south",
+ "spacingM": [
+  1.0,
+  1.0
+ ],
+ "gridEastOfOriginM": -700.0,
+ "gridNorthOfOriginM": 700.0,
+ "upMinM": -9.863305856082718,
+ "upMaxM": 19.6049633772285,
+ "quantStepM": 0.00044966382691902245,
+ "nodata": 65535,
+ "validCells": 1962801,
+ "cells": 1962801,
+ "source": "USGS Astrogeology controlled HiRISE DTM DTEPC_008591_2485_008644_2485_U01 (collection mro_hirise_socet_dtms)",
+ "dtmUrl": "https://astrogeo-ard.s3-us-west-2.amazonaws.com/mars/mro/hirise/controlled/dtm/PSP_008591_2485_PSP_008644_2485/DTEPC_008591_2485_008644_2485_U01.tif",
+ "dtmNativeM": 0.996514980811846,
+ "dtmCrs": "+proj=stere +lat_0=90 +lat_ts=90 +lon_0=0 +x_0=0 +y_0=0 +R=3396190 +units=m +no_defs=True",
+ "originLatLon": [
+  68.217789,
+  -125.750032
+ ],
+ "originSource": "HiRISE-identified lander, PSP_008591_2485 controlled orthoimage (this project, M5)",
+ "elevationReferenceM": -4131.829552936924,
+ "elevationDatum": "as in the DTM (USGS ARD: Mars 2015 sphere, R 3396190 m)",
+ "curvature": "up includes the sphere curvature about the origin (R 3396.19 km)"
+}

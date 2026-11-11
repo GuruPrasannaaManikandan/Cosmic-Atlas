@@ -1,0 +1,86 @@
+/* Relive Mission — full-screen mission player */
+.relive { position: fixed; inset: 0; z-index: 80; background: #000; color: var(--txt); font-family: var(--font); }
+.relive-canvas { position: absolute !important; inset: 0; }
+.relive .btn { min-height: 32px; }
+.relive .muted { color: var(--mut); }
+.relive .small { font-size: 12px; }
+.relive .eyebrow { font-size: 10px; letter-spacing: 0.16em; color: var(--warm); }
+
+.relive-top { position: absolute; top: 12px; left: 12px; right: 12px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; align-items: center; padding: 10px 14px; }
+.relive-title { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.relive-title b { font-size: 18px; color: #fff; }
+.relive-clock { display: flex; flex-direction: column; align-items: center; gap: 2px; font-family: var(--font-mono); }
+.relive-clock b { font-size: 26px; letter-spacing: 0.04em; color: var(--cy); text-shadow: 0 0 18px var(--cy-glow); }
+.relive-clock span { font-size: 12px; color: var(--txt-dim); }
+.relive-clock .rate { font-size: 11px; color: var(--warm); }
+.relive-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.relive-exit { border-color: var(--line-hi); }
+
+.relive-tele { position: absolute; left: 12px; top: 112px; width: 300px; padding: 10px 12px; }
+.relive-tele h4 { margin: 0 0 6px; font-size: 11px; letter-spacing: 0.14em; color: var(--mut); text-transform: uppercase; }
+.relive-tele-row { display: grid; grid-template-columns: 1fr auto auto; gap: 2px 8px; align-items: baseline; padding: 4px 0; border-top: 1px solid var(--line-subtle); }
+.relive-tele-row .k { font-size: 12px; color: var(--txt-dim); }
+.relive-tele-row .v { font-family: var(--font-mono); font-size: 15px; color: #fff; }
+.relive-tele-row .tag { font-size: 10px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--line); color: var(--mut); }
+.relive-tele-row .tag.ok { color: var(--ok); border-color: rgba(52, 211, 153, 0.5); }
+.relive-tele-row .frame { grid-column: 1 / -1; font-size: 10.5px; }
+
+.relive-cite a { color: var(--cy); font-size: 11px; margin-left: 3px; text-decoration: none; }
+.relive-cite a:hover { text-decoration: underline; }
+
+.relive-card { position: absolute; left: 50%; bottom: 128px; transform: translateX(-50%); width: min(560px, calc(100vw - 32px)); padding: 12px 14px; animation: relive-in 0.25s ease-out; }
+.relive-card header { display: flex; gap: 10px; align-items: flex-start; }
+.relive-card .ico { font-size: 22px; line-height: 1; }
+.relive-card header div { display: flex; flex-direction: column; flex: 1; }
+.relive-card b { font-size: 16px; color: #fff; }
+.relive-card time { font-family: var(--font-mono); font-size: 11.5px; color: var(--txt-dim); }
+.relive-card p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--txt-dim); }
+.relive-card .basis { font-size: 11px; color: var(--mut); }
+.relive-card .basis.ok { color: var(--ok); }
+.relive-card .basis.warn { color: var(--warm); }
+.relive .x { background: none; border: 0; color: var(--mut); font-size: 20px; cursor: pointer; line-height: 1; padding: 0 4px; }
+.relive .x:hover { color: #fff; }
+@keyframes relive-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+.relive-bottom { position: absolute; left: 12px; right: 12px; bottom: 12px; padding: 8px 12px 10px; display: flex; flex-direction: column; gap: 8px; }
+.relive-transport { display: flex; gap: 8px; align-items: center; }
+.relive-transport .play { min-width: 52px; font-size: 16px; border-color: var(--line-hi); }
+.relive-phase-note { margin-left: 8px; }
+.relive-tl-bar { position: relative; height: 34px; border-radius: 8px; background: rgba(255, 255, 255, 0.04); border: 1px solid var(--line); cursor: pointer; touch-action: none; overflow: hidden; }
+.relive-tl-bar:focus-visible { outline: 2px solid var(--cy); }
+.relive-tl-bar .ph { position: absolute; top: 0; bottom: 0; border-right: 1px solid rgba(255, 255, 255, 0.08); display: flex; align-items: flex-end; padding: 0 4px 3px; overflow: hidden; }
+.relive-tl-bar .ph span { font-size: 10px; color: var(--dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.relive-tl-bar .ph.on { background: rgba(103, 232, 249, 0.08); }
+.relive-tl-bar .ph.on span { color: var(--cy); }
+.relive-tl-bar .tick { position: absolute; top: 3px; width: 3px; height: 14px; margin-left: -1px; border: 0; padding: 0; border-radius: 2px; background: rgba(240, 244, 255, 0.55); cursor: pointer; }
+.relive-tl-bar .tick.derived { background: rgba(167, 139, 250, 0.8); }
+.relive-tl-bar .tick.sequence { background: rgba(251, 191, 36, 0.8); }
+.relive-tl-bar .tick.conceptual { background: rgba(140, 162, 200, 0.7); }
+.relive-tl-bar .tick.on, .relive-tl-bar .tick:hover { background: var(--cy); height: 18px; }
+.relive-tl-bar .head { position: absolute; top: -2px; bottom: -2px; width: 2px; margin-left: -1px; background: var(--cy); box-shadow: 0 0 10px var(--cy-glow); pointer-events: none; }
+
+.relive-intro { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(620px, calc(100vw - 32px)); padding: 22px 24px; text-align: left; }
+.relive-intro h2 { margin: 6px 0 2px; font-size: 30px; color: #fff; }
+.relive-intro .sub { margin: 0 0 12px; color: var(--warm); }
+.relive-intro p { line-height: 1.5; color: var(--txt-dim); }
+.relive-intro .row { display: flex; gap: 10px; flex-wrap: wrap; margin: 14px 0 8px; }
+
+.relive-info { position: absolute; right: 12px; top: 112px; bottom: 132px; width: min(420px, calc(100vw - 24px)); padding: 12px 14px; overflow: auto; }
+.relive-info header { display: flex; justify-content: space-between; align-items: center; }
+.relive-info h5 { margin: 12px 0 4px; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mut); }
+.relive-info ul, .relive-info ol { margin: 0; padding-left: 18px; color: var(--txt-dim); font-size: 12.5px; line-height: 1.45; }
+.relive-info a { color: var(--cy); }
+.relive .linkish { background: none; border: 0; padding: 0; color: var(--cy); cursor: pointer; font: inherit; }
+
+.exp-card.relive-a11 { background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(13, 22, 46, 0.7)); }
+.exp-card.relive-mer { background: linear-gradient(135deg, rgba(251, 146, 60, 0.2), rgba(13, 22, 46, 0.7)); }
+
+@media (max-width: 860px) {
+  .relive-top { grid-template-columns: 1fr; gap: 6px; }
+  .relive-clock { align-items: flex-start; }
+  .relive-clock b { font-size: 20px; }
+  .relive-actions { justify-content: flex-start; }
+  .relive-tele { top: auto; bottom: 150px; width: calc(100vw - 24px); }
+  .relive-card { bottom: 260px; }
+  .relive-info { top: 12px; bottom: 12px; }
+}

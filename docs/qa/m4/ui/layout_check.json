@@ -1,0 +1,31 @@
+{
+ "1440x900": {
+  "h1Top": 139,
+  "navBottom": 64,
+  "clear": true,
+  "scrollable": true,
+  "hOverflow": false
+ },
+ "1280x720": {
+  "h1Top": 139,
+  "navBottom": 64,
+  "clear": true,
+  "scrollable": true,
+  "hOverflow": false
+ },
+ "1024x768": {
+  "h1Top": 139,
+  "navBottom": 64,
+  "clear": true,
+  "scrollable": true,
+  "hOverflow": false
+ },
+ "390x844": {
+  "h1Top": 154,
+  "navBottom": 64,
+  "clear": true,
+  "scrollable": true,
+  "hOverflow": false
+ },
+ "catalogue390hOverflow": false
+}

@@ -1,0 +1,112 @@
+{
+ "routes": {
+  "A west plains": {
+   "longTasks": [
+    [
+     45566,
+     1245
+    ],
+    [
+     49715,
+     2082
+    ],
+    [
+     55317,
+     1036
+    ]
+   ],
+   "programsLinked": [
+    [
+     45594,
+     1211
+    ],
+    [
+     49743,
+     973
+    ],
+    [
+     50748,
+     1044
+    ],
+    [
+     55345,
+     1004
+    ]
+   ],
+   "unityWorstFrameMsPerSecond": [
+    18,
+    19,
+    19,
+    19,
+    18,
+    18,
+    18,
+    1246,
+    20,
+    20,
+    2082,
+    20,
+    21,
+    21
+   ]
+  },
+  "B south rim": {
+   "longTasks": [
+    [
+     56382,
+     2678
+    ],
+    [
+     68666,
+     1308
+    ]
+   ],
+   "programsLinked": [
+    [
+     68693,
+     1271
+    ]
+   ],
+   "unityWorstFrameMsPerSecond": [
+    2679,
+    2679,
+    26,
+    26,
+    24,
+    25,
+    26,
+    45,
+    45,
+    45,
+    1309,
+    1309,
+    29,
+    24
+   ]
+  },
+  "C north": {
+   "longTasks": [],
+   "programsLinked": [],
+   "unityWorstFrameMsPerSecond": [
+    19,
+    19,
+    21,
+    21,
+    19,
+    19,
+    18,
+    19,
+    19,
+    19,
+    20,
+    20,
+    20,
+    20
+   ]
+  }
+ },
+ "build": "322a5ef56efa",
+ "programsLinkedDuringLoad": 56,
+ "worstLongTaskMs": 2678,
+ "pass": false
+}

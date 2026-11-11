@@ -27,6 +27,8 @@ export function dateMs(d: string): number {
 /** short, distinct label for a source (organisation-based), for citation chips */
 export function sourceShort(id: string): string {
   const o = SOURCES[id]?.organisation ?? id
+  if (id === 'nasa-sp4029') return 'NASA SP-4029'
+  if (id.startsWith('jpl-mer-')) return 'NASA JPL'
   for (const k of ['NSSDCA', 'LROC', 'PDS', 'NASA Science', 'NASA 3D', 'ESA', 'ISRO', 'EGU']) if (o.includes(k)) return k === 'NASA 3D' ? 'NASA 3D Resources' : k
   return o.split(' ')[0]
 }

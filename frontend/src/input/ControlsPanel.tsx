@@ -36,12 +36,12 @@ function rows(bs: Binding[]): { keys: string; label: string }[] {
   return out
 }
 
-export function ControlsPanel({ mode, extra }: { mode?: InputMode; extra?: { keys: string; label: string }[] }) {
+export function ControlsPanel({ mode, extra, hide }: { mode?: InputMode; extra?: { keys: string; label: string }[]; hide?: string[] }) {
   const m = mode ?? input.refresh()
   const [s, setS] = useState(input.settings)
   useEffect(() => setS(input.settings), [])
   const update = (p: Partial<typeof s>) => { input.setSettings(p); setS(input.settings) }
-  const list = [...rows(input.bindings(m)), ...(extra ?? [])]
+  const list = [...rows(input.bindings(m).filter((b) => !hide?.includes(b.action))), ...(extra ?? [])]
   return (
     <div className="controls-panel" data-mode={m}>
       <h3 className="controls-title">{MODE_TITLE[m]}</h3>

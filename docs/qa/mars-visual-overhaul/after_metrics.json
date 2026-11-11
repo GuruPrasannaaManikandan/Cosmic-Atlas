@@ -52,14 +52,14 @@
   }
  ],
  "metrics": {
-  "loadToReadySec": 21.92,
+  "loadToReadySec": 8.31,
   "roverCalibration": "NASA 3D Resources articulated MER model (40 parts: 6 wheels, rocker-bogie, 5 solar panel sections, 5-joint arm with instrument turret, Pancam mast, high-gain antenna); scale 0.987 so the solar-panel span = 2.25 m (PDS); measured height 1.43 m vs PDS 1.54 m, length 1.65 m vs PDS 1.51 m",
   "terrainTriangles": 979844,
-  "msP50": 17,
-  "msP95": 26.00000762939453,
-  "drawCalls": 423,
-  "triangles": 6195228,
-  "setPass": 41,
+  "msP50": 16.9999942779541,
+  "msP95": 17.0000057220459,
+  "drawCalls": 508,
+  "triangles": 2581532,
+  "setPass": 54,
   "backbuffer": [
    1366,
    768
@@ -73,10 +73,10 @@
    "fogStart": 350,
    "fogEnd": 6000,
    "bloom": 1.7999999523162842,
-   "rockInstances": 7734,
-   "rockDrawCalls": 30
+   "rockInstances": 6770,
+   "rockDrawCalls": 132
   },
-  "jsHeapMB": 102
+  "jsHeapMB": 96
  },
  "consoleErrors": []
 }

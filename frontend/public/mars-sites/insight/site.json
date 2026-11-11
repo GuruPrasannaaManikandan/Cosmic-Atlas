@@ -1,0 +1,141 @@
+{
+ "id": "insight",
+ "name": "InSight \u2014 Elysium Planitia",
+ "missionId": "insight",
+ "mode": "lander",
+ "landing": {
+  "utc": "2018-11-26T19:52:59Z",
+  "landingSol": 0,
+  "source": "nasa-insight",
+  "solNote": ""
+ },
+ "scene": {
+  "date": "2019-02-13",
+  "ltst": 14.0,
+  "label": "13 February 2019, after deployment: SEIS under its Wind and Thermal Shield and HP3 on the ground in front of the lander (JPL). Offsets RECONSTRUCTED; lander heading ASSUMED; local time ILLUSTRATIVE",
+  "tau": 0.5,
+  "tauLabel": "tau 0.5 ASSUMED (no sourced optical depth for this sol in the scene)"
+ },
+ "hardware": [
+  {
+   "id": "insight-lander",
+   "label": "InSight lander",
+   "model": "glb:insight",
+   "kind": "lander",
+   "x": 0,
+   "z": 0,
+   "yawDeg": 0,
+   "radius": 3.1,
+   "provenance": "NASA MODEL (NASA 3D Resources: InSight Cruise Lander), native metres. SEIS, its Wind and Thermal Shield and HP3 are moved from the deck (where the model stows them) to the ground in front of the lander, in their deployed configuration: SEIS about 1.636 m away, about as far as the arm reaches (JPL, 19 Dec 2018), the shield placed over it, HP3 on the east side of the workspace (JPL). RECONSTRUCTED offsets: the 1.636 m is taken from the deck centre and HP3 is placed 1 m east of SEIS (not sourced); lander heading ASSUMED with the workspace (the arm side) to the south. Position: HiRISE-located lander (Golombek et al. 2020).",
+   "components": [
+    {
+     "id": "seis",
+     "label": "Seismic Experiment for Interior Structure (SEIS)",
+     "parts": [
+      "SEIS"
+     ],
+     "deployTo": [
+      0.0,
+      -1.876
+     ]
+    },
+    {
+     "id": "wts",
+     "label": "Wind and Thermal Shield (WTS) for SEIS",
+     "parts": [
+      "WTS"
+     ],
+     "deployTo": [
+      0.0,
+      -1.876
+     ]
+    },
+    {
+     "id": "hp3",
+     "label": "Heat Flow and Physical Properties Package (HP3)",
+     "parts": [
+      "HP3"
+     ],
+     "deployTo": [
+      1.0,
+      -1.876
+     ]
+    },
+    {
+     "id": "arm",
+     "label": "Instrument Deployment Arm and grapple",
+     "parts": [
+      "arm_",
+      "grapple",
+      "claw_",
+      "shovel"
+     ]
+    },
+    {
+     "id": "idc",
+     "label": "Instrument Deployment Camera (IDC)",
+     "parts": [
+      "IDC",
+      "lens_cap_IDC"
+     ]
+    },
+    {
+     "id": "icc",
+     "label": "Instrument Context Camera (ICC)",
+     "parts": [
+      "ICC",
+      "lens_cap_ICC"
+     ]
+    },
+    {
+     "id": "solar",
+     "label": "Solar arrays",
+     "parts": [
+      "panel_"
+     ]
+    },
+    {
+     "id": "rise",
+     "label": "RISE antennas (Rotation and Interior Structure Experiment)",
+     "parts": [
+      "RISE"
+     ]
+    },
+    {
+     "id": "twins",
+     "label": "TWINS weather sensors",
+     "parts": [
+      "TWINS"
+     ]
+    },
+    {
+     "id": "uhf",
+     "label": "UHF antenna",
+     "parts": [
+      "UHF"
+     ]
+    }
+   ]
+  }
+ ],
+ "start": {
+  "x": 20,
+  "z": -22,
+  "headingDeg": -40
+ },
+ "origin": {
+  "latDeg": 4.502384,
+  "lonEastDeg": 135.623447,
+  "source": "Golombek et al. 2020 (HiRISE-located lander)",
+  "registration": "HiRISE-located lander position (Golombek et al. 2020); RISE radio tracking places it ~220 m further west.",
+  "located": true
+ },
+ "terrain": {
+  "dtm": "USGS Astrogeology controlled HiRISE DTM DTEEC_037262_1845_036761_1845_U01 (collection mro_hirise_socet_dtms)",
+  "spacingM": 1.0,
+  "sizeM": 1400.0,
+  "validFraction": 1.0,
+  "albedo": "HiRISE orthoimage (RED band, single channel) at 0.5 m, colourised with an ILLUSTRATIVE soil ramp",
+  "horizon": "same DTM, decimated to ~24 m, out to ~9 km where the DTM covers it"
+ }
+}

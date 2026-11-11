@@ -1,0 +1,31 @@
+{
+ "width": 401,
+ "height": 401,
+ "rowOrder": "north-to-south",
+ "spacingM": [
+  250,
+  250
+ ],
+ "gridEastOfOriginM": -50000.0,
+ "gridNorthOfOriginM": 50000.0,
+ "upMinM": -344.69477776344127,
+ "upMaxM": 4862.563747620221,
+ "quantStepM": 0.07945888432544423,
+ "nodata": 65535,
+ "validCells": 100111,
+ "cells": 160801,
+ "source": "USGS Astrogeology controlled CTX DTMs (collection mro_ctx_controlled_usgs_dtms), mosaicked: P22_009650_1772_XI_02S222W__G04_019698_1747_XI_05S222W, P18_008002_1748_XN_05S222W__K06_055578_1749_XN_05S222W, T01_000881_1752_XI_04S223W__F21_043816_1748_XN_05S223W, T01_000881_1752_XI_04S223W__J02_045504_1745_XN_05S223W, P21_009149_1752_XI_04S222W__J01_045293_1746_XN_05S222W, P18_008002_1748_XN_05S222W__P01_001620_1749_XI_05S222W, T01_000881_1752_XI_04S223W__J22_053587_1751_XN_04S223W",
+ "datumOffsetM": -8.706785542378839,
+ "datumResidualP90M": 11.939370265304667,
+ "elevationReferenceM": -4503.773850354831,
+ "despikedNodes": 1238,
+ "cutout": "nodes where the HiRISE local terrain or horizon has data are left out (they are drawn there); the ring fills HiRISE gaps and drops up to 25 m beside the finer layers",
+ "curvature": "up includes the sphere curvature about the origin",
+ "provenance": "MEASURED (CTX DTM, ~20 m posts, sampled at 250 m)",
+ "albedo": {
+  "file": "far_albedo.jpg",
+  "spacingM": 125,
+  "source": "CTX orthoimages of the same DTMs, colourised with an ILLUSTRATIVE soil ramp",
+  "valid": 0.6298774471984925
+ }
+}

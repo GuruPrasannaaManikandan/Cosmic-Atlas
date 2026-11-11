@@ -1,0 +1,124 @@
+{
+ "results": [
+  {
+   "check": "E01 Moon expedition opens the conceptual flight",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E02 starts at Earth departure",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E03 flight is autonomous (keyboard owned by the UI)",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E04 the flight is labelled conceptual",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E05 the stage follows the flight (descent = arrival)",
+   "pass": true,
+   "detail": "arrival"
+  },
+  {
+   "check": "E06 the flight ends at Tranquility Base (no separate cut from orbit)",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E07 the lander flies its final descent on the measured terrain",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E08 egress: control returns to the astronaut after the landing",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E09 the astronaut stands at the foot of the ramp",
+   "pass": true,
+   "detail": [
+    -14,
+    -0.2,
+    10
+   ]
+  },
+  {
+   "check": "E10 WASD walks after landing",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E11 Return to orbit: the lander lifts off from the surface",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E12 the return flight takes over above the site",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E13 back in the orbital explorer after the return",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E14 ends at Earth",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E15 Skip jumps to the end of the flight and still lands",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E16 Cancel restores the explorer",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E21 Mars expedition opens the conceptual flight at departure",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E22 the Mars surface opens after the landing and deployment",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E23 Unity Mars ready",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E24 opens in exploration at the rover (the landing already happened)",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E25 Return to orbit: the view climbs away; the rover stays",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E26 back in the orbital explorer at Mars",
+   "pass": true,
+   "detail": null
+  },
+  {
+   "check": "E30 no console errors",
+   "pass": true,
+   "detail": []
+  }
+ ],
+ "console": []
+}
